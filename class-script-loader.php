@@ -27,6 +27,9 @@ SKU: COMBINATOR
 admin_url('admin-ajax.php?action=my_css') ????
  */
 
+require_once( 'class-js.php' );
+require_once( 'class-css.php' );
+
 class ScriptCombiner {
 	
 	const SECRET_KEY = "SuperSecretGambitKey";
@@ -35,8 +38,8 @@ class ScriptCombiner {
 	public $footerScripts = array();
 	public $headStyles = array();
 	public $footerStyles = array();
+	
 	public $inHead = true;
-	public $test = array();
 	
 	function __construct() {
 		
@@ -48,11 +51,21 @@ class ScriptCombiner {
 		add_action( 'wp_footer', array( $this, 'footerStyleLoader' ), 999 );
 		add_action( 'wp_head', array( $this, 'headStyleLoader' ), 999 );
 		
-		// add_action( 'wp_ajax_combinator_scripts', array( $this, 'combineScripts' ) );
-		// add_action( 'wp_ajax_nopriv_combinator_scripts', array( $this, 'combineScripts' ) );
-		
-		
+		add_action( 'wp_head', array( $this, 'doneWithHead' ), 1000 );
+
 	}
+	
+	public function deleteAllFiles() {
+		GambitCombinatorFiles::deleteAllFiles();
+	}
+	
+	
+	public function deleteAllCaches() {
+		global $wpdb;
+
+		$wpdb->query( "DELETE FROM $wpdb->options WHERE option_name LIKE '_transient_cmbntr_%' OR option_name LIKE '_transient_timeout_cmbntr_%'" );
+	}
+	
 	
 	public function isFrontEnd() {
 		return is_404() ||
@@ -81,16 +94,25 @@ class ScriptCombiner {
 	
 	public function encodeLoadParam( $fileArray ) {
 		$data = gzdeflate( serialize( $fileArray ) );
-        $data = mcrypt_encrypt(MCRYPT_RIJNDAEL_256, self::SECRET_KEY, $data, MCRYPT_MODE_ECB, mcrypt_create_iv(mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_ECB), MCRYPT_RAND));
+        $data = mcrypt_encrypt( MCRYPT_RIJNDAEL_256, self::SECRET_KEY, $data, MCRYPT_MODE_ECB, mcrypt_create_iv( mcrypt_get_iv_size( MCRYPT_RIJNDAEL_256, MCRYPT_MODE_ECB ), MCRYPT_RAND ) );
 		return base64_encode( $data );
 	}
 	
 	
 	public function gatherEnqueuedScripts( $tag, $handle, $src ) {
+		
+		$enabled = true;
+		
+		if ( ! $enabled ) {
+			return $tag;
+		}
 
 		if ( ! $this->isFrontEnd() ) {
 			return $tag;
 		}
+		
+		$includeIncludes = true;
+		$includeRemote = true;
 		
 		// Only do this for local wp-content files
 		$path = '';
@@ -104,20 +126,26 @@ class ScriptCombiner {
 		} else if ( strpos( $src, includes_url() ) !== false ) {
 	
 			// Get local path
+			if ( ! $includeIncludes ) {
+				return $tag;
+			}
 			$path = str_replace( trim( includes_url(), '/\\' ), ABSPATH . WPINC, $src );
 
-		} else {
-			// return $tag;
+		} else if ( ! $includeRemote ) {
+			return $tag;
 		}
 	
+		if ( ! empty( $path ) ) {
 		
-		// Remove trailing arguments
-		$path = preg_replace( '/\?.+$/', '', $path );
+			// Remove trailing arguments
+			$path = preg_replace( '/\?.+$/', '', $path );
 		
-		// Check if file exists
-		$path = realpath( $path );
-		if ( ! $path && ! @is_file( $path ) ) {
-			// return $tag;
+			// Check if file exists
+			$path = realpath( $path );
+			if ( ! $path && ! @is_file( $path ) ) {
+				return $tag;
+			}
+			
 		}
 		
 		// Remember the handler
@@ -141,29 +169,80 @@ class ScriptCombiner {
 	}
 	
 	
-	public function headScriptLoader() {
-		if ( count( $this->headScripts ) ) {
-			$data = $this->encodeLoadParam( $this->headScripts );
-			// echo "<script type='text/javascript' src='" . esc_url( add_query_arg( array( 'c' => 1, 'm' => 2, 'load' => $data ), admin_url( 'admin-ajax.php?action=combinator_scripts' ) ) ) . "'></script>";
-			echo "<script type='text/javascript' src='" . esc_url( add_query_arg( array( 'c' => 1, 'm' => 2, 'load' => $data ), plugins_url( 'class-load-scripts.php', __FILE__ ) ) ) . "'></script>";
+	public function scriptLoader( $scripts ) {
+		
+		$method = 1;
+		$compressionLevel = 2;
+		$gzip = 1;
+		
+		if ( ! count( $scripts ) ) {
+			return;
 		}
-		$this->inHead = false;
+		
+		$hash = substr( md5( serialize( $scripts ) . $compressionLevel ), 0, 8 );
+
+		global $wp_filesystem;
+		
+		// delete_transient( 'js_combined_' . $hash );
+		$output = get_transient( 'cmbntr_js' . $hash );
+		// var_dump('cmbntr_js_' . $hash, 'transient', $output);
+		if ( ( $method == 1 && ! $output ) || ( $method == 1 && ! empty( $output['path'] ) && ! $wp_filesystem->is_file( $output['path'] ) ) ) {
+		
+			$combined = GambitCombinatorJS::combineSources( $scripts );
+			
+			if ( $compressionLevel ) {
+				$combined = GambitCombinatorJS::closureCompile( $combined, $compressionLevel );
+			}
+			
+			$output = GambitCombinatorJS::createFile( 
+				$combined, 
+				$hash . '.js'
+			);
+			
+			// var_dump('cmbntr_js_' . $hash, $output);
+			set_transient( 'cmbntr_js' . $hash, $output, DAY_IN_SECONDS );
+			// var_dump('get_transient', get_transient( 'cmbntr_js_' . $hash ));
+		}
+		
+		// var_dump($upload_dir['baseurl'] . 'combinator/' . $filePath );
+		if ( $method == 1 && ! empty( $output['path'] ) && $wp_filesystem->is_file( $output['path'] ) ) {
+			echo "<script type='text/javascript' src='" . esc_url( $output['url'] ) . "'></script>";
+			
+		} else {
+		
+		// if ( count( $this->headScripts ) ) {
+			$data = $this->encodeLoadParam( $scripts );
+			// echo "<script type='text/javascript' src='" . esc_url( add_query_arg( array( 'c' => 1, 'm' => 0, 'load' => $data ), admin_url( 'admin-ajax.php?action=combinator_scripts' ) ) ) . "'></script>";
+			echo "<script type='text/javascript' src='" . esc_url( add_query_arg( array( 'c' => $gzip, 'm' => $compressionLevel, 'load' => $data ), plugins_url( 'fallback/class-load-scripts.php', __FILE__ ) ) ) . "'></script>";
+		// }
+		}
+		
+	}
+	
+	public function headScriptLoader() {
+		$this->scriptLoader( $this->headScripts );
 	}
 	
 
 	public function footerScriptLoader() {
-		if ( count( $this->footerScripts ) ) {
-			$data = $this->encodeLoadParam( $this->footerScripts );
-			echo "<script type='text/javascript' src='" . esc_url( add_query_arg( array( 'c' => 1, 'm' => 2, 'load' => $data ), plugins_url( 'class-load-scripts.php', __FILE__ ) ) ) . "'></script>";
-		}
+		$this->scriptLoader( $this->footerScripts );
 	}
 	
 	
 	public function gatherEnqueuedStyles( $tag, $handle ) {
+		
+		$enabled = true;
+		
+		if ( ! $enabled ) {
+			return $tag;
+		}
 
 		if ( ! $this->isFrontEnd() ) {
 			return $tag;
 		}
+		
+		$includeIncludes = true;
+		$includeRemote = true;
 		
 		// Do only for stylesheets
 		if ( ! preg_match( "/rel=['\"]stylesheet['\"]/", $tag ) ) {
@@ -191,20 +270,27 @@ class ScriptCombiner {
 		} else if ( strpos( $src, includes_url() ) !== false ) {
 	
 			// Get local path
+			if ( ! $includeIncludes ) {
+				return $tag;
+			}
 			$path = str_replace( trim( includes_url(), '/\\' ), ABSPATH . WPINC, $src );
 			
-		} else {
+		} else if ( ! $includeRemote ) {
 
-			// return $tag;
+			return $tag;
 		}
 		
-		// Remove trailing arguments
-		$path = preg_replace( '/\?.+$/', '', $path );
+		if ( ! empty( $path ) ) {
 		
-		// Check if file exists
-		$path = realpath( $path );
-		if ( ! $path && ! @is_file( $path ) ) {
-			// return $tag;
+			// Remove trailing arguments
+			$path = preg_replace( '/\?.+$/', '', $path );
+		
+			// Check if file exists
+			$path = realpath( $path );
+			if ( ! $path && ! @is_file( $path ) ) {
+				return $tag;
+			}
+			
 		}
 		
 		// If no handle, generate one
@@ -225,22 +311,82 @@ class ScriptCombiner {
 		return '';
 	}
 
+
+	
+	
+	public function styleLoader( $styles ) {
+		
+		$method = 1;
+		$compressionLevel = 1;
+		$gzip = 0;
+		
+		if ( ! count( $styles ) ) {
+			return;
+		}
+		
+		$hash = substr( md5( serialize( $styles ) . $compressionLevel ), 0, 8 );
+
+		global $wp_filesystem;
+		
+		// delete_transient( 'css_combined_' . $hash );
+		$output = get_transient( 'cmbntr_css' . $hash );
+		// var_dump($output);
+		if ( ( $method == 1 && ! $output ) || ( $method == 1 && ! empty( $output['path'] ) && ! $wp_filesystem->is_file( $output['path'] ) ) ) {
+		
+			$combined = GambitCombinatorCSS::combineSources( $styles );
+			
+			if ( $compressionLevel ) {
+				$combined = GambitCombinatorCSS::compile( $combined );
+			}
+			
+			$output = GambitCombinatorCSS::createFile( 
+				$combined, 
+				$hash . '.css'
+			);
+			
+			set_transient( 'cmbntr_css' . $hash, $output, DAY_IN_SECONDS );
+			
+		}
+		
+		// var_dump($upload_dir['baseurl'] . 'combinator/' . $filePath );
+		if ( $method == 1 && ! empty( $output['path'] ) && $wp_filesystem->is_file( $output['path'] ) ) {
+			echo "<link rel='stylesheet' id='css_combinator_" . esc_attr( $hash ) . "-css' href='" . esc_url( $output['url'] ) . "' type='text/css' media='all' />";
+			// echo "<script type='text/javascript' src='" . esc_url( $output['url'] ) . "'></script>";
+			
+		} else {
+		
+		// if ( count( $this->headScripts ) ) {
+			$data = $this->encodeLoadParam( $styles );
+			// echo "<script type='text/javascript' src='" . esc_url( add_query_arg( array( 'c' => 1, 'm' => 0, 'load' => $data ), admin_url( 'admin-ajax.php?action=combinator_scripts' ) ) ) . "'></script>";
+			// echo "<script type='text/javascript' src='" . esc_url( add_query_arg( array( 'c' => 1, 'm' => $compressionLevel, 'load' => $data ), plugins_url( 'fallback/class-load-scripts.php', __FILE__ ) ) ) . "'></script>";
+		// }
+			echo "<link rel='stylesheet' id='css_combinator_" . esc_attr( $hash ) . "-css' href='" . esc_url( add_query_arg( array( 'c' => $gzip, 'm' => $compressionLevel, 'load' => $data ), plugins_url( 'fallback/class-load-styles.php', __FILE__ ) ) ) . "' type='text/css' media='all' />";
+		
+		}
+		
+	}
 	
 	
 	public function headStyleLoader() {
-		if ( count( $this->headStyles ) ) {
-			$data = $this->encodeLoadParam( $this->headStyles );
-			echo "<link rel='stylesheet' id='css_combiner-css' href='" . esc_url( add_query_arg( array( 'c' => 1, 'm' => 2, 'load' => $data ), plugins_url( 'class-load-styles.php', __FILE__ ) ) ) . "' type='text/css' media='all' />";
-		}
-		$this->inHead = false;
+		// if ( count( $this->headStyles ) ) {
+		// 	$data = $this->encodeLoadParam( $this->headStyles );
+		// 	echo "<link rel='stylesheet' id='css_combiner-css' href='" . esc_url( add_query_arg( array( 'c' => 1, 'm' => 0, 'load' => $data ), plugins_url( 'fallback/class-load-styles.php', __FILE__ ) ) ) . "' type='text/css' media='all' />";
+		// }
+		$this->styleLoader( $this->headStyles );
 	}
 	
 
 	public function footerStyleLoader() {
-		if ( count( $this->footerStyles ) ) {
-			$data = $this->encodeLoadParam( $this->footerStyles );
-			echo "<link rel='stylesheet' id='css_combiner-footer-css' href='" . esc_url( add_query_arg( array( 'c' => 1, 'm' => 2, 'load' => $data ), plugins_url( 'class-load-styles.php', __FILE__ ) ) ) . "' type='text/css' media='all' />";
-		}
+		// if ( count( $this->footerStyles ) ) {
+		// 	$data = $this->encodeLoadParam( $this->footerStyles );
+		// 	echo "<link rel='stylesheet' id='css_combiner-footer-css' href='" . esc_url( add_query_arg( array( 'c' => 1, 'm' => 0, 'load' => $data ), plugins_url( 'fallback/class-load-styles.php', __FILE__ ) ) ) . "' type='text/css' media='all' />";
+		// }
+		$this->styleLoader( $this->footerStyles );
+	}
+	
+	
+	public function doneWithHead() {
+		$this->inHead = false;
 	}
 }
 
