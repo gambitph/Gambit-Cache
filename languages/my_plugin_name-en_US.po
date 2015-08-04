@@ -1,0 +1,719 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: The Loading Bar\n"
+"POT-Creation-Date: 2014-08-27 22:27+0800\n"
+"PO-Revision-Date: 2014-08-27 22:27+0800\n"
+"Last-Translator: Benjamin Intal <bfintal@gmail.com>\n"
+"Language-Team: Gambit <bfintal@gmail.com>\n"
+"Language: English\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.5.4\n"
+"X-Poedit-KeywordsList: __;_e\n"
+"X-Poedit-Basepath: .\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-SearchPath-0: ..\n"
+
+#: ../the-loading-bar.php:68
+msgid "The Loading Bar"
+msgstr ""
+
+#: ../the-loading-bar.php:70
+msgid ""
+"These are the settings for your website loading screen. Note that the "
+"loading screen will only show up if your page has images (because if you "
+"don&apos;t have any images then your page will load fast)."
+msgstr ""
+
+#: ../the-loading-bar.php:75
+msgid "General Settings"
+msgstr ""
+
+#: ../the-loading-bar.php:80
+msgid "Enable Loading Bar"
+msgstr ""
+
+#: ../the-loading-bar.php:83
+msgid "Enable the loading bar"
+msgstr ""
+
+#: ../the-loading-bar.php:88
+msgid "Testing Mode"
+msgstr ""
+
+#: ../the-loading-bar.php:91
+msgid ""
+"In testing mode, the speed (per tick) of the loading bar will be slower so "
+"that you can have a better view of your selected settings."
+msgstr ""
+
+#: ../the-loading-bar.php:98
+msgid "Don&apos;t show page"
+msgstr ""
+
+#: ../the-loading-bar.php:101
+msgid ""
+"Keep showing the loading bar, don&apos;t continue to the page when we reach "
+"100%. This is helpful when testing out your settings."
+msgstr ""
+
+#: ../the-loading-bar.php:114
+msgid "Background"
+msgstr ""
+
+#: ../the-loading-bar.php:119
+msgid "Background Color"
+msgstr ""
+
+#: ../the-loading-bar.php:122
+msgid "The background color of the loading screen"
+msgstr ""
+
+#: ../the-loading-bar.php:128
+msgid "Background Image"
+msgstr ""
+
+#: ../the-loading-bar.php:131
+msgid ""
+"Be careful of adding a background image to your loader. The loader should be "
+"fast and if you&apos;re going to add an image, make sure that it has a very "
+"small file size."
+msgstr ""
+
+#: ../the-loading-bar.php:140 ../the-loading-bar.php:145
+msgid "Percentage Label"
+msgstr ""
+
+#: ../the-loading-bar.php:150
+msgid "Show Label"
+msgstr ""
+
+#: ../the-loading-bar.php:151
+msgid "Hide Label"
+msgstr ""
+
+#: ../the-loading-bar.php:155
+msgid "Percentage Label Font"
+msgstr ""
+
+#: ../the-loading-bar.php:159
+msgid ""
+"Select the font to use for the percentage label. We recommend choosing a "
+"<strong>web safe font</strong> so that the loading screen will load faster. "
+"Using a Google WebFont will delay the appearance of the loading bar since "
+"the font file would have to be loaded also."
+msgstr ""
+
+#: ../the-loading-bar.php:174
+msgid "Label Placement"
+msgstr ""
+
+#: ../the-loading-bar.php:177
+msgid ""
+"The alignment of the percentage label within the screen. You can use the "
+"margin settings below to fine tune the location of the label."
+msgstr ""
+
+#: ../the-loading-bar.php:179 ../the-loading-bar.php:386
+msgid "Top Left"
+msgstr ""
+
+#: ../the-loading-bar.php:180 ../the-loading-bar.php:387
+msgid "Top Center"
+msgstr ""
+
+#: ../the-loading-bar.php:181 ../the-loading-bar.php:388
+msgid "Top Right"
+msgstr ""
+
+#: ../the-loading-bar.php:182 ../the-loading-bar.php:389
+msgid "Middle Left"
+msgstr ""
+
+#: ../the-loading-bar.php:183 ../the-loading-bar.php:390
+msgid "Centered"
+msgstr ""
+
+#: ../the-loading-bar.php:184 ../the-loading-bar.php:391
+msgid "Middle Right"
+msgstr ""
+
+#: ../the-loading-bar.php:185 ../the-loading-bar.php:392
+msgid "Bottom Left"
+msgstr ""
+
+#: ../the-loading-bar.php:186 ../the-loading-bar.php:393
+msgid "Bottom Center"
+msgstr ""
+
+#: ../the-loading-bar.php:187 ../the-loading-bar.php:394
+msgid "Bottom Right"
+msgstr ""
+
+#: ../the-loading-bar.php:207
+msgid "Margin Left & Right"
+msgstr ""
+
+#: ../the-loading-bar.php:210
+msgid ""
+"The left & right paddings of the percentage label. You can use this setting "
+"to push or pull your percentage label left or right."
+msgstr ""
+
+#: ../the-loading-bar.php:222
+msgid "Margin Top & Bottom"
+msgstr ""
+
+#: ../the-loading-bar.php:225
+msgid ""
+"The top & bottom paddings of the percentage label. You can use this setting "
+"to push or pull your percentage label up or down."
+msgstr ""
+
+#: ../the-loading-bar.php:241
+msgid "Loading Bar"
+msgstr ""
+
+#: ../the-loading-bar.php:246
+msgid "Loading Bar Style"
+msgstr ""
+
+#: ../the-loading-bar.php:249
+msgid "The type of loading bar to display."
+msgstr ""
+
+#: ../the-loading-bar.php:251
+msgid "Don&apos;t display a loading bar"
+msgstr ""
+
+#: ../the-loading-bar.php:252
+msgid "Horizontal line"
+msgstr ""
+
+#: ../the-loading-bar.php:253
+msgid "Fill up screen"
+msgstr ""
+
+#: ../the-loading-bar.php:254
+msgid "Classic progress bar"
+msgstr ""
+
+#: ../the-loading-bar.php:255
+msgid "Circular indicator"
+msgstr ""
+
+#: ../the-loading-bar.php:256
+msgid "Animated gif"
+msgstr ""
+
+#: ../the-loading-bar.php:262
+msgid "Bar Movement Speed"
+msgstr ""
+
+#: ../the-loading-bar.php:265
+msgid "The speed of the transitions of the movement of the progress bar."
+msgstr ""
+
+#: ../the-loading-bar.php:270
+msgid "seconds"
+msgstr ""
+
+#: ../the-loading-bar.php:292
+msgid "Gif"
+msgstr ""
+
+#: ../the-loading-bar.php:296
+msgid "Upload your own gif"
+msgstr ""
+
+#: ../the-loading-bar.php:297
+msgid "Choose from our list"
+msgstr ""
+
+#: ../the-loading-bar.php:300 ../the-loading-bar.php:310
+msgid "Upload your gif image"
+msgstr ""
+
+#: ../the-loading-bar.php:307
+msgid "Gif Image"
+msgstr ""
+
+#: ../the-loading-bar.php:318 ../the-loading-bar.php:319
+msgid "2D Rotating Dots"
+msgstr ""
+
+#: ../the-loading-bar.php:318 ../the-loading-bar.php:319
+#: ../the-loading-bar.php:320 ../the-loading-bar.php:321
+#: ../the-loading-bar.php:322 ../the-loading-bar.php:323
+#: ../the-loading-bar.php:324 ../the-loading-bar.php:325
+#: ../the-loading-bar.php:326 ../the-loading-bar.php:327
+#: ../the-loading-bar.php:328 ../the-loading-bar.php:329
+#: ../the-loading-bar.php:330 ../the-loading-bar.php:331
+#: ../the-loading-bar.php:332 ../the-loading-bar.php:333
+#: ../the-loading-bar.php:334 ../the-loading-bar.php:335
+#: ../the-loading-bar.php:338 ../the-loading-bar.php:339
+#: ../the-loading-bar.php:340 ../the-loading-bar.php:341
+#: ../the-loading-bar.php:342 ../the-loading-bar.php:343
+#: ../the-loading-bar.php:344 ../the-loading-bar.php:345
+#: ../the-loading-bar.php:346 ../the-loading-bar.php:347
+#: ../the-loading-bar.php:348 ../the-loading-bar.php:349
+msgid "white"
+msgstr ""
+
+#: ../the-loading-bar.php:320 ../the-loading-bar.php:321
+msgid "3D Rotating Dots"
+msgstr ""
+
+#: ../the-loading-bar.php:322 ../the-loading-bar.php:323
+msgid "4 Moving Dots"
+msgstr ""
+
+#: ../the-loading-bar.php:324 ../the-loading-bar.php:325
+msgid "Bouncing Dot"
+msgstr ""
+
+#: ../the-loading-bar.php:326 ../the-loading-bar.php:327
+msgid "Dot Target"
+msgstr ""
+
+#: ../the-loading-bar.php:328 ../the-loading-bar.php:329
+msgid "Enlarged Dots"
+msgstr ""
+
+#: ../the-loading-bar.php:330 ../the-loading-bar.php:331
+msgid "Fading Line of Dots"
+msgstr ""
+
+#: ../the-loading-bar.php:332 ../the-loading-bar.php:333
+msgid "Flipping Colors Dot"
+msgstr ""
+
+#: ../the-loading-bar.php:334 ../the-loading-bar.php:335
+msgid "Folding Dot"
+msgstr ""
+
+#: ../the-loading-bar.php:336 ../the-loading-bar.php:337
+msgid "Retro Snake"
+msgstr ""
+
+#: ../the-loading-bar.php:336 ../the-loading-bar.php:337
+#: ../the-loading-bar.php:350 ../the-loading-bar.php:351
+msgid "transparent"
+msgstr ""
+
+#: ../the-loading-bar.php:338 ../the-loading-bar.php:339
+msgid "Rotating Cube"
+msgstr ""
+
+#: ../the-loading-bar.php:340 ../the-loading-bar.php:341
+msgid "Rubik&apos;s Cube"
+msgstr ""
+
+#: ../the-loading-bar.php:342 ../the-loading-bar.php:343
+msgid "Shuffling Squares"
+msgstr ""
+
+#: ../the-loading-bar.php:344 ../the-loading-bar.php:345
+msgid "Spinning Dots"
+msgstr ""
+
+#: ../the-loading-bar.php:346 ../the-loading-bar.php:347
+msgid "Square into Line"
+msgstr ""
+
+#: ../the-loading-bar.php:348 ../the-loading-bar.php:349
+msgid "Square Splitting"
+msgstr ""
+
+#: ../the-loading-bar.php:350 ../the-loading-bar.php:351
+msgid "Tetris"
+msgstr ""
+
+#: ../the-loading-bar.php:368
+msgid "Select A Gif"
+msgstr ""
+
+#: ../the-loading-bar.php:373
+#, php-format
+msgid ""
+"Select a gif from this awesome list of preloaders created by %s. Note that "
+"only some of these have transparent backgrounds, most of them need your "
+"background to be white. The background color is indicated in the dropdown."
+msgstr ""
+
+#: ../the-loading-bar.php:381
+msgid "Bar Placement"
+msgstr ""
+
+#: ../the-loading-bar.php:384
+msgid ""
+"Select the location where to align your bar. You can use the margin setting "
+"below to fine tune the location of your loading bar."
+msgstr ""
+
+#: ../the-loading-bar.php:403
+msgid "Loading Bar Color"
+msgstr ""
+
+#: ../the-loading-bar.php:406
+msgid "The color of the progress bar"
+msgstr ""
+
+#: ../the-loading-bar.php:418
+msgid "Loading Bar Background Color"
+msgstr ""
+
+#: ../the-loading-bar.php:421
+msgid ""
+"The background color of the circular indicator, this is the unfilled part of "
+"the bar. Leave blank for transparent."
+msgstr ""
+
+#: ../the-loading-bar.php:429
+msgid "Bar Thickness"
+msgstr ""
+
+#: ../the-loading-bar.php:432
+msgid "The thickness of the loading bar line"
+msgstr ""
+
+#: ../the-loading-bar.php:445
+msgid "Bar Width"
+msgstr ""
+
+#: ../the-loading-bar.php:448
+msgid "The maximum width of your loading bar"
+msgstr ""
+
+#: ../the-loading-bar.php:460
+msgid "Indicator Radius"
+msgstr ""
+
+#: ../the-loading-bar.php:463
+msgid "The radius of the circular indicator"
+msgstr ""
+
+#: ../the-loading-bar.php:474
+msgid "Bar Margin"
+msgstr ""
+
+#: ../the-loading-bar.php:477
+msgid ""
+"The side margins of the loading bar, you can use this to fine tune the "
+"position of your loading bar."
+msgstr ""
+
+#: ../the-loading-bar.php:489
+msgid "Bar Margin Left & Right"
+msgstr ""
+
+#: ../the-loading-bar.php:492
+msgid ""
+"The left & right paddings of the loading bar. You can use this setting to "
+"push or pull your loading bar left or right"
+msgstr ""
+
+#: ../the-loading-bar.php:506
+msgid "Bar Margin Top & Bottom"
+msgstr ""
+
+#: ../the-loading-bar.php:509
+msgid ""
+"The top & bottom paddings of the loading bar. You can use this setting to "
+"push or pull your loading bar up or down"
+msgstr ""
+
+#: ../the-loading-bar.php:523
+msgid "Fill Direction"
+msgstr ""
+
+#: ../the-loading-bar.php:526
+msgid "The direction of the fill direction."
+msgstr ""
+
+#: ../the-loading-bar.php:528
+msgid "Bottom to top"
+msgstr ""
+
+#: ../the-loading-bar.php:529
+msgid "Top to bottom"
+msgstr ""
+
+#: ../the-loading-bar.php:530
+msgid "Right to left"
+msgstr ""
+
+#: ../the-loading-bar.php:531
+msgid "Left to right"
+msgstr ""
+
+#: ../the-loading-bar.php:532
+msgid "Center to sides"
+msgstr ""
+
+#: ../the-loading-bar.php:533
+msgid "Center to top and bottom"
+msgstr ""
+
+#: ../the-loading-bar.php:542
+msgid "Fill Image"
+msgstr ""
+
+#: ../the-loading-bar.php:545
+msgid ""
+"You can put an image inside your loading bar. The loading bar loads first so "
+"be mindful of your image file size, it should be small in order to be seen."
+msgstr ""
+
+#: ../the-loading-bar.php:553
+msgid "Fill Image Attachment"
+msgstr ""
+
+#: ../the-loading-bar.php:556
+msgid "Make the background image fixed (not moving)"
+msgstr ""
+
+#: ../the-loading-bar.php:564
+msgid "Border Radius"
+msgstr ""
+
+#: ../the-loading-bar.php:567
+msgid "The roundness of the corners of your loading bar."
+msgstr ""
+
+#: ../the-loading-bar.php:580
+msgid "Classic Bar Type"
+msgstr ""
+
+#: ../the-loading-bar.php:583
+msgid "The animation type to use for your bar"
+msgstr ""
+
+#: ../the-loading-bar.php:585
+msgid "A solid bar"
+msgstr ""
+
+#: ../the-loading-bar.php:586
+msgid "Small bars that pop up"
+msgstr ""
+
+#: ../the-loading-bar.php:587
+msgid "Small bars that grow"
+msgstr ""
+
+#: ../the-loading-bar.php:596
+msgid "Bar Sections"
+msgstr ""
+
+#: ../the-loading-bar.php:599
+msgid "The number of sections to split the bar into"
+msgstr ""
+
+#: ../the-loading-bar.php:611
+msgid "Bar Section Gap"
+msgstr ""
+
+#: ../the-loading-bar.php:614
+msgid "The amount of gap between sections"
+msgstr ""
+
+#: ../the-loading-bar.php:630
+msgid "Page Loaded Transition"
+msgstr ""
+
+#: ../the-loading-bar.php:635
+msgid "Choose a Transition"
+msgstr ""
+
+#: ../the-loading-bar.php:638
+msgid ""
+"The type of animation to play when your loading screen finishes and "
+"transitions into your site."
+msgstr ""
+
+#: ../the-loading-bar.php:640
+msgid "Fade Out"
+msgstr ""
+
+#: ../the-loading-bar.php:641
+msgid "Rotate / Push from Top"
+msgstr ""
+
+#: ../the-loading-bar.php:642
+msgid "Rotate / Push from Bottom"
+msgstr ""
+
+#: ../the-loading-bar.php:643
+msgid "Rotate / Push from Right"
+msgstr ""
+
+#: ../the-loading-bar.php:644
+msgid "Rotate / Push from Left"
+msgstr ""
+
+#: ../the-loading-bar.php:645
+msgid "Fade / Push from Top"
+msgstr ""
+
+#: ../the-loading-bar.php:646
+msgid "Fade / Push from Bottom"
+msgstr ""
+
+#: ../the-loading-bar.php:647
+msgid "Fade / Push from Right"
+msgstr ""
+
+#: ../the-loading-bar.php:648
+msgid "Fade / Push from Left"
+msgstr ""
+
+#: ../the-loading-bar.php:649
+msgid "Different Speed from Top"
+msgstr ""
+
+#: ../the-loading-bar.php:650
+msgid "Different Speed from Bottom"
+msgstr ""
+
+#: ../the-loading-bar.php:651
+msgid "Different Speed from Right"
+msgstr ""
+
+#: ../the-loading-bar.php:652
+msgid "Different Speed from Left"
+msgstr ""
+
+#: ../the-loading-bar.php:653
+msgid "Rotate Top / Rotate Bottom"
+msgstr ""
+
+#: ../the-loading-bar.php:654
+msgid "Rotate Bottom / Rotate Top"
+msgstr ""
+
+#: ../the-loading-bar.php:655
+msgid "Rotate Left / Rotate Right"
+msgstr ""
+
+#: ../the-loading-bar.php:656
+msgid "Rotate Right / Rotate Left"
+msgstr ""
+
+#: ../the-loading-bar.php:657
+msgid "Move from Top"
+msgstr ""
+
+#: ../the-loading-bar.php:658
+msgid "Move from Bottom"
+msgstr ""
+
+#: ../the-loading-bar.php:659
+msgid "Move from Right"
+msgstr ""
+
+#: ../the-loading-bar.php:660
+msgid "Move from Left"
+msgstr ""
+
+#: ../the-loading-bar.php:661
+msgid "Scale Up / Scale Up"
+msgstr ""
+
+#: ../the-loading-bar.php:671
+msgid "Loading Bar Placement"
+msgstr ""
+
+#: ../the-loading-bar.php:676
+msgid "Where to Show the Loading Bar?"
+msgstr ""
+
+#: ../the-loading-bar.php:679
+msgid ""
+"Choose the locations where your loading bar should show up. We recommend "
+"that you choose only your landing pages."
+msgstr ""
+
+#: ../the-loading-bar.php:689
+msgid "Pages with a Loading Bar"
+msgstr ""
+
+#: ../the-loading-bar.php:692
+msgid ""
+"Choose specific pages that will show the loading bar. We recommend that you "
+"choose only your landing pages."
+msgstr ""
+
+#: ../the-loading-bar.php:704 ../the-loading-bar.php:709
+msgid "Custom CSS"
+msgstr ""
+
+#: ../the-loading-bar.php:712
+msgid ""
+"If you want to style The Loading Bar further, you can add here your "
+"additional CSS rules. The loading bar is split into just 3 elements, to make "
+"things easier, here they are:<br><ul><li><code>#loading-bar-container</code> "
+"- This is the main container the spans the whole page and is the background,"
+"</li><li><code>#loading-bar-label</code> - The progress percentage text "
+"label, and</li><li><code>#loading-bar-progress</code> - The bar itself, this "
+"is the one that&apos;s moving.</li></ul>"
+msgstr ""
+
+#: ../the-loading-bar.php:895
+msgid "Get Customer Support"
+msgstr ""
+
+#: ../the-loading-bar.php:899
+msgid "Get More Plugins"
+msgstr ""
+
+#: ../the-loading-bar.php:914
+msgid "Settings"
+msgstr ""
+
+#: ../the-loading-bar.php:1023
+#, php-format
+msgid "Enjoying %s?"
+msgstr ""
+
+#: ../the-loading-bar.php:1024
+msgid ""
+"Help us out by rating our plugin 5 stars in CodeCanyon! This will allow us "
+"to create more awesome products and provide top notch customer support."
+msgstr ""
+
+#: ../the-loading-bar.php:1025
+msgid "Rate us 5 stars in CodeCanyon :)"
+msgstr ""
+
+#: ../the-loading-bar.php:1026
+msgid "Remind me tomorrow"
+msgstr ""
+
+#: ../the-loading-bar.php:1027
+msgid "I&apos;ve already rated!"
+msgstr ""
+
+#: ../the-loading-bar.php:1098
+#, php-format
+msgid "Thank you for activating %s!"
+msgstr ""
+
+#: ../the-loading-bar.php:1099
+msgid "You can change the looks of your loading bar in <em><a href=\""
+msgstr ""
+
+#: ../the-loading-bar.php:1100
+msgid ""
+"If you need any support, you can leave us a ticket in our support site. The "
+"link to our support site is listed in the plugin details for future "
+"reference."
+msgstr ""
+
+#: ../the-loading-bar.php:1101
+msgid "Visit our support site"
+msgstr ""
+
+#: ../the-loading-bar.php:1103
+msgid "This notice will go away in a moment"
+msgstr ""
