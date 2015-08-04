@@ -8,6 +8,12 @@ class GambitCombinatorJS extends GambitCombinatorFiles {
 	
 	public static function closureCompile( $code, $level ) {
 	
+		$codeHash = substr( md5( $code ), 0, 8 );
+		$failedBefore = get_transient( 'cmbntr_fail' . $codeHash );
+		if ( $failedBefore ) {
+			return $code;
+		}
+	
 		$compilationLevel = 'WHITESPACE_ONLY';
 		if ( $level == 2 ) {
 			$compilationLevel = 'SIMPLE_OPTIMIZATIONS'; // default 2
@@ -32,18 +38,29 @@ class GambitCombinatorJS extends GambitCombinatorFiles {
 			'cookies' => array()
 		    )
 		);
+		
+		if ( class_exists( 'WP_Error' ) && function_exists( 'is_wp_error' ) ) {
+			if ( is_wp_error( $response ) ) {
+				set_transient( 'cmbntr_fail' . $codeHash, '1', DAY_IN_SECONDS );
+				return $code;
+			}
+		}
 
-		if ( ! empty( $response['response']['code'] ) && ! empty( $response['body'] ) ) {
+		if ( is_array( $response ) && ! empty( $response['response']['code'] ) && ! empty( $response['body'] ) ) {
 			if ( $response['response']['code'] == 200 ) {
 				$code = $response['body'];
+			} else {
+				set_transient( 'cmbntr_fail' . $codeHash, '1', DAY_IN_SECONDS );
 			}
+		} else {
+			set_transient( 'cmbntr_fail' . $codeHash, '1', DAY_IN_SECONDS );
 		}
 		
 		return $code;
 	}
 	
-	public static function combineSources( $sources, $type = 'js' ) {
-		return parent::combineSources( $sources, 'js' );
+	public static function combineSources( $sources, $type = 'js', $inlineCode = '' ) {
+		return parent::combineSources( $sources, 'js', $inlineCode );
 	}
 	
 }

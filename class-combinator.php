@@ -44,12 +44,16 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 			'js_enabled' => true,
 			'js_compression_level' => 2,
 			'js_include_includes' => true,
-			'js_include_remote' => false,
+			'js_include_remote' => true,
+			'js_include_inline' => false,
+			'js_exclude' => '',
 			
 			'css_compression_level' => 1,
 			'css_enabled' => true,
 			'css_include_includes' => true,
-			'css_include_remotes' => false,
+			'css_include_remote' => true,
+			'css_include_inline' => false,
+			'css_exclude' => 'googleapis',
 		);
 	
 		function __construct() {
@@ -58,16 +62,432 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 			add_action( 'tf_create_options', array( $this, 'createAdminOptions' ) );
 			add_action( 'tf_done', array( $this, 'gatherSettings' ), 10 );
 		
-			add_filter( 'script_loader_tag', array( $this, 'gatherEnqueuedScripts' ), 999, 3 );
-			add_action( 'wp_footer', array( $this, 'footerScriptLoader' ), 999 );
-			add_action( 'wp_head', array( $this, 'headScriptLoader' ), 999 );
+			// add_filter( 'script_loader_tag', array( $this, 'gatherEnqueuedScripts' ), 999, 3 );
+			// add_action( 'wp_footer', array( $this, 'footerScriptLoader' ), 99999 );
+			// add_action( 'wp_head', array( $this, 'headScriptLoader' ), 99999 );
 	
-			add_filter( 'style_loader_tag', array( $this, 'gatherEnqueuedStyles' ), 999, 2 );
-			add_action( 'wp_footer', array( $this, 'footerStyleLoader' ), 999 );
-			add_action( 'wp_head', array( $this, 'headStyleLoader' ), 999 );
+			// add_filter( 'style_loader_tag', array( $this, 'gatherEnqueuedStyles' ), 999, 2 );
+			// add_action( 'wp_footer', array( $this, 'footerStyleLoader' ), 99999 );
+			// add_action( 'wp_head', array( $this, 'headStyleLoader' ), 99999 );
 		
-			add_action( 'wp_head', array( $this, 'doneWithHead' ), 1000 );
+			// add_action( 'wp_head', array( $this, 'doneWithHead' ), 1000 );
+			
+			
+			add_action( 'wp_head', array( $this, 'test1' ), 0 );
+			add_action( 'wp_head', array( $this, 'test2' ), 9999 );
+			
+			add_action( 'wp_footer', array( $this, 'test1' ), 0 );
+			add_action( 'wp_footer', array( $this, 'test2' ), 9999 );
 
+		}
+		
+		public function test1() {
+			// $this->deleteAllCaches();
+			if ( ! $this->settings['global_enabled'] ) {
+				return;
+			}
+			if ( ! $this->settings['js_enabled'] && ! $this->settings['css_enabled'] ) {
+				return;
+			}
+
+			if ( ! $this->isFrontEnd() ) {
+				return;
+			}
+			
+			ob_start();
+		}
+		
+		public function test2() {
+			
+			if ( ! $this->settings['global_enabled'] ) {
+				return;
+			}
+			if ( ! $this->settings['js_enabled'] && ! $this->settings['css_enabled'] ) {
+				return;
+			}
+
+			if ( ! $this->isFrontEnd() ) {
+				return;
+			}
+			
+			$content = ob_get_contents();
+			ob_end_clean();
+			
+			
+			// Get the scripts & output
+			$scriptsStyles = $this->getAllScriptsStyles( $content );
+			$output = $this->scriptStlyesLoader( $content, $scriptsStyles, 'head' );
+			
+			
+			// Output the head/footer content
+			echo $content;
+			
+			
+			// Output the compressed stuff
+			if ( ! empty( $output['js']['url'] ) ) {
+				echo "<script type='text/javascript' src='" . esc_url( $output['js']['url'] ) . "'></script>";
+			}
+			if ( ! empty( $output['css']['url'] ) ) {
+				echo "<link rel='stylesheet' id='css_combinator_" . esc_attr( $output['css']['hash'] ) . "-css' href='" . esc_url( $output['css']['url'] ) . "' type='text/css' media='all' />";
+			}
+
+		}
+		
+		
+		public function scriptStlyesLoader( &$content, $scriptsStyles, $location = 'head' ) {
+
+			
+			/**
+			 * JS
+			 */
+		
+			$outputJS = '';
+			if ( $this->settings['js_enabled'] ) {
+			
+				$compressionLevel = $this->settings['js_compression_level'];
+			
+			
+				// Create hash
+				$hash = serialize( $scriptsStyles['script_files'] );
+				$hash .= serialize( $scriptsStyles['script_codes'] );
+				$hash .= $compressionLevel;
+				$hash = substr( md5( $hash ), 0, 8 );
+			
+			
+				$files = $scriptsStyles['script_files'];
+				$inline = implode( ';', $scriptsStyles['script_codes'] );
+			
+				$outputJS = get_transient( 'cmbntr_js' . $hash );
+				if ( empty( $outputJS ) && ( count( $files ) || ! empty( $inline ) ) ) {
+				
+					$combined = GambitCombinatorJS::combineSources( $files, null, $inline );
+				
+					if ( $compressionLevel ) {
+						$combined = GambitCombinatorJS::closureCompile( $combined, $compressionLevel );
+					}
+				
+					$outputJS = GambitCombinatorJS::createFile(
+						$combined,
+						$hash . '.js'
+					);
+					$outputJS['hash'] = $hash;
+					
+					set_transient( 'cmbntr_js' . $hash, $outputJS, DAY_IN_SECONDS );
+				
+				}
+				
+				// Adjust the content to remove the combined stuff
+				foreach ( $scriptsStyles['script_file_tags'] as $i => $tag ) {
+					$content = str_replace( $tag, '', $content );
+				}
+				foreach ( $scriptsStyles['script_code_tags'] as $i => $tag ) {
+					$content = str_replace( $tag, '', $content );
+				}
+			
+			}
+			
+			
+			/**
+			 * CSS
+			 */
+			
+			$outputCSS = '';
+			if ( $this->settings['css_enabled'] ) {
+				
+				$compressionLevel = $this->settings['css_compression_level'];
+			
+				// Create hash
+				$hash = serialize( $scriptsStyles['style_files'] );
+				$hash .= serialize( $scriptsStyles['style_codes'] );
+				$hash .= $compressionLevel;
+				$hash = substr( md5( $hash ), 0, 8 );
+				
+				
+				$files = $scriptsStyles['style_files'];
+				$inline = implode( '', $scriptsStyles['style_codes'] );
+				
+			
+				$outputCSS = get_transient( 'cmbntr_css' . $hash );
+				if ( empty( $outputCSS ) && ( count( $files ) || ! empty( $inline ) ) ) {
+					$combined = GambitCombinatorCSS::combineSources( $files, null, $inline );
+					
+					if ( $compressionLevel ) {
+						$combined = GambitCombinatorCSS::compile( $combined );
+					}
+			
+					$outputCSS = GambitCombinatorCSS::createFile( 
+						$combined, 
+						$hash . '.css'
+					);
+					$outputCSS['hash'] = $hash;
+					
+					set_transient( 'cmbntr_css' . $hash, $outputCSS, DAY_IN_SECONDS );
+					
+				}
+				
+				
+				// Adjust the content to remove the combined stuff
+				foreach ( $scriptsStyles['style_file_tags'] as $i => $tag ) {
+					$content = str_replace( $tag, '', $content );
+				}
+				foreach ( $scriptsStyles['style_code_tags'] as $i => $tag ) {
+					$content = str_replace( $tag, '', $content );
+				}
+			}
+			
+			
+			return array(
+				'js' => $outputJS,
+				'css' => $outputCSS,
+			);
+			
+		}
+		
+			//
+		// public function scriptLoader2( $scriptsStyles ) {
+		//
+		// 	$method = $this->settings['combine_method'];
+		// 	$compressionLevel = $this->settings['js_compression_level'];
+		// 	$gzip = $this->settings['gzip_output'] ? '1' : '';
+		//
+		// 	if ( ! count( $scripts ) ) {
+		// 		return;
+		// 	}
+		//
+		// 	$hash = substr( md5( serialize( $scripts ) . $compressionLevel ), 0, 8 );
+		//
+		// 	global $wp_filesystem;
+		// 	GambitCombinatorFiles::initFilesystem();
+		//
+		// 	// delete_transient( 'js_combined_' . $hash );
+		// 	$output = get_transient( 'cmbntr_js' . $hash );
+		//
+		// 	// var_dump('cmbntr_js_' . $hash, 'transient', $output);
+		// 	if ( ( $method == 1 && ! $output ) || ( $method == 1 && ! empty( $output['path'] ) && ! $wp_filesystem->is_file( $output['path'] ) ) ) {
+		// 		// var_dump('combining');
+		// 		$combined = GambitCombinatorJS::combineSources( $scripts, 'js',  );
+		//
+		// 		if ( $compressionLevel ) {
+		// 			$combined = GambitCombinatorJS::closureCompile( $combined, $compressionLevel );
+		// 		}
+		//
+		// 		$output = GambitCombinatorJS::createFile(
+		// 			$combined,
+		// 			$hash . '.js'
+		// 		);
+		//
+		// 		// var_dump('cmbntr_js_' . $hash, $output);
+		// 		set_transient( 'cmbntr_js' . $hash, $output, DAY_IN_SECONDS );
+		// 		// var_dump('get_transient', get_transient( 'cmbntr_js_' . $hash ));
+		// 	}
+		//
+		// 	// var_dump($upload_dir['baseurl'] . 'combinator/' . $filePath );
+		// 	if ( $method == 1 && ! empty( $output['path'] ) && $wp_filesystem->is_file( $output['path'] ) ) {
+		// 		echo "<script type='text/javascript' src='" . esc_url( $output['url'] ) . "'></script>";
+		//
+		// 	} else {
+		//
+		// 	// if ( count( $this->headScripts ) ) {
+		// 		$data = $this->encodeLoadParam( $scripts );
+		// 		// echo "<script type='text/javascript' src='" . esc_url( add_query_arg( array( 'c' => 1, 'm' => 0, 'load' => $data ), admin_url( 'admin-ajax.php?action=combinator_scripts' ) ) ) . "'></script>";
+		// 		echo "<script type='text/javascript' src='" . esc_url( add_query_arg( array( 'c' => $gzip, 'm' => $compressionLevel, 'load' => $data ), plugins_url( 'combinator/fallback/class-load-scripts.php', __FILE__ ) ) ) . "'></script>";
+		// 	// }
+		// 	}
+		//
+		// }
+		
+		public function getAllScriptsStyles( $content ) {
+			
+			
+			/**
+			 * Excludes
+			 */
+
+			$excludesJS = '';
+			if ( ! empty( $this->settings['js_exclude'] ) ) {
+				$excludesJS = preg_replace( "/\n/", "|", $this->settings['js_exclude'] );
+				$excludesJS = preg_replace( "/ /", "", $excludesJS );
+			}
+			$excludesCSS = '';
+			if ( ! empty( $this->settings['css_exclude'] ) ) {
+				$excludesCSS = preg_replace( "/\n/", "|", $this->settings['css_exclude'] );
+				$excludesCSS = preg_replace( "/ /", "", $excludesCSS );
+			}
+								
+			
+			// Remove commented out stuff since we don't want to include those
+			$cleanedContent = preg_replace( "/<!--.*?-->/s", "", $content );
+			
+			
+			/**
+			 * JS files
+			 */
+			$scriptTagsToReplace = array();
+			$scriptSrcs = array();
+			$inlineScriptTagsToReplace = array();
+			$inlineScriptCodes = array();
+			
+			preg_match_all( "/<script.*?\/script>\s?/s", $cleanedContent, $match );
+			
+			if ( count( $match ) ) {
+
+				foreach ( $match[0] as $scriptTag ) {
+					
+					// Do not include backbone templates
+					if ( preg_match( "/id=['\"]tmpl-/s", $scriptTag ) ) {
+						continue;
+					}
+					
+					// Get the URL
+					preg_match( "/src=['\"](.*?)['\"]/s", $scriptTag, $src );
+					if ( ! empty( $src[1] ) ) {
+						$src = $src[1];
+					
+						// Excludes
+						if ( $excludesJS ) {
+							try {
+								if ( preg_match( '/(' . $excludesJS . ')/', $src ) ) {
+									continue;
+								}
+							} catch ( Exception $e ) {
+								// regex failed, ignore
+							}
+						}
+						
+				
+						// Filter depending on settings
+						if ( strpos( $src, content_url() ) ) {
+						} else if ( strpos( $src, includes_url() ) !== false ) {
+							if ( ! $this->settings['js_include_includes'] ) {
+								continue;
+							}
+						} else if ( ! $this->settings['js_include_remote'] ) {
+							continue;
+						}
+						
+						$scriptTagsToReplace[] = $scriptTag;
+						$scriptSrcs[] = $src;
+						continue;
+					}
+					
+			
+					if ( $this->settings['js_include_inline'] ) {
+						preg_match( "/<script.*?>(.*?)<\/script>/s", $scriptTag, $code );
+						if ( ! empty( $code[1] ) ) {
+							$inlineScriptTagsToReplace[] = $scriptTag;
+							$inlineScriptCodes[] = trim( $code[1] );
+						}
+					}
+					
+				}
+
+			}
+			
+			// foreach ( $scriptTagsToReplace as $tag ) {
+			// 	$content = str_replace( $tag, '', $content );
+			// }
+			// foreach ( $inlineScriptTagsToReplace as $tag ) {
+			// 	$content = str_replace( $tag, '', $content );
+			// }
+			
+			
+			
+			/**
+			 * CSS files
+			 */
+			$linkTagsToReplace = array();
+			$linkSrcs = array();
+			
+			preg_match_all( "/<link.*?href=.*?\/>\s?/s", $cleanedContent, $match );
+			
+			if ( count( $match ) ) {
+
+				foreach ( $match[0] as $linkTag ) {
+					if ( ! preg_match( "/rel=['\"]stylesheet['\"]/s", $linkTag ) ) {
+						continue;
+					}
+					if ( ! preg_match( "/media=['\"]all['\"]/s", $linkTag ) ) {
+						continue;
+					}
+					if ( ! preg_match( "/href=['\"](.*?)['\"]/s", $linkTag, $src ) ) {
+						continue;
+					}
+					
+					// Get the URL
+					if ( ! empty( $src[1] ) ) {
+						$src = $src[1];
+
+						// Excludes
+						if ( $excludesCSS ) {
+							try {
+								if ( preg_match( '/(' . $excludesCSS . ')/', $src ) ) {
+									continue;
+								}
+							} catch ( Exception $e ) {
+								// regex failed, ignore
+							}
+						}
+						
+						// Filter depending on settings
+						if ( strpos( $src, content_url() ) ) {
+						} else if ( strpos( $src, includes_url() ) !== false ) {
+							if ( ! $this->settings['css_include_includes'] ) {
+								continue;
+							}
+						} else if ( ! $this->settings['css_include_remote'] ) {
+							continue;
+						}
+						
+						$linkTagsToReplace[] = $linkTag;
+						$linkSrcs[] = $src;
+					}
+				}
+			}
+			
+			// foreach ( $linkTagsToReplace as $tag ) {
+			// 	$content = str_replace( $tag, '', $content );
+			// }
+			
+			
+			/**
+			 * CSS style tags
+			 */
+			$styleTagsToReplace = array();
+			$styleCodes = array();
+			
+			if ( $this->settings['css_include_inline'] ) {
+				
+				preg_match_all( "/<style.*?>.*?<\/style>\s?/s", $cleanedContent, $match );
+			
+				if ( count( $match ) ) {
+
+					foreach ( $match[0] as $styleTag ) {
+						if ( ! preg_match( "/<style.*?>(.*?)<\/style>/s", $styleTag, $code ) ) {
+							continue;
+						}
+						if ( ! empty( $code[1] ) ) {
+							$styleTagsToReplace[] = $styleTag;
+							$styleCodes[] = trim( $code[1] );
+						}
+					}
+				}
+				
+			}
+			
+			// foreach ( $styleTagsToReplace as $tag ) {
+			// 	$content = str_replace( $tag, '', $content );
+			// }
+			
+			return array(
+				'script_file_tags' => $scriptTagsToReplace,
+				'script_files' => $scriptSrcs,
+				'script_code_tags' => $inlineScriptTagsToReplace,
+				'script_codes' => $inlineScriptCodes,
+				'style_file_tags' => $linkTagsToReplace,
+				'style_files' => $linkSrcs,
+				'style_code_tags' => $styleTagsToReplace,
+				'style_codes' => $styleCodes,
+			);
 		}
 
 
@@ -131,7 +551,7 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 			
 			$adminPanel->createOption( array(
 				'name' => __( 'Enable Combinator', GAMBIT_COMBINATOR ),
-				'id' => 'global_enable',
+				'id' => 'global_enabled',
 				'type' => 'enable',
 				'default' => true,
 				'desc' => __( 'You can enable or disable the combining of scripts and stylesheets globally with this setting.', GAMBIT_COMBINATOR ),
@@ -174,7 +594,7 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 			
 			$adminPanel->createOption( array(
 				'name' => __( 'Combine Javascripts', GAMBIT_COMBINATOR ),
-				'id' => 'js_enable',
+				'id' => 'js_enabled',
 				'type' => 'enable',
 				'default' => true,
 				'desc' => __( 'Enable combining of Javascript files', GAMBIT_COMBINATOR ),
@@ -210,7 +630,7 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 			
 			$adminPanel->createOption( array(
 				'name' => __( 'Combine Stylesheets', GAMBIT_COMBINATOR ),
-				'id' => 'css_enable',
+				'id' => 'css_enabled',
 				'type' => 'enable',
 				'default' => true,
 				'desc' => __( 'Enable combining of stylesheets', GAMBIT_COMBINATOR ),
@@ -239,15 +659,12 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 
 			$titan = TitanFramework::getInstance( GAMBIT_COMBINATOR );
 			
-			$this->settings['global_enabled'] = $titan->getOption( 'global_enable' );
-			$this->settings['js_enable'] = $titan->getOption( 'js_enable' );
-			$this->settings['css_enable'] = $titan->getOption( 'css_enable' );
+			$this->settings['global_enabled'] = $titan->getOption( 'global_enabled' );
+			$this->settings['js_enabled'] = $titan->getOption( 'js_enabled' );
+			$this->settings['css_enabled'] = $titan->getOption( 'css_enabled' );
 			$this->settings['combine_method'] = $titan->getOption( 'combine_method' );
 			$this->settings['gzip_output'] = $titan->getOption( 'gzip_output' );
 			$this->settings['js_compression_level'] = $titan->getOption( 'js_compression_level' );
-			// $titan->setOption( 'global_enable', true );
-			// var_dump($titan->getOption( 'global_enable' ) );
-			// var_dump($titan->saveOptions());
 		}
 	
 	
@@ -297,7 +714,7 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 	
 		public function gatherEnqueuedScripts( $tag, $handle, $src ) {
 		
-			if ( ! $this->settings['js_enable'] || ! $this->settings['global_enabled'] ) {
+			if ( ! $this->settings['js_enabled'] || ! $this->settings['global_enabled'] ) {
 				return $tag;
 			}
 
@@ -335,8 +752,10 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 				$path = preg_replace( '/\?.+$/', '', $path );
 		
 				// Check if file exists
+				global $wp_filesystem;
+				GambitCombinatorFiles::initFilesystem();
 				$path = realpath( $path );
-				if ( ! $path && ! @is_file( $path ) ) {
+				if ( ! $path && ! $wp_filesystem->is_file( $path ) ) {
 					return $tag;
 				}
 			
@@ -376,12 +795,14 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 			$hash = substr( md5( serialize( $scripts ) . $compressionLevel ), 0, 8 );
 
 			global $wp_filesystem;
+			GambitCombinatorFiles::initFilesystem();
 		
 			// delete_transient( 'js_combined_' . $hash );
 			$output = get_transient( 'cmbntr_js' . $hash );
+
 			// var_dump('cmbntr_js_' . $hash, 'transient', $output);
 			if ( ( $method == 1 && ! $output ) || ( $method == 1 && ! empty( $output['path'] ) && ! $wp_filesystem->is_file( $output['path'] ) ) ) {
-		
+				// var_dump('combining');
 				$combined = GambitCombinatorJS::combineSources( $scripts );
 			
 				if ( $compressionLevel ) {
@@ -425,7 +846,7 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 	
 		public function gatherEnqueuedStyles( $tag, $handle ) {
 		
-			if ( ! $this->settings['css_enable'] || ! $this->settings['global_enabled'] ) {
+			if ( ! $this->settings['css_enabled'] || ! $this->settings['global_enabled'] ) {
 				return $tag;
 			}
 
@@ -478,8 +899,10 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 				$path = preg_replace( '/\?.+$/', '', $path );
 		
 				// Check if file exists
+				global $wp_filesystem;
+				GambitCombinatorFiles::initFilesystem();
 				$path = realpath( $path );
-				if ( ! $path && ! @is_file( $path ) ) {
+				if ( ! $path && ! $wp_filesystem->is_file( $path ) ) {
 					return $tag;
 				}
 			
@@ -519,6 +942,7 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 			$hash = substr( md5( serialize( $styles ) . $compressionLevel ), 0, 8 );
 
 			global $wp_filesystem;
+			GambitCombinatorFiles::initFilesystem();
 		
 			// delete_transient( 'css_combined_' . $hash );
 			$output = get_transient( 'cmbntr_css' . $hash );

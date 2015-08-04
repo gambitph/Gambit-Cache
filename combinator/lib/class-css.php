@@ -33,8 +33,8 @@ class GambitCombinatorCSS extends GambitCombinatorFiles {
 		return $code;
 	}
 	
-	public static function combineSources( $sources, $type = 'css' ) {
-		return parent::combineSources( $sources, 'css' );
+	public static function combineSources( $sources, $type = 'css', $inlineCode = '' ) {
+		return parent::combineSources( $sources, 'css', $inlineCode );
 	}
 	
 }
