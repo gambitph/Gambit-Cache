@@ -28,7 +28,7 @@ class GambitCombinatorCSS extends GambitCombinatorFiles {
 		$code = preg_replace( "/#([0-9a-fA-F])\\1([0-9a-fA-F])\\2([0-9a-fA-F])\\3/", "#$1$2$3", $code );
 
 		// Convert content CSS to glyphs
-		$code = preg_replace_callback( "/(?<=content:[\"'])(\\\[0-9a-fA-F]+)/", 'combinator_css_content_hex_to_glyph', $code );
+		// $code = preg_replace_callback( "/(?<=content:[\"'])(\\\[0-9a-fA-F]+)/", 'combinator_css_content_hex_to_glyph', $code );
 		
 		return $code;
 	}

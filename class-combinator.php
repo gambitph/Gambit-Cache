@@ -2,18 +2,10 @@
 
 // TODO
 /**
-1. include wp-include scripts
-2. include remote scripts
-3. add field to exclude scripts
 4. add note for secret key
-5. add field to exclude page
 6. add field to specifically include script
 7. Closure compiler (select optimization: whitespace only, simple, advanced)
 8. Compress CSS
-
-9. If compile/compress is enabled for JS, do not use class-load-scripts.php, use closure cached instead
-
-admin_url('admin-ajax.php?action=my_css') ????
  */
 
 require_once( 'combinator/lib/class-js.php' );
@@ -38,8 +30,11 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 		
 		public $settings = array(
 			'global_enabled' => true,
-			'combine_method' => 1,
-			'gzip_output' => 1,
+			// 'combine_method' => 1,
+			// 'gzip_output' => 1,
+			'exclude_plugins' => array(),
+			'exclude_found_js' => array(),
+			'exclude_found_css' => array(),
 			
 			'js_enabled' => true,
 			'js_compression_level' => 2,
@@ -61,7 +56,7 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 			add_filter( 'plugin_action_links', array( $this, 'pluginSettingsLink' ), 10, 2 );
 			add_action( 'tf_create_options', array( $this, 'createAdminOptions' ) );
 			add_action( 'tf_done', array( $this, 'gatherSettings' ), 10 );
-		
+
 			// add_filter( 'script_loader_tag', array( $this, 'gatherEnqueuedScripts' ), 999, 3 );
 			// add_action( 'wp_footer', array( $this, 'footerScriptLoader' ), 99999 );
 			// add_action( 'wp_head', array( $this, 'headScriptLoader' ), 99999 );
@@ -298,6 +293,9 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 		
 		public function getAllScriptsStyles( $content ) {
 			
+			$foundJSScripts = array();
+			$foundCSSStyles = array();
+			
 			
 			/**
 			 * Excludes
@@ -308,10 +306,23 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 				$excludesJS = preg_replace( "/\n/", "|", $this->settings['js_exclude'] );
 				$excludesJS = preg_replace( "/ /", "", $excludesJS );
 			}
+			if ( ! empty( $this->settings['exclude_plugins'] ) ) {
+				foreach ( $this->settings['exclude_plugins'] as $slug ) {
+					$excludesJS .= ! empty( $excludesJS ) ? '|' : '';
+					$excludesJS .= str_replace( '/', '\\/', trim( trailingslashit( dirname( $slug ) ) ) );
+				}
+			}
+			
 			$excludesCSS = '';
 			if ( ! empty( $this->settings['css_exclude'] ) ) {
 				$excludesCSS = preg_replace( "/\n/", "|", $this->settings['css_exclude'] );
 				$excludesCSS = preg_replace( "/ /", "", $excludesCSS );
+			}
+			if ( ! empty( $this->settings['exclude_plugins'] ) ) {
+				foreach ( $this->settings['exclude_plugins'] as $slug ) {
+					$excludesCSS .= ! empty( $excludesCSS ) ? '|' : '';
+					$excludesCSS .= str_replace( '/', '\\/', trim( trailingslashit( dirname( $slug ) ) ) );
+				}
 			}
 								
 			
@@ -342,6 +353,9 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 					preg_match( "/src=['\"](.*?)['\"]/s", $scriptTag, $src );
 					if ( ! empty( $src[1] ) ) {
 						$src = $src[1];
+						
+						// Keep note of what we found
+						$foundJSScripts[] = preg_replace( "/(^.*:|\?.*$)/", "", $src );
 					
 						// Excludes
 						if ( $excludesJS ) {
@@ -352,6 +366,18 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 							} catch ( Exception $e ) {
 								// regex failed, ignore
 							}
+						}
+						
+						// Exclude scripts
+						$excludeIt = false;
+						foreach ( $this->settings['exclude_found_js'] as $excludeSrc ) {
+							if ( stripos( $src, $excludeSrc ) !== false ) {
+								$excludeIt = true;
+								break;
+							}
+						}
+						if ( $excludeIt ) {
+							continue;
 						}
 						
 				
@@ -416,6 +442,9 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 					// Get the URL
 					if ( ! empty( $src[1] ) ) {
 						$src = $src[1];
+						
+						// Keep note of what we found
+						$foundCSSStyles[] = preg_replace( "/(^.*:|\?.*$)/", "", $src );
 
 						// Excludes
 						if ( $excludesCSS ) {
@@ -426,6 +455,18 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 							} catch ( Exception $e ) {
 								// regex failed, ignore
 							}
+						}
+						
+						// Exclude scripts
+						$excludeIt = false;
+						foreach ( $this->settings['exclude_found_css'] as $excludeSrc ) {
+							if ( stripos( $src, $excludeSrc ) !== false ) {
+								$excludeIt = true;
+								break;
+							}
+						}
+						if ( $excludeIt ) {
+							continue;
 						}
 						
 						// Filter depending on settings
@@ -473,6 +514,32 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 				}
 				
 			}
+			
+			
+			
+			/**
+			 * Merge the scripts & styles we found
+			 */
+			$currentFoundJS = get_option( 'combinator_found_js' );
+			if ( empty( $currentFoundJS ) ) {
+				$currentFoundJS = array();
+			} else if ( is_serialized( $currentFoundJS ) ) {
+				$currentFoundJS = unserialize( $currentFoundJS );
+			}
+			$currentFoundJS = array_merge( $currentFoundJS, $foundJSScripts );
+			$currentFoundJS = array_unique( $currentFoundJS );
+			update_option( 'combinator_found_js', serialize( $currentFoundJS ) );
+
+			$currentFoundCSS = get_option( 'combinator_found_css' );
+			if ( empty( $currentFoundCSS ) ) {
+				$currentFoundCSS = array();
+			} else if ( is_serialized( $currentFoundCSS ) ) {
+				$currentFoundCSS = unserialize( $currentFoundCSS );
+			}
+			$currentFoundCSS = array_merge( $currentFoundCSS, $foundCSSStyles );
+			$currentFoundCSS = array_unique( $currentFoundCSS );
+			update_option( 'combinator_found_css', serialize( $currentFoundCSS ) );
+			
 			
 			// foreach ( $styleTagsToReplace as $tag ) {
 			// 	$content = str_replace( $tag, '', $content );
@@ -532,6 +599,28 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 		 */
 		public function createAdminOptions() {
 			$titan = TitanFramework::getInstance( GAMBIT_COMBINATOR );
+			
+			
+			/**
+			 * Get list of active plugins
+			 */
+			$activePluginSlugs = get_option( 'active_plugins' );
+			$allPlugins = get_plugins();
+			
+			$pluginOptions = array();
+			foreach ( $activePluginSlugs as $slug ) {
+				if ( empty( $allPlugins[ $slug ] ) ) {
+					continue;
+				}
+				
+				if ( stripos( $allPlugins[ $slug ]['Name'], 'combinator' ) !== false ) {
+					continue;
+				}
+				
+				$pluginOptions[ $slug ] = $allPlugins[ $slug ]['Name'];
+			}
+
+
 
 			$adminPanel = $titan->createAdminPanel( array(
 			    'name' => 'Combinator',
@@ -539,14 +628,10 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 			    'parent' => 'options-general.php',
 			) );
 			
-			// TODO Add Titan Framework options here
 			
 			$adminPanel->createOption( array(
 				'name' => __( 'General Settings', GAMBIT_COMBINATOR ),
-				// 'id' => 'my_text_option',
 				'type' => 'heading',
-				// 'desc' => __( 'This is our option', GAMBIT_COMBINATOR ),
-				// 'placeholder' => __( 'Put a value here', GAMBIT_COMBINATOR ),
 			) );
 			
 			$adminPanel->createOption( array(
@@ -555,41 +640,37 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 				'type' => 'enable',
 				'default' => true,
 				'desc' => __( 'You can enable or disable the combining of scripts and stylesheets globally with this setting.', GAMBIT_COMBINATOR ),
-				// 'placeholder' => __( 'Put a value here', GAMBIT_COMBINATOR ),
 			) );
 			
-			$adminPanel->createOption( array(
-				'name' => __( 'Combination Method', GAMBIT_COMBINATOR ),
-				'id' => 'combine_method',
-				'type' => 'select',
-				'default' => 1,
-				'options' => array(
-					'1' => __( 'Generate files & fallback to on-the-fly generation', GAMBIT_COMBINATOR ),
-					'2' => __( 'On-the-fly generation', GAMBIT_COMBINATOR ),
-				),
-				'desc' => __( 'Combinator uses 2 methods to combine scripts and stylesheets:<ol><li><strong>Generate files in the uploads folder</strong><br>Scripts and styles are combined and saved in the <code>combinator</code> subdirectory in your uploads folder. This works in the majority of server setups and results in the fastest loading speeds.</li><li><strong>On-the-fly generation</strong><br>Scripts and stylesheets are combined when needed and no files are generated. You will still get the benefits of fewer server requests, but Javascript compression will be disabled and the performance is slower than the first method.</ol>', GAMBIT_COMBINATOR ),
-				// 'placeholder' => __( 'Put a value here', GAMBIT_COMBINATOR ),
-			) );
+			// $adminPanel->createOption( array(
+			// 	'name' => __( 'Combination Method', GAMBIT_COMBINATOR ),
+			// 	'id' => 'combine_method',
+			// 	'type' => 'select',
+			// 	'default' => 1,
+			// 	'options' => array(
+			// 		'1' => __( 'Generate files & fallback to on-the-fly generation', GAMBIT_COMBINATOR ),
+			// 		'2' => __( 'On-the-fly generation', GAMBIT_COMBINATOR ),
+			// 	),
+			// 	'desc' => __( 'Combinator uses 2 methods to combine scripts and stylesheets:<ol><li><strong>Generate files in the uploads folder</strong><br>Scripts and styles are combined and saved in the <code>combinator</code> subdirectory in your uploads folder. This works in the majority of server setups and results in the fastest loading speeds.</li><li><strong>On-the-fly generation</strong><br>Scripts and stylesheets are combined when needed and no files are generated. You will still get the benefits of fewer server requests, but Javascript compression will be disabled and the performance is slower than the first method.</ol>', GAMBIT_COMBINATOR ),
+			// ) );
 			
-			$adminPanel->createOption( array(
-				'name' => __( 'Enable GZIP Compression', GAMBIT_COMBINATOR ),
-				'id' => 'gzip_output',
-				'type' => 'enable',
-				'default' => true,
-				'desc' => __( '<strong>[For on-the-fly generation only]</strong><br>Use gzip for Content Encoding the output of combined scripts and stylesheets.', GAMBIT_COMBINATOR ),
-				// 'placeholder' => __( 'Put a value here', GAMBIT_COMBINATOR ),
-			) );
+			// $adminPanel->createOption( array(
+			// 	'name' => __( 'Enable GZIP Compression', GAMBIT_COMBINATOR ),
+			// 	'id' => 'gzip_output',
+			// 	'type' => 'enable',
+			// 	'default' => true,
+			// 	'desc' => __( '<strong>[For on-the-fly generation only]</strong><br>Use gzip for Content Encoding the output of combined scripts and stylesheets.', GAMBIT_COMBINATOR ),
+			// ) );
 
 			$adminPanel->createOption( array(
 			    'type' => 'save',
 			) );
 			
+			
+			
 			$adminPanel->createOption( array(
 				'name' => __( 'Javascript Settings', GAMBIT_COMBINATOR ),
-				// 'id' => 'my_text_option',
 				'type' => 'heading',
-				// 'desc' => __( 'This is our option', GAMBIT_COMBINATOR ),
-				// 'placeholder' => __( 'Put a value here', GAMBIT_COMBINATOR ),
 			) );
 			
 			$adminPanel->createOption( array(
@@ -598,7 +679,6 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 				'type' => 'enable',
 				'default' => true,
 				'desc' => __( 'Enable combining of Javascript files', GAMBIT_COMBINATOR ),
-				// 'placeholder' => __( 'Put a value here', GAMBIT_COMBINATOR ),
 			) );
 			
 			$adminPanel->createOption( array(
@@ -612,20 +692,40 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 					'2' => __( 'Simple Optimizations', GAMBIT_COMBINATOR ),
 					'3' => __( 'Advanced Optimizations', GAMBIT_COMBINATOR ),
 				),
-				'desc' => __( '<strong>[For generate files method only]</strong><br>Combinator uses <a href="https://developers.google.com/closure/compiler/index">Closure Compiler</a> to perform code compression. You can choose from these types of compression:<ul><li><strong>White Space Removal</strong><br>Gives some compression by removing unnecessary spaces from your scripts. <em>(<strong>Recommended</strong> if Simple Optimization fails and produces errors)</em>,</li><li><strong>Simple Optimizations</strong><br>Performs great compression and optimizations that does not interfere with script interactions. <em>(<strong>Recommended</strong> and should work in most setups)</em></li><li><strong>Advanced Optimizations</strong><br>Highest level of compression, but all variables/function names/symbols in your scripts will be renamed. <em>(<strong>Not recommended</strong>, since this will most likely create broken references in your Javascript. Read more on this in the <a href="https://developers.google.com/closure/compiler/docs/api-tutorial3">Closure Compiler docs</a> for more information on how to circumvent this, note that this would entail rewriting your Javascript)</em></li></ul>', GAMBIT_COMBINATOR ),
-				// 'placeholder' => __( 'Put a value here', GAMBIT_COMBINATOR ),
+				'desc' => __( 'Combinator uses <a href="https://developers.google.com/closure/compiler/index">Closure Compiler</a> to perform code compression. You can choose from these types of compression:<ul><li><strong>White Space Removal</strong><br>Gives some compression by removing unnecessary spaces from your scripts. <em>(<strong>Recommended</strong> if Simple Optimization fails and produces errors)</em>,</li><li><strong>Simple Optimizations</strong><br>Performs great compression and optimizations that does not interfere with script interactions. <em>(<strong>Recommended</strong> and should work in most setups)</em></li><li><strong>Advanced Optimizations</strong><br>Highest level of compression, but all variables/function names/symbols in your scripts will be renamed. <em>(<strong>Not recommended</strong>, since this will most likely create broken references in your Javascript. Read more on this in the <a href="https://developers.google.com/closure/compiler/docs/api-tutorial3">Closure Compiler docs</a> for more information on how to circumvent this, note that this would entail rewriting your Javascript)</em></li></ul>', GAMBIT_COMBINATOR ),
+			) );
+			
+			$adminPanel->createOption( array(
+				'name' => __( 'What to Combine', GAMBIT_COMBINATOR ),
+				'id' => 'js_includes',
+				'type' => 'multicheck',
+				'default' => array( 'includes', 'remote' ),
+				'options' => array(
+					'includes' => __( 'WordPres wp-include files', GAMBIT_COMBINATOR ),
+					'remote' => __( 'Remote scripts', GAMBIT_COMBINATOR ),
+					'inline' => __( 'Script tags', GAMBIT_COMBINATOR ),
+				),
+				'desc' => __( 'Check the types of scripts to combine.', GAMBIT_COMBINATOR ),
+			) );
+			
+			$adminPanel->createOption( array(
+				'name' => __( 'Exclude these Domains', GAMBIT_COMBINATOR ),
+				'id' => 'js_exclude',
+				'type' => 'textarea',
+				'default' => '',
+				'desc' => __( 'Enter a domain or part of a URL (one per line) that you want to exclude from the combination process.', GAMBIT_COMBINATOR ),
+				'placeholder' => __( 'Enter a domain or part of a URL (one per line)', GAMBIT_COMBINATOR ),
 			) );
 
 			$adminPanel->createOption( array(
 			    'type' => 'save',
 			) );
 			
+			
+			
 			$adminPanel->createOption( array(
 				'name' => __( 'CSS Settings', GAMBIT_COMBINATOR ),
-				// 'id' => 'my_text_option',
 				'type' => 'heading',
-				// 'desc' => __( 'This is our option', GAMBIT_COMBINATOR ),
-				// 'placeholder' => __( 'Put a value here', GAMBIT_COMBINATOR ),
 			) );
 			
 			$adminPanel->createOption( array(
@@ -634,20 +734,108 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 				'type' => 'enable',
 				'default' => true,
 				'desc' => __( 'Enable combining of stylesheets', GAMBIT_COMBINATOR ),
-				// 'placeholder' => __( 'Put a value here', GAMBIT_COMBINATOR ),
 			) );
 			
-			// $adminPanel->createOption( array(
-			// 	'name' => __( 'My Text Option', GAMBIT_COMBINATOR ),
-			// 	'id' => 'my_text_option',
-			// 	'type' => 'text',
-			// 	'desc' => __( 'This is our option', GAMBIT_COMBINATOR ),
-			// 	'placeholder' => __( 'Put a value here', GAMBIT_COMBINATOR ),
-			// ) );
+			$adminPanel->createOption( array(
+				'name' => __( 'Compression Level', GAMBIT_COMBINATOR ),
+				'id' => 'css_compression_level',
+				'type' => 'select',
+				'default' => 1,
+				'options' => array(
+					'0' => __( 'No Compression, Just Combine Styles', GAMBIT_COMBINATOR ),
+					'1' => __( 'Simple Optimizations', GAMBIT_COMBINATOR ),
+				),
+				'desc' => __( 'Choose the compression level for CSS stylesheets.', GAMBIT_COMBINATOR ),
+			) );
+			
+			$adminPanel->createOption( array(
+				'name' => __( 'What to Combine', GAMBIT_COMBINATOR ),
+				'id' => 'css_includes',
+				'type' => 'multicheck',
+				'default' => array( 'includes', 'remote' ),
+				'options' => array(
+					'includes' => __( 'WordPres wp-include files', GAMBIT_COMBINATOR ),
+					'remote' => __( 'Remote stylesheets', GAMBIT_COMBINATOR ),
+					'inline' => __( 'Style tags', GAMBIT_COMBINATOR ),
+				),
+				'desc' => __( 'Check the types of styles to combine.', GAMBIT_COMBINATOR ),
+			) );
+			
+			$adminPanel->createOption( array(
+				'name' => __( 'Exclude these Domains', GAMBIT_COMBINATOR ),
+				'id' => 'css_exclude',
+				'type' => 'textarea',
+				'default' => 'googleapis',
+				'desc' => __( 'Enter a domain or part of a URL (one per line) that you want to exclude from the combination process.', GAMBIT_COMBINATOR ),
+				'placeholder' => __( 'Enter a domain or part of a URL (one per line)', GAMBIT_COMBINATOR ),
+			) );
 
 			$adminPanel->createOption( array(
 			    'type' => 'save',
 			) );
+			
+			
+			
+			$adminPanel->createOption( array(
+				'name' => __( 'Exclusion Settings', GAMBIT_COMBINATOR ),
+				'type' => 'heading',
+			) );
+			
+			$adminPanel->createOption( array(
+				'name' => __( 'Exclude these Plugins', GAMBIT_COMBINATOR ),
+				'id' => 'exclude_plugins',
+				'type' => 'multicheck',
+				'default' => array(),
+				'options' => $pluginOptions,
+				'desc' => __( 'Combinator combines all scripts and styles it can find. If a plugin stops working because of the combination process, <strong>check the plugin here to exclude it</strong>.', GAMBIT_COMBINATOR ),
+			) );
+			
+			
+			$foundJS = get_option( 'combinator_found_js' );
+			$jsOptions = array();
+			if ( empty( $foundJS ) ) {
+				$foundJS = array();
+			} else if ( is_serialized( $foundJS ) ) {
+				$foundJS = unserialize( $foundJS );
+			}
+			foreach ( $foundJS as $src ) {
+				$jsOptions[ $src ] = '<code>' . $src . '</code>';
+			}
+			
+			$adminPanel->createOption( array(
+				'name' => __( 'Exclude Found Javascript', GAMBIT_COMBINATOR ),
+				'id' => 'exclude_found_js',
+				'type' => 'multicheck',
+				'default' => array(),
+				'options' => $jsOptions,
+				'desc' => __( 'Here is a list of all the Javascript URLs Combinator has found. If the list below is empty, visit your site to populate it.<br><strong>Check the URL here to exclude it.</strong>', GAMBIT_COMBINATOR ),
+			) );
+			
+			
+			$foundCSS = get_option( 'combinator_found_css' );
+			$cssOptions = array();
+			if ( empty( $foundCSS ) ) {
+				$foundCSS = array();
+			} else if ( is_serialized( $foundCSS ) ) {
+				$foundCSS = unserialize( $foundCSS );
+			}
+			foreach ( $foundCSS as $src ) {
+				$cssOptions[ $src ] = '<code>' . $src . '</code>';
+			}
+			
+			$adminPanel->createOption( array(
+				'name' => __( 'Exclude Found Stylesheets', GAMBIT_COMBINATOR ),
+				'id' => 'exclude_found_css',
+				'type' => 'multicheck',
+				'default' => array(),
+				'options' => $cssOptions,
+				'desc' => __( 'Here is a list of all the Stylesheet URLs Combinator has found. If the list below is empty, visit your site to populate it.<br><strong>Check the URL here to exclude it.</strong>', GAMBIT_COMBINATOR ),
+			) );
+
+			$adminPanel->createOption( array(
+			    'type' => 'save',
+			) );
+			
 		}
 		
 		
@@ -662,9 +850,23 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 			$this->settings['global_enabled'] = $titan->getOption( 'global_enabled' );
 			$this->settings['js_enabled'] = $titan->getOption( 'js_enabled' );
 			$this->settings['css_enabled'] = $titan->getOption( 'css_enabled' );
-			$this->settings['combine_method'] = $titan->getOption( 'combine_method' );
-			$this->settings['gzip_output'] = $titan->getOption( 'gzip_output' );
+			$this->settings['exclude_plugins'] = $titan->getOption( 'exclude_plugins' );
+			$this->settings['exclude_found_js'] = $titan->getOption( 'exclude_found_js' );
+			$this->settings['exclude_found_css'] = $titan->getOption( 'exclude_found_css' );
+			// $this->settings['combine_method'] = $titan->getOption( 'combine_method' );
+			// $this->settings['gzip_output'] = $titan->getOption( 'gzip_output' );
 			$this->settings['js_compression_level'] = $titan->getOption( 'js_compression_level' );
+			$this->settings['css_compression_level'] = $titan->getOption( 'css_compression_level' );
+			
+			$this->settings['js_include_includes'] = in_array( 'includes', $titan->getOption( 'js_includes' ) );
+			$this->settings['js_include_remote'] = in_array( 'remote', $titan->getOption( 'js_includes' ) );
+			$this->settings['js_include_inline'] = in_array( 'inline', $titan->getOption( 'js_includes' ) );
+			$this->settings['js_exclude'] = $titan->getOption( 'js_exclude' );
+			
+			$this->settings['css_include_includes'] = in_array( 'includes', $titan->getOption( 'css_includes' ) );
+			$this->settings['css_include_remote'] = in_array( 'remote', $titan->getOption( 'css_includes' ) );
+			$this->settings['css_include_inline'] = in_array( 'inline', $titan->getOption( 'css_includes' ) );
+			$this->settings['css_exclude'] = $titan->getOption( 'css_exclude' );
 		}
 	
 	

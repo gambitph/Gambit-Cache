@@ -20,3 +20,6 @@ $wpdb->query( "DELETE FROM $wpdb->options WHERE option_name LIKE '_transient_cmb
 // Delete all generated JS & CSS
 require_once( 'combinator/lib/class-files.php' );
 GambitCombinatorFiles::deleteAllFiles();
+
+delete_option( 'combinator_found_js' );
+delete_option( 'combinator_found_css' );
