@@ -1,12 +1,5 @@
 <?php
 
-// TODO
-/**
-8. Compress CSS
-
-ADd checker for readability
- */
-
 require_once( 'combinator/lib/class-js.php' );
 require_once( 'combinator/lib/class-css.php' );
 
@@ -18,14 +11,21 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 	
 	class GambitCombinator {
 	
-		const SECRET_KEY = "SuperSecretGambitKey";
-	
 		public $headScripts = array();
 		public $footerScripts = array();
 		public $headStyles = array();
 		public $footerStyles = array();
 	
 		public $inHead = true;
+		
+		/**
+		 * These plugins have been proven to be NOT working when combined
+		 */
+		public $blackListedPlugins = array(
+			'Facebook Like Box',
+			'PopTrends',
+			'Smooth MouseWheel',
+		);
 		
 		public $settings = array(
 			'global_enabled' => true,
@@ -38,7 +38,7 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 			'js_include_includes' => true,
 			'js_include_remote' => true,
 			'js_include_inline' => false,
-			'js_exclude' => '',
+			'js_exclude' => 'jquery.js',
 			
 			'css_compression_level' => 1,
 			'css_enabled' => true,
@@ -263,6 +263,41 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 			
 			$foundJSScripts = array();
 			$foundCSSStyles = array();
+			
+			
+			/**
+			 * Blacklisted plugins
+			 */
+			
+			// Check if get_plugins() function exists. This is required on the front end of the
+			// site, since it is in a file that is normally only loaded in the admin.
+			if ( ! function_exists( 'get_plugins' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/plugin.php';
+			}
+			
+			// Get list of active plugins
+			$activePluginSlugs = get_option( 'active_plugins' );
+			$allPlugins = get_plugins();
+			
+			$blacklistedPluginSlugs = array();
+			foreach ( $activePluginSlugs as $slug ) {
+				if ( empty( $allPlugins[ $slug ] ) ) {
+					continue;
+				}
+				
+				if ( stripos( $allPlugins[ $slug ]['Name'], 'combinator' ) !== false ) {
+					continue;
+				}
+				
+				if ( in_array( $allPlugins[ $slug ]['Name'], $this->blackListedPlugins ) ) {
+					$blacklistedPluginSlugs[] = $slug;
+				}
+			}
+			
+			// Add the black listed plugins to the excluded list
+			$this->settings['exclude_plugins'] = array_merge( $this->settings['exclude_plugins'], $blacklistedPluginSlugs );
+			$this->settings['exclude_plugins'] = array_unique( $this->settings['exclude_plugins'] );
+			
 			
 			
 			/**
@@ -565,6 +600,7 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 			$activePluginSlugs = get_option( 'active_plugins' );
 			$allPlugins = get_plugins();
 			
+			$blackListDefault = array();
 			$pluginOptions = array();
 			foreach ( $activePluginSlugs as $slug ) {
 				if ( empty( $allPlugins[ $slug ] ) ) {
@@ -575,6 +611,9 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 					continue;
 				}
 				
+				if ( in_array( $allPlugins[ $slug ]['Name'], $this->blackListedPlugins ) ) {
+					$blackListDefault[] = $slug;
+				}
 				$pluginOptions[ $slug ] = $allPlugins[ $slug ]['Name'];
 			}
 
@@ -667,7 +706,7 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 				'name' => __( 'Exclude these Domains', GAMBIT_COMBINATOR ),
 				'id' => 'js_exclude',
 				'type' => 'textarea',
-				'default' => '',
+				'default' => 'jquery.js',
 				'desc' => __( 'Enter a domain or part of a URL (one per line) that you want to exclude from the combination process.', GAMBIT_COMBINATOR ),
 				'placeholder' => __( 'Enter a domain or part of a URL (one per line)', GAMBIT_COMBINATOR ),
 			) );
@@ -740,9 +779,12 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 				'name' => __( 'Exclude these Plugins', GAMBIT_COMBINATOR ),
 				'id' => 'exclude_plugins',
 				'type' => 'multicheck',
-				'default' => array(),
+				'default' => $blackListDefault,
 				'options' => $pluginOptions,
-				'desc' => __( 'Combinator combines all scripts and styles it can find. If a plugin stops working because of the combination process, <strong>check the plugin here to exclude it</strong>.', GAMBIT_COMBINATOR ),
+				'desc' => __( 'Combinator combines all scripts and styles it can find. If a plugin stops working because of the combination process, <strong>check the plugin here to exclude it</strong>.', GAMBIT_COMBINATOR ) . 
+					'<div style="border-left: 4px solid #dd3d36; box-shadow: 0 1px 1px 0 rgba(0,0,0,.1); margin: 5px 0 15px; padding: 1px 12px;"><p style="margin: .5em 0;padding: 2px;"><strong>' .
+					__( 'If you have found a plugin to be not working when included with Combinator, please let us know by commenting it in our CodeCanyon page so we can include it in our internal blacklist.', GAMBIT_COMBINATOR ) . 
+					'</strong></p></div>',
 			) );
 			
 			
@@ -804,6 +846,8 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 			if ( ! class_exists( 'TitanFramework' ) ) {
 				return;
 			}
+			
+			$this->blackListedPlugins = apply_filters( 'combinator_blacklist', $this->blackListedPlugins );
 
 			$titan = TitanFramework::getInstance( GAMBIT_COMBINATOR );
 			
@@ -825,6 +869,42 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 			$this->settings['css_include_remote'] = in_array( 'remote', $titan->getOption( 'css_includes' ) );
 			$this->settings['css_include_inline'] = in_array( 'inline', $titan->getOption( 'css_includes' ) );
 			$this->settings['css_exclude'] = $titan->getOption( 'css_exclude' );
+			
+			
+			/**
+			 * Blacklisted plugins are always included
+			 */
+			
+			// Check if get_plugins() function exists. This is required on the front end of the
+			// site, since it is in a file that is normally only loaded in the admin.
+			if ( ! function_exists( 'get_plugins' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/plugin.php';
+			}
+			
+			// Get list of active plugins
+			$activePluginSlugs = get_option( 'active_plugins' );
+			$allPlugins = get_plugins();
+			
+			// $blacklistedPluginSlugs = array();
+			foreach ( $activePluginSlugs as $slug ) {
+				if ( empty( $allPlugins[ $slug ] ) ) {
+					continue;
+				}
+				
+				if ( stripos( $allPlugins[ $slug ]['Name'], 'combinator' ) !== false ) {
+					continue;
+				}
+				
+				if ( in_array( $allPlugins[ $slug ]['Name'], $this->blackListedPlugins ) ) {
+					$this->settings['exclude_plugins'][] = $slug;
+				}
+			}
+			$this->settings['exclude_plugins'] = array_unique( $this->settings['exclude_plugins'] );
+			
+			if ( $this->settings['exclude_plugins'] != $titan->getOption( 'exclude_plugins' ) ) {
+				$titan->setOption( 'exclude_plugins', $this->settings['exclude_plugins'] );
+				$titan->saveOptions();
+			}
 		}
 		
 		
