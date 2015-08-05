@@ -8,6 +8,64 @@ class GambitCombinatorFiles {
 	
 	public static $filesystemInitialized = false;
 	
+	/**
+	 * @see http://99webtools.com/blog/convert-relative-path-into-absolute-url/
+	 */
+	public static function rel2abs( $rel, $base ) {
+		extract( parse_url( $base ) );
+
+		if(strpos($rel,"//")===0)
+		{
+		return $scheme . ':' . $rel;
+		// return "http:".$rel;
+		}
+		/* return if  already absolute URL */
+		if  (parse_url($rel, PHP_URL_SCHEME) != '') return $rel;
+		/* queries and  anchors */
+		if ($rel[0]=='#'  || $rel[0]=='?') return $base.$rel;
+		/* parse base URL  and convert to local variables:
+		$scheme, $host,  $path */
+		// extract(parse_url($base));
+		/* remove  non-directory element from path */
+		$path = preg_replace('#/[^/]*$#',  '', $path);
+		/* destroy path if  relative url points to root */
+		if ($rel[0] ==  '/') $path = '';
+		/* dirty absolute  URL */
+		$abs =  "$host$path/$rel";
+		/* replace '//' or  '/./' or '/foo/../' with '/' */
+		// var_dump($abs);
+		// $re =  array('#(/.?/)#', '#/(?!..)[^/]+/../#');
+		// $abs = preg_replace( '#(/.?/)#', '/', $abs );
+		$abs = preg_replace("/(\/\.?\/)/", "/", $abs );
+		// $abs = preg_replace( '#/(?!..)[^/]+/../#', '/', $abs );
+		$abs = preg_replace( "/\/(?!\.\.)[^\/]+\/\.\.\//", "/", $abs );
+		// for($n=1; $n>0;  $abs=preg_replace($re, '/', $abs, -1, $n)) {}
+		/* absolute URL is  ready! */
+		return  $scheme.'://'.$abs;
+	}
+ 
+	public static function fixRelativeURLSCSS( &$content, $src ) {
+
+		preg_match_all( "/(url\(~?['\"]?(.*?)['\"]?\))/", $content, $urlMatches );
+
+		if ( ! empty( $urlMatches[2] ) ) {
+			foreach ( $urlMatches[2] as $i => $url ) {
+
+				// Absolute URLS are okay already
+				if ( preg_match( '/^https?:/', $url ) ) {
+					continue;
+				}
+				// Base 64 encoded stuff are okay already
+				if ( stripos( $url, 'data:' ) !== false ) {
+					continue;
+				}
+
+				$content = str_replace( $urlMatches[0][ $i ], 'url("' . self::rel2abs( $url, $src ) . '")', $content );
+				
+			}
+		}
+	}
+	
 	public static function combineSources( $sources, $type = 'js', $inlineCode = '' ) {
 		
 		$out = '';
@@ -29,6 +87,10 @@ class GambitCombinatorFiles {
 			
 			if ( $continueLoad ) {
 				$content = wp_remote_fopen( $src );
+			}
+			
+			if ( $type == 'css' ) {
+				self::fixRelativeURLSCSS( $content, $src );
 			}
 			
 			if ( ! empty( $content ) ) {
