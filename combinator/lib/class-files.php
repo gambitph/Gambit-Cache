@@ -9,41 +9,59 @@ class GambitCombinatorFiles {
 	public static $filesystemInitialized = false;
 	
 	/**
-	 * @see http://99webtools.com/blog/convert-relative-path-into-absolute-url/
+	 * Convets a relative URL to an absolute URL
+	 * @see http://www.gambit.ph/converting-relative-urls-to-absolute-urls-in-php/
+	 *
+	 * @param	$rel	String	The relative URL
+	 * @param	$base	String	The absolute URL to base it on
+	 * @return	The absolute URL
 	 */
 	public static function rel2abs( $rel, $base ) {
+		
+		/* parse base URL  and convert to local variables: $scheme, $host,  $path */
 		extract( parse_url( $base ) );
 
-		if(strpos($rel,"//")===0)
-		{
-		return $scheme . ':' . $rel;
-		// return "http:".$rel;
+		if ( strpos( $rel,"//" ) === 0 ) {
+			return $scheme . ':' . $rel;
 		}
+		
 		/* return if  already absolute URL */
-		if  (parse_url($rel, PHP_URL_SCHEME) != '') return $rel;
+		if ( parse_url( $rel, PHP_URL_SCHEME ) != '' ) {
+			return $rel;
+		}
+		
 		/* queries and  anchors */
-		if ($rel[0]=='#'  || $rel[0]=='?') return $base.$rel;
-		/* parse base URL  and convert to local variables:
-		$scheme, $host,  $path */
-		// extract(parse_url($base));
+		if ( $rel[0] == '#' || $rel[0] == '?' ) {
+			return $base . $rel;
+		}
+		
 		/* remove  non-directory element from path */
-		$path = preg_replace('#/[^/]*$#',  '', $path);
+		$path = preg_replace( '#/[^/]*$#', '', $path );
+		
 		/* destroy path if  relative url points to root */
-		if ($rel[0] ==  '/') $path = '';
+		if ( $rel[0] ==  '/' ) {
+			$path = '';
+		}
+		
 		/* dirty absolute  URL */
-		$abs =  "$host$path/$rel";
+		$abs = $host . $path . "/" . $rel;
+		
 		/* replace '//' or  '/./' or '/foo/../' with '/' */
-		// var_dump($abs);
-		// $re =  array('#(/.?/)#', '#/(?!..)[^/]+/../#');
-		// $abs = preg_replace( '#(/.?/)#', '/', $abs );
-		$abs = preg_replace("/(\/\.?\/)/", "/", $abs );
-		// $abs = preg_replace( '#/(?!..)[^/]+/../#', '/', $abs );
+		$abs = preg_replace( "/(\/\.?\/)/", "/", $abs );
 		$abs = preg_replace( "/\/(?!\.\.)[^\/]+\/\.\.\//", "/", $abs );
-		// for($n=1; $n>0;  $abs=preg_replace($re, '/', $abs, -1, $n)) {}
+
 		/* absolute URL is  ready! */
-		return  $scheme.'://'.$abs;
+		return $scheme . '://' . $abs;
 	}
- 
+	
+	
+	/**
+	 * Converts all the relative URLs placed inside a "url(...)" into absolute URLs
+	 *
+	 * @param 	&$content	String	The CSS to parse & modify
+	 * @param 	$src		String	The URL of the CSS being parsed
+	 * @return	void
+	 */
 	public static function fixRelativeURLSCSS( &$content, $src ) {
 
 		preg_match_all( "/(url\(~?['\"]?(.*?)['\"]?\))/", $content, $urlMatches );
@@ -103,7 +121,6 @@ class GambitCombinatorFiles {
 			
 		}
 		
-		// return $out . ( $type == 'js' ? ';' : '' ) . $inlineCode;
 		if ( $type == 'js' ) {
 			return $inlineCode . ';' . $out;
 		} else {
@@ -147,10 +164,10 @@ class GambitCombinatorFiles {
 		$combinatorDir = trailingslashit( $upload_dir['basedir'] ) . self::UPLOADS_SUBDIR;
 		
 		if ( ! $wp_filesystem->is_writable( $upload_dir['basedir'] ) ) {
-			return false;
+			return $combinatorDir;
 		}
 		if ( $wp_filesystem->is_dir( $combinatorDir ) ) {
-			return $wp_filesystem->is_writable( $combinatorDir );
+			return $wp_filesystem->is_writable( $combinatorDir ) ? true : $combinatorDir;
 		}
 		return true;
 	}
@@ -164,13 +181,9 @@ class GambitCombinatorFiles {
 		$upload_dir = wp_upload_dir(); // Grab uploads folder array
 		$dir = trailingslashit( trailingslashit( $upload_dir['basedir'] ) . self::UPLOADS_SUBDIR ); // Set storage directory path
 
-		// $hash = $type . '_' . md5( serialize( $this->headScripts ) );
 		$filePath = $dir . $filename;
 		$fileURL = trailingslashit( trailingslashit( $upload_dir['baseurl'] ) . self::UPLOADS_SUBDIR ) . $filename;
-		// $css = 'body { background: red }';
 
-		// WP_Filesystem(); // Initial WP file system
-		
 		if ( ! $wp_filesystem->is_dir( $dir ) ) {
 			$wp_filesystem->mkdir( $dir ); // Make a new folder for storing our file
 		}

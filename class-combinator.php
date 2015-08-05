@@ -2,10 +2,9 @@
 
 // TODO
 /**
-4. add note for secret key
-6. add field to specifically include script
-7. Closure compiler (select optimization: whitespace only, simple, advanced)
 8. Compress CSS
+
+ADd checker for readability
  */
 
 require_once( 'combinator/lib/class-js.php' );
@@ -30,8 +29,6 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 		
 		public $settings = array(
 			'global_enabled' => true,
-			// 'combine_method' => 1,
-			// 'gzip_output' => 1,
 			'exclude_plugins' => array(),
 			'exclude_found_js' => array(),
 			'exclude_found_css' => array(),
@@ -50,44 +47,44 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 			'css_include_inline' => false,
 			'css_exclude' => 'googleapis',
 		);
-	
+		
+		
+		/**
+		 * Hook into WordPress
+		 */
 		function __construct() {
 			// Initializes settings panel
 			add_filter( 'plugin_action_links', array( $this, 'pluginSettingsLink' ), 10, 2 );
 			add_action( 'tf_create_options', array( $this, 'createAdminOptions' ) );
 			add_action( 'tf_done', array( $this, 'gatherSettings' ), 10 );
-
-			// add_filter( 'script_loader_tag', array( $this, 'gatherEnqueuedScripts' ), 999, 3 );
-			// add_action( 'wp_footer', array( $this, 'footerScriptLoader' ), 99999 );
-			// add_action( 'wp_head', array( $this, 'headScriptLoader' ), 99999 );
-	
-			// add_filter( 'style_loader_tag', array( $this, 'gatherEnqueuedStyles' ), 999, 2 );
-			// add_action( 'wp_footer', array( $this, 'footerStyleLoader' ), 99999 );
-			// add_action( 'wp_head', array( $this, 'headStyleLoader' ), 99999 );
-		
-			// add_action( 'wp_head', array( $this, 'doneWithHead' ), 1000 );
 			
+			add_action( 'wp_head', array( $this, 'startGatheringOutput' ), 0 );
+			add_action( 'wp_head', array( $this, 'endGatheringOutput' ), 9999 );
 			
-			add_action( 'wp_head', array( $this, 'test1' ), 0 );
-			add_action( 'wp_head', array( $this, 'test2' ), 9999 );
-			
-			add_action( 'wp_footer', array( $this, 'test1' ), 0 );
-			add_action( 'wp_footer', array( $this, 'test2' ), 9999 );
+			add_action( 'wp_footer', array( $this, 'startGatheringOutput' ), 0 );
+			add_action( 'wp_footer', array( $this, 'endGatheringOutput' ), 9999 );
 			
 			add_action( 'wp_ajax_combinator_clear_cache', array( $this, 'clearCache' ) );
-			// add_action( 'wp_ajax_combinator_clear_files', array( $this, 'clearFiles' ) );
-
+			
+			// Admin notice for when the uploads folder is unwritable
+			add_action( 'admin_notices', array( $this, 'adminNotices' ) );
+			add_action( 'wp_ajax_combinator_notice_dismiss', array( $this, 'dismissAdminNotice' ) );
 		}
 		
-		public function test1() {
-			// $this->deleteAllCaches();
+		
+		/**
+		 * Starts gathering outputted data. To be used in conjunction with $this->endGatheringOutput()
+		 * If $this->endGatheringOutput() isn't called, no HTML will be rendered in the page.
+		 *
+		 * @return	void
+		 */
+		public function startGatheringOutput() {
 			if ( ! $this->settings['global_enabled'] ) {
 				return;
 			}
 			if ( ! $this->settings['js_enabled'] && ! $this->settings['css_enabled'] ) {
 				return;
 			}
-
 			if ( ! $this->isFrontEnd() ) {
 				return;
 			}
@@ -95,15 +92,20 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 			ob_start();
 		}
 		
-		public function test2() {
-			
+		
+		/**
+		 * Stops the current ob_start performed by $this->startGatheringOutput()
+		 * and processes the data gathered; then proceeds to generate the combined files
+		 *
+		 * @return	void
+		 */
+		public function endGatheringOutput() {
 			if ( ! $this->settings['global_enabled'] ) {
 				return;
 			}
 			if ( ! $this->settings['js_enabled'] && ! $this->settings['css_enabled'] ) {
 				return;
 			}
-
 			if ( ! $this->isFrontEnd() ) {
 				return;
 			}
@@ -114,7 +116,7 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 			
 			// Get the scripts & output
 			$scriptsStyles = $this->getAllScriptsStyles( $content );
-			$output = $this->scriptStlyesLoader( $content, $scriptsStyles, 'head' );
+			$output = $this->scriptStlyesLoader( $content, $scriptsStyles );
 			
 			
 			// Output the head/footer content
@@ -132,7 +134,16 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 		}
 		
 		
-		public function scriptStlyesLoader( &$content, $scriptsStyles, $location = 'head' ) {
+		/**
+		 * Generates a combined version of the scripts and styles $scriptsStyles and
+		 * removes the replaced scripts from $content
+		 *
+		 * @param	&$content		String	The head or footer content to look for the scripts & styles
+		 * @param	$scriptsStlyes	Array	The collection of scripts & styles as outputted
+		 * 									by $this->getAllScriptsStyles()
+		 * @return					Array	The URL, path and hash generated for the combined files
+		 */
+		public function scriptStlyesLoader( &$content, $scriptsStyles ) {
 
 			
 			/**
@@ -170,7 +181,7 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 					);
 					$outputJS['hash'] = $hash;
 					
-					set_transient( 'cmbntr_js' . $hash, $outputJS, DAY_IN_SECONDS );
+					set_transient( 'cmbntr_js' . $hash, $outputJS, WEEK_IN_SECONDS );
 				
 				}
 				
@@ -219,7 +230,7 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 					);
 					$outputCSS['hash'] = $hash;
 					
-					set_transient( 'cmbntr_css' . $hash, $outputCSS, DAY_IN_SECONDS );
+					set_transient( 'cmbntr_css' . $hash, $outputCSS, WEEK_IN_SECONDS );
 					
 				}
 				
@@ -241,59 +252,13 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 			
 		}
 		
-			//
-		// public function scriptLoader2( $scriptsStyles ) {
-		//
-		// 	$method = $this->settings['combine_method'];
-		// 	$compressionLevel = $this->settings['js_compression_level'];
-		// 	$gzip = $this->settings['gzip_output'] ? '1' : '';
-		//
-		// 	if ( ! count( $scripts ) ) {
-		// 		return;
-		// 	}
-		//
-		// 	$hash = substr( md5( serialize( $scripts ) . $compressionLevel ), 0, 8 );
-		//
-		// 	global $wp_filesystem;
-		// 	GambitCombinatorFiles::initFilesystem();
-		//
-		// 	// delete_transient( 'js_combined_' . $hash );
-		// 	$output = get_transient( 'cmbntr_js' . $hash );
-		//
-		// 	// var_dump('cmbntr_js_' . $hash, 'transient', $output);
-		// 	if ( ( $method == 1 && ! $output ) || ( $method == 1 && ! empty( $output['path'] ) && ! $wp_filesystem->is_file( $output['path'] ) ) ) {
-		// 		// var_dump('combining');
-		// 		$combined = GambitCombinatorJS::combineSources( $scripts, 'js',  );
-		//
-		// 		if ( $compressionLevel ) {
-		// 			$combined = GambitCombinatorJS::closureCompile( $combined, $compressionLevel );
-		// 		}
-		//
-		// 		$output = GambitCombinatorJS::createFile(
-		// 			$combined,
-		// 			$hash . '.js'
-		// 		);
-		//
-		// 		// var_dump('cmbntr_js_' . $hash, $output);
-		// 		set_transient( 'cmbntr_js' . $hash, $output, DAY_IN_SECONDS );
-		// 		// var_dump('get_transient', get_transient( 'cmbntr_js_' . $hash ));
-		// 	}
-		//
-		// 	// var_dump($upload_dir['baseurl'] . 'combinator/' . $filePath );
-		// 	if ( $method == 1 && ! empty( $output['path'] ) && $wp_filesystem->is_file( $output['path'] ) ) {
-		// 		echo "<script type='text/javascript' src='" . esc_url( $output['url'] ) . "'></script>";
-		//
-		// 	} else {
-		//
-		// 	// if ( count( $this->headScripts ) ) {
-		// 		$data = $this->encodeLoadParam( $scripts );
-		// 		// echo "<script type='text/javascript' src='" . esc_url( add_query_arg( array( 'c' => 1, 'm' => 0, 'load' => $data ), admin_url( 'admin-ajax.php?action=combinator_scripts' ) ) ) . "'></script>";
-		// 		echo "<script type='text/javascript' src='" . esc_url( add_query_arg( array( 'c' => $gzip, 'm' => $compressionLevel, 'load' => $data ), plugins_url( 'combinator/fallback/class-load-scripts.php', __FILE__ ) ) ) . "'></script>";
-		// 	// }
-		// 	}
-		//
-		// }
 		
+		/**
+		 * Parses the given $content and gets all the scripts and styles from it
+		 * 
+		 * @param	$content	String	The content to parse
+		 * @return				Array	The scripts and styles gathered
+		 */
 		public function getAllScriptsStyles( $content ) {
 			
 			$foundJSScripts = array();
@@ -412,13 +377,6 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 
 			}
 			
-			// foreach ( $scriptTagsToReplace as $tag ) {
-			// 	$content = str_replace( $tag, '', $content );
-			// }
-			// foreach ( $inlineScriptTagsToReplace as $tag ) {
-			// 	$content = str_replace( $tag, '', $content );
-			// }
-			
 			
 			
 			/**
@@ -488,10 +446,6 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 				}
 			}
 			
-			// foreach ( $linkTagsToReplace as $tag ) {
-			// 	$content = str_replace( $tag, '', $content );
-			// }
-			
 			
 			/**
 			 * CSS style tags
@@ -543,10 +497,6 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 			$currentFoundCSS = array_unique( $currentFoundCSS );
 			update_option( 'combinator_found_css', serialize( $currentFoundCSS ) );
 			
-			
-			// foreach ( $styleTagsToReplace as $tag ) {
-			// 	$content = str_replace( $tag, '', $content );
-			// }
 			
 			return array(
 				'script_file_tags' => $scriptTagsToReplace,
@@ -652,9 +602,7 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 			
 			$adminPanel->createOption( array(
 				'name' => __( 'Cache Control', GAMBIT_COMBINATOR ),
-				// 'id' => '',
 				'type' => 'note',
-				// 'default' => true,
 				'desc' => '<button id="combinator_cache_btn" name="action" class="button button-secondary" onclick="
 					var t = jQuery(this);
   				wp.ajax.send( \'combinator_clear_cache\', {
@@ -668,26 +616,6 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
     jQuery(this).blur(); return false;">' . __( 'Clear Generated Files & Database Caches', GAMBIT_COMBINATOR ) . '</button>
 	<p class="description">If you are getting <code>Uncaught SyntaxError: Unexpected token :</code> errors in Javascript, this can usually be fixed by clearing the cache with this button.</p>'
 			) );
-			
-			// $adminPanel->createOption( array(
-			// 	'name' => __( 'Combination Method', GAMBIT_COMBINATOR ),
-			// 	'id' => 'combine_method',
-			// 	'type' => 'select',
-			// 	'default' => 1,
-			// 	'options' => array(
-			// 		'1' => __( 'Generate files & fallback to on-the-fly generation', GAMBIT_COMBINATOR ),
-			// 		'2' => __( 'On-the-fly generation', GAMBIT_COMBINATOR ),
-			// 	),
-			// 	'desc' => __( 'Combinator uses 2 methods to combine scripts and stylesheets:<ol><li><strong>Generate files in the uploads folder</strong><br>Scripts and styles are combined and saved in the <code>combinator</code> subdirectory in your uploads folder. This works in the majority of server setups and results in the fastest loading speeds.</li><li><strong>On-the-fly generation</strong><br>Scripts and stylesheets are combined when needed and no files are generated. You will still get the benefits of fewer server requests, but Javascript compression will be disabled and the performance is slower than the first method.</ol>', GAMBIT_COMBINATOR ),
-			// ) );
-			
-			// $adminPanel->createOption( array(
-			// 	'name' => __( 'Enable GZIP Compression', GAMBIT_COMBINATOR ),
-			// 	'id' => 'gzip_output',
-			// 	'type' => 'enable',
-			// 	'default' => true,
-			// 	'desc' => __( '<strong>[For on-the-fly generation only]</strong><br>Use gzip for Content Encoding the output of combined scripts and stylesheets.', GAMBIT_COMBINATOR ),
-			// ) );
 
 			$adminPanel->createOption( array(
 			    'type' => 'save',
@@ -728,7 +656,7 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 				'type' => 'multicheck',
 				'default' => array( 'includes', 'remote' ),
 				'options' => array(
-					'includes' => __( 'WordPres wp-include files', GAMBIT_COMBINATOR ),
+					'includes' => __( 'WordPress wp-include files', GAMBIT_COMBINATOR ),
 					'remote' => __( 'Remote scripts', GAMBIT_COMBINATOR ),
 					'inline' => __( 'Script tags (small chance to give errors)', GAMBIT_COMBINATOR ),
 				),
@@ -781,7 +709,7 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 				'type' => 'multicheck',
 				'default' => array( 'includes', 'remote' ),
 				'options' => array(
-					'includes' => __( 'WordPres wp-include files', GAMBIT_COMBINATOR ),
+					'includes' => __( 'WordPress wp-include files', GAMBIT_COMBINATOR ),
 					'remote' => __( 'Remote stylesheets', GAMBIT_COMBINATOR ),
 					'inline' => __( 'Style tags (high chance to disrupt page styles)', GAMBIT_COMBINATOR ),
 				),
@@ -866,6 +794,11 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 		}
 		
 		
+		/**
+		 * Populates the $this->settings variable with all the settings from the admin panel
+		 *
+		 * @return	void
+		 */
 		public function gatherSettings() {
 
 			if ( ! class_exists( 'TitanFramework' ) ) {
@@ -880,8 +813,6 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 			$this->settings['exclude_plugins'] = $titan->getOption( 'exclude_plugins' );
 			$this->settings['exclude_found_js'] = $titan->getOption( 'exclude_found_js' );
 			$this->settings['exclude_found_css'] = $titan->getOption( 'exclude_found_css' );
-			// $this->settings['combine_method'] = $titan->getOption( 'combine_method' );
-			// $this->settings['gzip_output'] = $titan->getOption( 'gzip_output' );
 			$this->settings['js_compression_level'] = $titan->getOption( 'js_compression_level' );
 			$this->settings['css_compression_level'] = $titan->getOption( 'css_compression_level' );
 			
@@ -897,6 +828,12 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 		}
 		
 		
+		/**
+		 * Clears the generated files and transients
+		 * Ajax handler for the settings
+		 *
+		 * @return	void
+		 */
 		public function clearCache() {
 			if ( empty( $_REQUEST['nonce'] ) ) {
 				wp_send_json_error();
@@ -909,20 +846,36 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 			
 			wp_send_json_success();
 		}
-	
-	
+		
+		
+		/**
+		 * Delete all the uploads folder files
+		 *
+		 * @return	void
+		 */
 		public function deleteAllFiles() {
 			GambitCombinatorFiles::deleteAllFiles();
 		}
-	
-	
+		
+		
+		/**
+		 * Deletes all the transient database data
+		 *
+		 * @return	void
+		 */
 		public function deleteAllCaches() {
 			global $wpdb;
 
 			$wpdb->query( "DELETE FROM $wpdb->options WHERE option_name LIKE '_transient_%' AND option_name LIKE '%cmbntr%'" );
 		}
-	
-	
+		
+		
+		/**
+		 * Check whether we are currently in the frontend
+		 * Simply doing ! is_admin() doesn't cut it
+		 *
+		 * @return	void
+		 */
 		public function isFrontEnd() {
 			if ( is_admin() ) {
 				return false;
@@ -949,307 +902,48 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 				   is_time() ||
 				   is_year();
 		}
-	
-	
-		public function encodeLoadParam( $fileArray ) {
-			$data = gzdeflate( serialize( $fileArray ) );
-	        $data = mcrypt_encrypt( MCRYPT_RIJNDAEL_256, self::SECRET_KEY, $data, MCRYPT_MODE_ECB, mcrypt_create_iv( mcrypt_get_iv_size( MCRYPT_RIJNDAEL_256, MCRYPT_MODE_ECB ), MCRYPT_RAND ) );
-			return base64_encode( $data );
+		
+		
+		/**
+		 * Displays an admin notice when the uploads folder is unwritable
+		 *
+		 * @return	void
+		 */
+		public function adminNotices() {
+			$isWritable = GambitCombinatorFiles::canWriteCombinatorFiles();
+
+			if ( $isWritable !== true && get_option( 'combinator_notice_dismiss1' ) === false ) {
+				echo "<div id='combinator_notice_1' class='error notice is-dismissible'><p><strong>" . __( "Combinator Error", GAMBIT_COMBINATOR ) . ":</strong> " . __( "We have a problem. We generate files and put them in our own subdirectory in your <code>uploads</code> folder for caching. Since it is unwritable, we cannot create our subdirectory on our own. Please make sure that this directory exists, and that it is writable by giving it permissions of <code>755</code>:<br>", GAMBIT_COMBINATOR ) . "<code>{$isWritable}</code></p></div>";
+				echo "<script>jQuery(document).ready(function($) {
+					$('body').on('click', '#combinator_notice_1 .notice-dismiss', function() {
+						wp.ajax.send( 'combinator_notice_dismiss', {
+							data: {
+								nonce: '" . wp_create_nonce( 'combinator_notice_dismiss' ) . "'
+							}
+						}); 
+					});
+				});</script>";
+			}
+		}
+		
+		
+		/**
+		 * Dismiss handler for the admin notice
+		 *
+		 * @return	void
+		 */
+		public function dismissAdminNotice() {
+			if ( empty( $_REQUEST['nonce'] ) ) {
+				wp_send_json_error();
+			}
+			
+			if ( wp_verify_nonce( $_REQUEST['nonce'], 'combinator_notice_dismiss' ) ) {
+			    update_option( 'combinator_notice_dismiss1', 1 );
+			}
+			
+			wp_send_json_success();
 		}
 	
-	
-		public function gatherEnqueuedScripts( $tag, $handle, $src ) {
-		
-			if ( ! $this->settings['js_enabled'] || ! $this->settings['global_enabled'] ) {
-				return $tag;
-			}
-
-			if ( ! $this->isFrontEnd() ) {
-				return $tag;
-			}
-		
-			$includeIncludes = true;
-			$includeRemote = true;
-		
-			// Only do this for local wp-content files
-			$path = '';
-			if ( strpos( $src, content_url() ) !== false ) {
-	
-				// Get local path
-				$path = str_replace( content_url(), WP_CONTENT_DIR, $src );
-			
-		
-			// Only do this for local wp-include files
-			} else if ( strpos( $src, includes_url() ) !== false ) {
-	
-				// Get local path
-				if ( ! $includeIncludes ) {
-					return $tag;
-				}
-				$path = str_replace( trim( includes_url(), '/\\' ), ABSPATH . WPINC, $src );
-
-			} else if ( ! $includeRemote ) {
-				return $tag;
-			}
-	
-			if ( ! empty( $path ) ) {
-		
-				// Remove trailing arguments
-				$path = preg_replace( '/\?.+$/', '', $path );
-		
-				// Check if file exists
-				global $wp_filesystem;
-				GambitCombinatorFiles::initFilesystem();
-				$path = realpath( $path );
-				if ( ! $path && ! $wp_filesystem->is_file( $path ) ) {
-					return $tag;
-				}
-			
-			}
-		
-			// Remember the handler
-			if ( $this->inHead ) {
-				$this->headScripts[] = $src;
-			} else {
-				$this->footerScripts[] = $src;
-			}
-		
-			// $_SESSION[ 'scriptHandles' ] = wp_remote_fopen( $src );
-			// $this->test[] = $src;
-			// var_dump($src);
-	// 		var_dump(gzdeflate($this->test));
-	// 		var_dump(base64_encode(gzdeflate($this->test)));
-	// 		var_dump(gzinflate(base64_decode(base64_encode(gzdeflate($this->test)))));
-
-			// Save the path of this file
-			// update_option( 'js_combiner_' . $handle, $path );
-	
-			return '';
-		}
-	
-	
-		public function scriptLoader( $scripts ) {
-		
-			$method = $this->settings['combine_method'];
-			$compressionLevel = $this->settings['js_compression_level'];
-			$gzip = $this->settings['gzip_output'] ? '1' : '';
-		
-			if ( ! count( $scripts ) ) {
-				return;
-			}
-		
-			$hash = substr( md5( serialize( $scripts ) . $compressionLevel ), 0, 8 );
-
-			global $wp_filesystem;
-			GambitCombinatorFiles::initFilesystem();
-		
-			// delete_transient( 'js_combined_' . $hash );
-			$output = get_transient( 'cmbntr_js' . $hash );
-
-			// var_dump('cmbntr_js_' . $hash, 'transient', $output);
-			if ( ( $method == 1 && ! $output ) || ( $method == 1 && ! empty( $output['path'] ) && ! $wp_filesystem->is_file( $output['path'] ) ) ) {
-				// var_dump('combining');
-				$combined = GambitCombinatorJS::combineSources( $scripts );
-			
-				if ( $compressionLevel ) {
-					$combined = GambitCombinatorJS::closureCompile( $combined, $compressionLevel );
-				}
-			
-				$output = GambitCombinatorJS::createFile( 
-					$combined, 
-					$hash . '.js'
-				);
-			
-				// var_dump('cmbntr_js_' . $hash, $output);
-				set_transient( 'cmbntr_js' . $hash, $output, DAY_IN_SECONDS );
-				// var_dump('get_transient', get_transient( 'cmbntr_js_' . $hash ));
-			}
-		
-			// var_dump($upload_dir['baseurl'] . 'combinator/' . $filePath );
-			if ( $method == 1 && ! empty( $output['path'] ) && $wp_filesystem->is_file( $output['path'] ) ) {
-				echo "<script type='text/javascript' src='" . esc_url( $output['url'] ) . "'></script>";
-			
-			} else {
-		
-			// if ( count( $this->headScripts ) ) {
-				$data = $this->encodeLoadParam( $scripts );
-				// echo "<script type='text/javascript' src='" . esc_url( add_query_arg( array( 'c' => 1, 'm' => 0, 'load' => $data ), admin_url( 'admin-ajax.php?action=combinator_scripts' ) ) ) . "'></script>";
-				echo "<script type='text/javascript' src='" . esc_url( add_query_arg( array( 'c' => $gzip, 'm' => $compressionLevel, 'load' => $data ), plugins_url( 'combinator/fallback/class-load-scripts.php', __FILE__ ) ) ) . "'></script>";
-			// }
-			}
-		
-		}
-	
-		public function headScriptLoader() {
-			$this->scriptLoader( $this->headScripts );
-		}
-	
-
-		public function footerScriptLoader() {
-			$this->scriptLoader( $this->footerScripts );
-		}
-	
-	
-		public function gatherEnqueuedStyles( $tag, $handle ) {
-		
-			if ( ! $this->settings['css_enabled'] || ! $this->settings['global_enabled'] ) {
-				return $tag;
-			}
-
-			if ( ! $this->isFrontEnd() ) {
-				return $tag;
-			}
-		
-			$includeIncludes = true;
-			$includeRemote = true;
-		
-			// Do only for stylesheets
-			if ( ! preg_match( "/rel=['\"]stylesheet['\"]/", $tag ) ) {
-				return $tag;
-			}
-			if ( ! preg_match( "/media=['\"]all['\"]/", $tag ) ) {
-				return $tag;
-			}
-		
-			// Get $src
-			preg_match( "/href=['\"]([^'\"]+)['\"]/", $tag, $matches );
-			if ( count( $matches ) < 1 ) {
-				return $tag;
-			}
-			$src = $matches[1];
-		
-			// Only do this for local wp-content files
-			$path = '';
-			if ( strpos( $src, content_url() ) !== false ) {
-	
-				// Get local path
-				$path = str_replace( content_url(), WP_CONTENT_DIR, $src );
-		
-			// Only do this for local wp-include files
-			} else if ( strpos( $src, includes_url() ) !== false ) {
-	
-				// Get local path
-				if ( ! $includeIncludes ) {
-					return $tag;
-				}
-				$path = str_replace( trim( includes_url(), '/\\' ), ABSPATH . WPINC, $src );
-			
-			} else if ( ! $includeRemote ) {
-
-				return $tag;
-			}
-		
-			if ( ! empty( $path ) ) {
-		
-				// Remove trailing arguments
-				$path = preg_replace( '/\?.+$/', '', $path );
-		
-				// Check if file exists
-				global $wp_filesystem;
-				GambitCombinatorFiles::initFilesystem();
-				$path = realpath( $path );
-				if ( ! $path && ! $wp_filesystem->is_file( $path ) ) {
-					return $tag;
-				}
-			
-			}
-		
-			// If no handle, generate one
-			// $handle = ! empty( $handle ) ? $handle : substr_compare( md5( $path ), 0, 8 );
-		
-			// Remember the handler
-			if ( $this->inHead ) {
-				$this->headStyles[] = $src;
-			} else {
-				$this->footerStyles[] = $src;
-			}
-		
-			// $_SESSION[ 'styleHandles' ] = $path;
-
-			// Save the path of this file
-			// update_option( 'css_combiner_' . $handle, $path );
-		
-			return '';
-		}
-
-
-	
-	
-		public function styleLoader( $styles ) {
-		
-			$method = $this->settings['combine_method'];
-			$compressionLevel = 1;
-			$gzip = $this->settings['gzip_output'] ? '1' : '';
-		
-			if ( ! count( $styles ) ) {
-				return;
-			}
-		
-			$hash = substr( md5( serialize( $styles ) . $compressionLevel ), 0, 8 );
-
-			global $wp_filesystem;
-			GambitCombinatorFiles::initFilesystem();
-		
-			// delete_transient( 'css_combined_' . $hash );
-			$output = get_transient( 'cmbntr_css' . $hash );
-			// var_dump($output);
-			if ( ( $method == 1 && ! $output ) || ( $method == 1 && ! empty( $output['path'] ) && ! $wp_filesystem->is_file( $output['path'] ) ) ) {
-		
-				$combined = GambitCombinatorCSS::combineSources( $styles );
-			
-				if ( $compressionLevel ) {
-					$combined = GambitCombinatorCSS::compile( $combined );
-				}
-			
-				$output = GambitCombinatorCSS::createFile( 
-					$combined, 
-					$hash . '.css'
-				);
-			
-				set_transient( 'cmbntr_css' . $hash, $output, DAY_IN_SECONDS );
-			
-			}
-		
-			// var_dump($upload_dir['baseurl'] . 'combinator/' . $filePath );
-			if ( $method == 1 && ! empty( $output['path'] ) && $wp_filesystem->is_file( $output['path'] ) ) {
-				echo "<link rel='stylesheet' id='css_combinator_" . esc_attr( $hash ) . "-css' href='" . esc_url( $output['url'] ) . "' type='text/css' media='all' />";
-				// echo "<script type='text/javascript' src='" . esc_url( $output['url'] ) . "'></script>";
-			
-			} else {
-		
-			// if ( count( $this->headScripts ) ) {
-				$data = $this->encodeLoadParam( $styles );
-				// echo "<script type='text/javascript' src='" . esc_url( add_query_arg( array( 'c' => 1, 'm' => 0, 'load' => $data ), admin_url( 'admin-ajax.php?action=combinator_scripts' ) ) ) . "'></script>";
-				// echo "<script type='text/javascript' src='" . esc_url( add_query_arg( array( 'c' => 1, 'm' => $compressionLevel, 'load' => $data ), plugins_url( 'fallback/class-load-scripts.php', __FILE__ ) ) ) . "'></script>";
-			// }
-				echo "<link rel='stylesheet' id='css_combinator_" . esc_attr( $hash ) . "-css' href='" . esc_url( add_query_arg( array( 'c' => $gzip, 'm' => $compressionLevel, 'load' => $data ), plugins_url( 'combinator/fallback/class-load-styles.php', __FILE__ ) ) ) . "' type='text/css' media='all' />";
-		
-			}
-		
-		}
-	
-	
-		public function headStyleLoader() {
-			// if ( count( $this->headStyles ) ) {
-			// 	$data = $this->encodeLoadParam( $this->headStyles );
-			// 	echo "<link rel='stylesheet' id='css_combiner-css' href='" . esc_url( add_query_arg( array( 'c' => 1, 'm' => 0, 'load' => $data ), plugins_url( 'fallback/class-load-styles.php', __FILE__ ) ) ) . "' type='text/css' media='all' />";
-			// }
-			$this->styleLoader( $this->headStyles );
-		}
-	
-
-		public function footerStyleLoader() {
-			// if ( count( $this->footerStyles ) ) {
-			// 	$data = $this->encodeLoadParam( $this->footerStyles );
-			// 	echo "<link rel='stylesheet' id='css_combiner-footer-css' href='" . esc_url( add_query_arg( array( 'c' => 1, 'm' => 0, 'load' => $data ), plugins_url( 'fallback/class-load-styles.php', __FILE__ ) ) ) . "' type='text/css' media='all' />";
-			// }
-			$this->styleLoader( $this->footerStyles );
-		}
-	
-	
-		public function doneWithHead() {
-			$this->inHead = false;
-		}
 	}
 
 	new GambitCombinator();

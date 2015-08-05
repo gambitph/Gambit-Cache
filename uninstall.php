@@ -23,3 +23,4 @@ GambitCombinatorFiles::deleteAllFiles();
 
 delete_option( 'combinator_found_js' );
 delete_option( 'combinator_found_css' );
+delete_option( 'combinator_notice_dismiss1' );
