@@ -41,19 +41,20 @@ class GambitCombinatorJS extends GambitCombinatorFiles {
 		
 		if ( class_exists( 'WP_Error' ) && function_exists( 'is_wp_error' ) ) {
 			if ( is_wp_error( $response ) ) {
-				set_transient( 'cmbntr_fail' . $codeHash, '1', DAY_IN_SECONDS );
+				set_transient( 'cmbntr_fail' . $codeHash, '1', MINUTE_IN_SECONDS );
 				return $code;
 			}
 		}
 
 		if ( is_array( $response ) && ! empty( $response['response']['code'] ) && ! empty( $response['body'] ) ) {
-			if ( $response['response']['code'] == 200 ) {
+			if ( $response['response']['code'] == 200 
+				 && stripos( $response['body'], 'Error(22): Too many compiles performed recently' ) === false ) {
 				$code = $response['body'];
 			} else {
-				set_transient( 'cmbntr_fail' . $codeHash, '1', DAY_IN_SECONDS );
+				set_transient( 'cmbntr_fail' . $codeHash, '1', MINUTE_IN_SECONDS );
 			}
 		} else {
-			set_transient( 'cmbntr_fail' . $codeHash, '1', DAY_IN_SECONDS );
+			set_transient( 'cmbntr_fail' . $codeHash, '1', MINUTE_IN_SECONDS );
 		}
 		
 		return $code;

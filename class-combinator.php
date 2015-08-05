@@ -73,6 +73,9 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 			
 			add_action( 'wp_footer', array( $this, 'test1' ), 0 );
 			add_action( 'wp_footer', array( $this, 'test2' ), 9999 );
+			
+			add_action( 'wp_ajax_combinator_clear_cache', array( $this, 'clearCache' ) );
+			// add_action( 'wp_ajax_combinator_clear_files', array( $this, 'clearFiles' ) );
 
 		}
 		
@@ -642,6 +645,21 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 				'desc' => __( 'You can enable or disable the combining of scripts and stylesheets globally with this setting.', GAMBIT_COMBINATOR ),
 			) );
 			
+			$adminPanel->createOption( array(
+				'name' => __( 'Cache Control', GAMBIT_COMBINATOR ),
+				// 'id' => '',
+				'type' => 'note',
+				// 'default' => true,
+				'desc' => '<button name="action" class="button button-secondary" onclick="
+  				wp.ajax.send( \'combinator_clear_cache\', {
+  				    data: {
+  				      nonce: \'' . wp_create_nonce( 'combinator_clear_cache' ) . '\'
+  				    }
+  				  }); 
+    jQuery(this).blur(); return false;">' . __( 'Clear Generated Files & Database Caches', GAMBIT_COMBINATOR ) . '</button>
+	<p class="description">If you are getting <code>Uncaught SyntaxError: Unexpected token :</code> errors in Javascript, this can usually be fixed by clearing the cache with this button.</p>'
+			) );
+			
 			// $adminPanel->createOption( array(
 			// 	'name' => __( 'Combination Method', GAMBIT_COMBINATOR ),
 			// 	'id' => 'combine_method',
@@ -689,8 +707,8 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 				'options' => array(
 					'0' => __( 'No Compression, Just Combine Scripts', GAMBIT_COMBINATOR ),
 					'1' => __( 'White Space Removal', GAMBIT_COMBINATOR ),
-					'2' => __( 'Simple Optimizations', GAMBIT_COMBINATOR ),
-					'3' => __( 'Advanced Optimizations', GAMBIT_COMBINATOR ),
+					'2' => __( 'Simple Optimizations (Recommended)', GAMBIT_COMBINATOR ),
+					'3' => __( 'Advanced Optimizations (NOT Recommended)', GAMBIT_COMBINATOR ),
 				),
 				'desc' => __( 'Combinator uses <a href="https://developers.google.com/closure/compiler/index">Closure Compiler</a> to perform code compression. You can choose from these types of compression:<ul><li><strong>White Space Removal</strong><br>Gives some compression by removing unnecessary spaces from your scripts. <em>(<strong>Recommended</strong> if Simple Optimization fails and produces errors)</em>,</li><li><strong>Simple Optimizations</strong><br>Performs great compression and optimizations that does not interfere with script interactions. <em>(<strong>Recommended</strong> and should work in most setups)</em></li><li><strong>Advanced Optimizations</strong><br>Highest level of compression, but all variables/function names/symbols in your scripts will be renamed. <em>(<strong>Not recommended</strong>, since this will most likely create broken references in your Javascript. Read more on this in the <a href="https://developers.google.com/closure/compiler/docs/api-tutorial3">Closure Compiler docs</a> for more information on how to circumvent this, note that this would entail rewriting your Javascript)</em></li></ul>', GAMBIT_COMBINATOR ),
 			) );
@@ -703,9 +721,9 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 				'options' => array(
 					'includes' => __( 'WordPres wp-include files', GAMBIT_COMBINATOR ),
 					'remote' => __( 'Remote scripts', GAMBIT_COMBINATOR ),
-					'inline' => __( 'Script tags', GAMBIT_COMBINATOR ),
+					'inline' => __( 'Script tags (small chance to give errors)', GAMBIT_COMBINATOR ),
 				),
-				'desc' => __( 'Check the types of scripts to combine.', GAMBIT_COMBINATOR ),
+				'desc' => __( 'Check the types of scripts to combine. Scripts from plugins & themes are always combined.', GAMBIT_COMBINATOR ),
 			) );
 			
 			$adminPanel->createOption( array(
@@ -743,7 +761,7 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 				'default' => 1,
 				'options' => array(
 					'0' => __( 'No Compression, Just Combine Styles', GAMBIT_COMBINATOR ),
-					'1' => __( 'Simple Optimizations', GAMBIT_COMBINATOR ),
+					'1' => __( 'Simple Optimizations (Recommended)', GAMBIT_COMBINATOR ),
 				),
 				'desc' => __( 'Choose the compression level for CSS stylesheets.', GAMBIT_COMBINATOR ),
 			) );
@@ -756,9 +774,9 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 				'options' => array(
 					'includes' => __( 'WordPres wp-include files', GAMBIT_COMBINATOR ),
 					'remote' => __( 'Remote stylesheets', GAMBIT_COMBINATOR ),
-					'inline' => __( 'Style tags', GAMBIT_COMBINATOR ),
+					'inline' => __( 'Style tags (high chance to disrupt page styles)', GAMBIT_COMBINATOR ),
 				),
-				'desc' => __( 'Check the types of styles to combine.', GAMBIT_COMBINATOR ),
+				'desc' => __( 'Check the types of styles to combine. Styles from plugins & themes are always combined.', GAMBIT_COMBINATOR ),
 			) );
 			
 			$adminPanel->createOption( array(
@@ -868,6 +886,19 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 			$this->settings['css_include_inline'] = in_array( 'inline', $titan->getOption( 'css_includes' ) );
 			$this->settings['css_exclude'] = $titan->getOption( 'css_exclude' );
 		}
+		
+		
+		public function clearCache() {
+			if ( empty( $_REQUEST['nonce'] ) ) {
+				die();
+			}
+			
+			if ( wp_verify_nonce( $_REQUEST['nonce'], 'combinator_clear_cache' ) ) {
+			    $this->deleteAllCaches();
+				$this->deleteAllCaches();
+			}
+			die();
+		}
 	
 	
 		public function deleteAllFiles() {
@@ -878,7 +909,7 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 		public function deleteAllCaches() {
 			global $wpdb;
 
-			$wpdb->query( "DELETE FROM $wpdb->options WHERE option_name LIKE '_transient_cmbntr_%' OR option_name LIKE '_transient_timeout_cmbntr_%'" );
+			$wpdb->query( "DELETE FROM $wpdb->options WHERE option_name LIKE '_transient_%' AND option_name LIKE '%cmbntr%'" );
 		}
 	
 	

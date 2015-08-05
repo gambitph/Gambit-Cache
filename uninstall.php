@@ -15,7 +15,7 @@ update_user_meta( get_current_user_id(), 'dismissed_wp_pointers', $dismissedAdmi
 
 // Delete all transients
 global $wpdb;
-$wpdb->query( "DELETE FROM $wpdb->options WHERE option_name LIKE '_transient_cmbntr_%' OR option_name LIKE '_transient_timeout_cmbntr_%'" );
+$wpdb->query( "DELETE FROM $wpdb->options WHERE option_name LIKE '_transient_%' AND option_name LIKE '%cmbntr%'" );
 
 // Delete all generated JS & CSS
 require_once( 'combinator/lib/class-files.php' );
