@@ -1,0 +1,349 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: The Loading Bar\n"
+"POT-Creation-Date: 2015-08-05 19:22+0800\n"
+"PO-Revision-Date: 2015-08-05 19:22+0800\n"
+"Last-Translator: Benjamin Intal <bf.intal@gambit.ph>\n"
+"Language-Team: Gambit <bfintal@gmail.com>\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.7.6\n"
+"X-Poedit-KeywordsList: __;_e\n"
+"X-Poedit-Basepath: .\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-SearchPath-0: ..\n"
+
+#: ../class-admin-license.php:436
+#, php-format
+msgid "Plugin Activation Page for %s"
+msgstr ""
+
+#: ../class-admin-license.php:438
+#, php-format
+msgid ""
+"Get notified of plugin updates right here in your WordPress admin! Just "
+"enter your purchase code for our plugins in the field/s below to get "
+"automatic updates. Don&apos;t know how to get your purchase code? "
+"%sHere&apos;s how.%s"
+msgstr ""
+
+#: ../class-admin-license.php:446
+msgid "Plugin"
+msgstr ""
+
+#: ../class-admin-license.php:447 ../class-admin-license.php:474
+msgid "Purchase Code"
+msgstr ""
+
+#: ../class-admin-license.php:475
+msgid "Save & Activate Automatic Updates"
+msgstr ""
+
+#: ../class-admin-license.php:480
+msgid "FAQ"
+msgstr ""
+
+#: ../class-admin-license.php:496
+msgid "Our Other Plugins That You Might Find Useful"
+msgstr ""
+
+#: ../class-admin-license.php:534
+msgid "View Demo"
+msgstr ""
+
+#: ../class-admin-license.php:537
+msgid "Learn More"
+msgstr ""
+
+#: ../class-admin-license.php:558
+msgid "Need Support?"
+msgstr ""
+
+#: ../class-admin-license.php:560
+msgid "Enjoying Our Plugin?"
+msgstr ""
+
+#: ../class-admin-license.php:568
+msgid ""
+"Show your appreciation by <strong>rating our plugins 5 stars in CodeCanyon</"
+"strong>. Doing that will greatly help us and will allow us to provide you "
+"with better support and even more awesome plugins. :)"
+msgstr ""
+
+#: ../class-admin-license.php:907
+#, php-format
+msgid ""
+"There is a new version of %1$s available. <a target=\"_blank\" class="
+"\"thickbox\" href=\"%2$s\">View version %3$s details</a>."
+msgstr ""
+
+#: ../class-admin-license.php:914
+#, php-format
+msgid ""
+"There is a new version of %1$s available. <a target=\"_blank\" class="
+"\"thickbox\" href=\"%2$s\">View version %3$s details</a> or <a href=\"%4$s"
+"\">update now</a>."
+msgstr ""
+
+#: ../class-admin-license.php:1054
+msgid "You do not have permission to install plugin updates"
+msgstr ""
+
+#: ../class-admin-license.php:1054
+msgid "Error"
+msgstr ""
+
+#: ../class-admin-pointers.php:23 ../class-plugin.php:58
+msgid "Automatic Updates"
+msgstr ""
+
+#: ../class-admin-pointers.php:24
+msgid "Keep your plugin updated by entering your purchase code here."
+msgstr ""
+
+#: ../class-combinator.php:574
+msgid "Settings"
+msgstr ""
+
+#: ../class-combinator.php:630
+msgid "General Settings"
+msgstr ""
+
+#: ../class-combinator.php:635
+msgid "Enable Combinator"
+msgstr ""
+
+#: ../class-combinator.php:639
+msgid ""
+"You can enable or disable the combining of scripts and stylesheets globally "
+"with this setting."
+msgstr ""
+
+#: ../class-combinator.php:643
+msgid "Cache Control"
+msgstr ""
+
+#: ../class-combinator.php:648
+msgid "Cleared Generated Files & Database Caches"
+msgstr ""
+
+#: ../class-combinator.php:649
+msgid "Something went wrong, try again"
+msgstr ""
+
+#: ../class-combinator.php:654
+msgid "Clearing..."
+msgstr ""
+
+#: ../class-combinator.php:655
+msgid "Clear Generated Files & Database Caches"
+msgstr ""
+
+#: ../class-combinator.php:666
+msgid "Javascript Settings"
+msgstr ""
+
+#: ../class-combinator.php:671
+msgid "Combine Javascripts"
+msgstr ""
+
+#: ../class-combinator.php:675
+msgid "Enable combining of Javascript files"
+msgstr ""
+
+#: ../class-combinator.php:679 ../class-combinator.php:734
+msgid "Compression Level"
+msgstr ""
+
+#: ../class-combinator.php:684
+msgid "No Compression, Just Combine Scripts"
+msgstr ""
+
+#: ../class-combinator.php:685
+msgid "White Space Removal"
+msgstr ""
+
+#: ../class-combinator.php:686 ../class-combinator.php:740
+msgid "Simple Optimizations (Recommended)"
+msgstr ""
+
+#: ../class-combinator.php:687
+msgid "Advanced Optimizations (NOT Recommended)"
+msgstr ""
+
+#: ../class-combinator.php:689
+msgid ""
+"Combinator uses <a href=\"https://developers.google.com/closure/compiler/"
+"index\">Closure Compiler</a> to perform code compression. You can choose "
+"from these types of compression:<ul><li><strong>White Space Removal</"
+"strong><br>Gives some compression by removing unnecessary spaces from your "
+"scripts. <em>(<strong>Recommended</strong> if Simple Optimization fails and "
+"produces errors)</em>,</li><li><strong>Simple Optimizations</"
+"strong><br>Performs great compression and optimizations that does not "
+"interfere with script interactions. <em>(<strong>Recommended</strong> and "
+"should work in most setups)</em></li><li><strong>Advanced Optimizations</"
+"strong><br>Highest level of compression, but all variables/function names/"
+"symbols in your scripts will be renamed. <em>(<strong>Not recommended</"
+"strong>, since this will most likely create broken references in your "
+"Javascript. Read more on this in the <a href=\"https://developers.google.com/"
+"closure/compiler/docs/api-tutorial3\">Closure Compiler docs</a> for more "
+"information on how to circumvent this, note that this would entail rewriting "
+"your Javascript)</em></li></ul>"
+msgstr ""
+
+#: ../class-combinator.php:693 ../class-combinator.php:746
+msgid "What to Combine"
+msgstr ""
+
+#: ../class-combinator.php:698 ../class-combinator.php:751
+msgid "WordPress wp-include files"
+msgstr ""
+
+#: ../class-combinator.php:699
+msgid "Remote scripts"
+msgstr ""
+
+#: ../class-combinator.php:700
+msgid "Script tags (small chance to give errors)"
+msgstr ""
+
+#: ../class-combinator.php:702
+msgid ""
+"Check the types of scripts to combine. Scripts from plugins & themes are "
+"always combined."
+msgstr ""
+
+#: ../class-combinator.php:706 ../class-combinator.php:759
+msgid "Exclude these Domains"
+msgstr ""
+
+#: ../class-combinator.php:710 ../class-combinator.php:763
+msgid ""
+"Enter a domain or part of a URL (one per line) that you want to exclude from "
+"the combination process."
+msgstr ""
+
+#: ../class-combinator.php:711 ../class-combinator.php:764
+msgid "Enter a domain or part of a URL (one per line)"
+msgstr ""
+
+#: ../class-combinator.php:721
+msgid "CSS Settings"
+msgstr ""
+
+#: ../class-combinator.php:726
+msgid "Combine Stylesheets"
+msgstr ""
+
+#: ../class-combinator.php:730
+msgid "Enable combining of stylesheets"
+msgstr ""
+
+#: ../class-combinator.php:739
+msgid "No Compression, Just Combine Styles"
+msgstr ""
+
+#: ../class-combinator.php:742
+msgid "Choose the compression level for CSS stylesheets."
+msgstr ""
+
+#: ../class-combinator.php:752
+msgid "Remote stylesheets"
+msgstr ""
+
+#: ../class-combinator.php:753
+msgid "Style tags (high chance to disrupt page styles)"
+msgstr ""
+
+#: ../class-combinator.php:755
+msgid ""
+"Check the types of styles to combine. Styles from plugins & themes are "
+"always combined."
+msgstr ""
+
+#: ../class-combinator.php:774
+msgid "Exclusion Settings"
+msgstr ""
+
+#: ../class-combinator.php:779
+msgid "Exclude these Plugins"
+msgstr ""
+
+#: ../class-combinator.php:784
+msgid ""
+"Combinator combines all scripts and styles it can find. If a plugin stops "
+"working because of the combination process, <strong>check the plugin here to "
+"exclude it</strong>."
+msgstr ""
+
+#: ../class-combinator.php:786
+msgid ""
+"If you have found a plugin to be not working when included with Combinator, "
+"please let us know by commenting it in our CodeCanyon page so we can include "
+"it in our internal blacklist."
+msgstr ""
+
+#: ../class-combinator.php:803
+msgid "Exclude Found Javascript"
+msgstr ""
+
+#: ../class-combinator.php:808
+msgid ""
+"Here is a list of all the Javascript URLs Combinator has found. If the list "
+"below is empty, visit your site to populate it.<br><strong>Check the URL "
+"here to exclude it.</strong>"
+msgstr ""
+
+#: ../class-combinator.php:824
+msgid "Exclude Found Stylesheets"
+msgstr ""
+
+#: ../class-combinator.php:829
+msgid ""
+"Here is a list of all the Stylesheet URLs Combinator has found. If the list "
+"below is empty, visit your site to populate it.<br><strong>Check the URL "
+"here to exclude it.</strong>"
+msgstr ""
+
+#: ../class-combinator.php:996
+msgid "Combinator Error"
+msgstr ""
+
+#: ../class-combinator.php:996
+msgid ""
+"We have a problem. We generate files and put them in our own subdirectory in "
+"your <code>uploads</code> folder for caching. Since it is unwritable, we "
+"cannot create our subdirectory on our own. Please make sure that this "
+"directory exists, and that it is writable by giving it permissions of "
+"<code>755</code>:<br>"
+msgstr ""
+
+#: ../class-plugin.php:59
+msgid "Keep Combinator updated by entering your purchase code here."
+msgstr ""
+
+#: ../class-plugin.php:97
+msgid "Get Customer Support"
+msgstr ""
+
+#: ../class-plugin.php:101
+msgid "Get More Plugins"
+msgstr ""
+
+#: ../titan-framework-checker.php:88
+msgid "Titan Framework needs to be installed."
+msgstr ""
+
+#: ../titan-framework-checker.php:91
+msgid "Click here to search for the plugin."
+msgstr ""
+
+#: ../titan-framework-checker.php:110
+msgid "Titan Framework needs to be activated."
+msgstr ""
+
+#: ../titan-framework-checker.php:113
+msgid "Click here to go to the plugins page and activate it."
+msgstr ""
