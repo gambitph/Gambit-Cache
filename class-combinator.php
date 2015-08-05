@@ -603,6 +603,11 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 		public function createAdminOptions() {
 			$titan = TitanFramework::getInstance( GAMBIT_COMBINATOR );
 			
+			// Check if get_plugins() function exists. This is required on the front end of the
+			// site, since it is in a file that is normally only loaded in the admin.
+			if ( ! function_exists( 'get_plugins' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/plugin.php';
+			}
 			
 			/**
 			 * Get list of active plugins
@@ -919,6 +924,9 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 	
 	
 		public function isFrontEnd() {
+			if ( is_admin() ) {
+				return false;
+			}
 			return is_404() ||
 				   is_archive() ||
 				   is_attachment() ||
