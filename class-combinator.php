@@ -650,12 +650,16 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 				// 'id' => '',
 				'type' => 'note',
 				// 'default' => true,
-				'desc' => '<button name="action" class="button button-secondary" onclick="
+				'desc' => '<button id="combinator_cache_btn" name="action" class="button button-secondary" onclick="
+					var t = jQuery(this);
   				wp.ajax.send( \'combinator_clear_cache\', {
+					success: function() { t.text(\'' . __( 'Cleared Generated Files & Database Caches', GAMBIT_COMBINATOR ) . '\'); },
+				    error:   function() { t.text(\'' . __( 'Something went wrong, try again', GAMBIT_COMBINATOR ) . '\'); },
   				    data: {
   				      nonce: \'' . wp_create_nonce( 'combinator_clear_cache' ) . '\'
   				    }
   				  }); 
+				  jQuery(this).text(\'' . __( 'Clearing...', GAMBIT_COMBINATOR ) . '\');
     jQuery(this).blur(); return false;">' . __( 'Clear Generated Files & Database Caches', GAMBIT_COMBINATOR ) . '</button>
 	<p class="description">If you are getting <code>Uncaught SyntaxError: Unexpected token :</code> errors in Javascript, this can usually be fixed by clearing the cache with this button.</p>'
 			) );
@@ -890,14 +894,15 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 		
 		public function clearCache() {
 			if ( empty( $_REQUEST['nonce'] ) ) {
-				die();
+				wp_send_json_error();
 			}
 			
 			if ( wp_verify_nonce( $_REQUEST['nonce'], 'combinator_clear_cache' ) ) {
 			    $this->deleteAllCaches();
 				$this->deleteAllCaches();
 			}
-			die();
+			
+			wp_send_json_success();
 		}
 	
 	
