@@ -2,10 +2,14 @@
 
 require_once( 'combinator/lib/class-js.php' );
 require_once( 'combinator/lib/class-css.php' );
+require_once( 'combinator/lib/class-cache-clearer.php' );
+require_once( 'combinator/lib/class-cache-activation.php' );
+require_once( 'combinator/lib/class-cache-deactivation.php' );
 
 // Initializes Titan Framework
 require_once( 'titan-framework-checker.php' );
 
+// ob_start();
 
 if ( ! class_exists( 'GambitCombinator' ) ) {
 	
@@ -53,22 +57,333 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 		 * Hook into WordPress
 		 */
 		function __construct() {
+			
+			new GambitCacheActivation();
+			new GambitCacheDeactivation();
+
+			if ( ! function_exists( '__c' ) ) {
+				require_once( 'combinator/phpfastcache.php' );
+			}
+			
+			// Admin notice for when the uploads folder is unwritable
+			add_action( 'admin_notices', array( $this, 'adminNotices' ) );
+			add_action( 'wp_ajax_combinator_notice_dismiss', array( $this, 'dismissAdminNotice' ) );
+			
+			add_action( 'wp_ajax_combinator_clear_cache', array( $this, 'clearCache' ) );
+
 			// Initializes settings panel
 			add_filter( 'plugin_action_links', array( $this, 'pluginSettingsLink' ), 10, 2 );
 			add_action( 'tf_create_options', array( $this, 'createAdminOptions' ) );
 			add_action( 'tf_done', array( $this, 'gatherSettings' ), 10 );
 			
+			
+				
+				
+			add_action( 'switch_theme', 'wp_cache_flush' );
+			add_action( 'customize_save_after', 'wp_cache_flush' );
+			
+			// Option change
+			add_action( 'updated_option', 'wp_cache_flush' );
+			add_action( 'added_option', 'wp_cache_flush' );
+			add_action( 'delete_option', 'wp_cache_flush' );
+			
+			if ( is_multisite() ) {
+				add_action( 'delete_blog', 'wp_cache_flush' );
+				add_action( 'switch_blog', 'wp_cache_flush' );
+			}
+
+			
+			if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+				return;
+			} 
+			
+			add_action( 'plugins_loaded', array( $this, 'test' ), -1 );
+			add_action( 'shutdown', array( $this, 'test2' ), 0 );
+
 			add_action( 'wp_head', array( $this, 'startGatheringOutput' ), 0 );
 			add_action( 'wp_head', array( $this, 'endGatheringOutput' ), 9999 );
-			
+
 			add_action( 'wp_footer', array( $this, 'startGatheringOutput' ), 0 );
 			add_action( 'wp_footer', array( $this, 'endGatheringOutput' ), 9999 );
 			
-			add_action( 'wp_ajax_combinator_clear_cache', array( $this, 'clearCache' ) );
+
 			
-			// Admin notice for when the uploads folder is unwritable
-			add_action( 'admin_notices', array( $this, 'adminNotices' ) );
-			add_action( 'wp_ajax_combinator_notice_dismiss', array( $this, 'dismissAdminNotice' ) );
+			if ( empty( $this->pageHash ) ) {
+				$this->pageHash = self::getHash( $this->getCurrentUrl() );
+			}
+			
+			// $this->loadCached();
+			
+			// add_action( 'init', array( $this, 'setLoggedInCookie' ) );
+			// add_action( 'wp_logout', array( $this, 'removeLoggedInCookie' ) );
+			
+			new GambitCacheCleaner();
+				///updated_{$post_type}_meta
+				
+
+			// Post-induced flushing
+	        // if ($this->_do_flush()) {
+// 	            global $wp_version;
+// 	            if (version_compare($wp_version,'3.5', '>=')) {
+// 	                add_action('clean_post_cache', array(
+// 	                    &$this,
+// 	                    'on_post_change'
+// 	                ), 0, 2);
+// 	            } else {
+// 	                add_action('wp_trash_post', array(
+// 	                    &$this,
+// 	                    'on_post_change'
+// 	                ), 0);
+//
+// 	                add_action('save_post', array(
+// 	                    &$this,
+// 	                    'on_post_change'
+// 	                ), 0);
+//
+// 	                add_action('delete_post', array(
+// 	                    &$this,
+// 	                    'on_post_change'
+// 	                ), 0);
+//
+// 	                add_action('publish_phone', array(
+// 	                    &$this,
+// 	                    'on_post_change'
+// 	                ), 0);
+// 	            }
+// 	        }
+//
+// 	        if ($this->_do_flush()) {
+// 	            add_action('comment_post', array(
+// 	                &$this,
+// 	                'on_comment_change'
+// 	            ), 0);
+//
+// 	            add_action('edit_comment', array(
+// 	                &$this,
+// 	                'on_comment_change'
+// 	            ), 0);
+//
+// 	            add_action('delete_comment', array(
+// 	                &$this,
+// 	                'on_comment_change'
+// 	            ), 0);
+//
+// 	            add_action('wp_set_comment_status', array(
+// 	                &$this,
+// 	                'on_comment_status'
+// 	            ), 0, 2);
+//
+// 	            add_action('trackback_post', array(
+// 	                &$this,
+// 	                'on_comment_change'
+// 	            ), 0);
+//
+// 	            add_action('pingback_post', array(
+// 	                &$this,
+// 	                'on_comment_change'
+// 	            ), 0);
+// 	        }
+//
+// 	        add_action('switch_theme', array(
+// 	            &$this,
+// 	            'on_change'
+// 	        ), 0);
+//
+// 	        if ($this->_do_flush()) {
+// 	            add_action('updated_option', array(
+// 	                &$this,
+// 	                'on_change_option'
+// 	            ), 0, 1);
+// 	            add_action('added_option', array(
+// 	                &$this,
+// 	                'on_change_option'
+// 	            ), 0, 1);
+//
+// 	            add_action('delete_option', array(
+// 	                &$this,
+// 	                'on_change_option'
+// 	            ), 0, 1);
+// 	        }
+//
+// 	        add_action('edit_user_profile_update', array(
+// 	            &$this,
+// 	            'on_change_profile'
+// 	        ), 0);
+//
+// 	        if (w3_is_multisite()) {
+// 	            add_action('delete_blog', array(
+// 	                &$this,
+// 	                'on_change'
+// 	            ), 0);
+//
+// 	            add_action('switch_blog', array(
+// 	                &$this,
+// 	                'switch_blog'
+// 	            ), 0, 2);
+// 	        }
+		}
+		
+		
+		public static function getHash( $url ) {
+			
+			$url = preg_replace( '/\#.*$/', '', $url );
+			
+			return substr( md5( $url ), 0, 8 );
+		}
+		
+		
+		public function removeLoggedInCookie() {
+		}
+		
+		
+		public function loadCached() {
+			return;
+			global $wpdb;
+			
+			if ( ! empty( $_POST ) ) {
+				return;
+			}
+if ( preg_match( '/wp\-.*\.php/', $this->getCurrentUrl() ) ) {
+	return;
+}
+			if ( is_admin() ) {
+				return;
+			}
+			require_once( ABSPATH . 'wp-includes/pluggable.php' );
+			if ( is_user_logged_in() ) {
+				return;
+			}
+			
+			
+			if ( ! function_exists( '__c' ) ) {
+				require_once( 'combinator/phpfastcache/phpfastcache.php' );
+			}
+
+			$html = __c("files")->get( $this->pageHash );
+
+			if ( $html ) {
+				echo $html;
+				echo "<!-- Cached by Combinator -->";
+				die();
+			}
+			
+			return;
+			
+			/*
+			$timeout = $wpdb->get_var( $wpdb->prepare( 'SELECT option_value FROM ' . $wpdb->options . ' WHERE option_name = %s', '_transient_timeout_cmbntr_p' . $this->pageHash ) );
+			if ( empty( $timeout ) ) {
+				return;
+			}
+			$timeout = (int) $timeout;
+
+			// Cached transient is expired
+			if ( time() > $timeout ) {
+				$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . $wpdb->options . ' WHERE option_name = %s', '_transient_timeout_cmbntr_p' . $this->pageHash ) );
+				$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . $wpdb->options . ' WHERE option_name = %s', '_transient_cmbntr_p' . $this->pageHash ) );
+				return;
+			}
+			
+			$cachedPage = $wpdb->get_var( $wpdb->prepare( 'SELECT option_value FROM ' . $wpdb->options . ' WHERE option_name = %s', '_transient_cmbntr_p' . $this->pageHash ) );
+			if ( empty( $cachedPage ) ) {
+				return;
+			}
+			
+			echo $cachedPage;
+			echo '<!-- Cached by Combinator -->';
+			die();
+			*/
+		}
+		
+		
+	    /**
+	      * Get the current Url taking into account Https and Port
+	      * @link http://css-tricks.com/snippets/php/get-current-page-url/
+	      * @version Refactored by @AlexParraSilva
+	      */
+	     public function getCurrentUrl() {
+	         $url  = isset( $_SERVER['HTTPS'] ) && 'on' === $_SERVER['HTTPS'] ? 'https' : 'http';
+	         $url .= '://' . $_SERVER['SERVER_NAME'];
+	         $url .= in_array( $_SERVER['SERVER_PORT'], array('80', '443') ) ? '' : ':' . $_SERVER['SERVER_PORT'];
+	         $url .= $_SERVER['REQUEST_URI'];
+	         return $url;
+	     }
+		
+		 public $firstCalled = false;
+		 public $pageHash = '';
+		 public $pageToCache = '';
+		 public $cachingStarted = false;
+		public function test() {
+
+			if ( is_admin() ) {
+				return;
+			}
+			if ( is_user_logged_in() ) {
+				return;
+			}
+
+			
+			if ( $this->firstCalled ) {
+				return;
+			}
+			$this->firstCalled = true;
+			
+				$this->cachingStarted = true;
+				ob_start();
+
+				
+		}
+		public function test2() {
+			
+			if ( ! $this->cachingStarted ) {
+				return;
+			}
+			// return;
+			
+			$this->pageToCache = '';
+
+		    // We'll need to get the number of ob levels we're in, so that we can iterate over each, collecting
+		    // that buffer's output into the final output.
+		    $levels = ob_get_level();
+
+			// @see http://stackoverflow.com/questions/772510/wordpress-filter-to-modify-final-html-output/22818089#22818089
+		    for ($i = 0; $i < $levels; $i++)
+		    {
+				$currentOb = ob_get_clean();
+		        $this->pageToCache .= $currentOb;
+				// echo $currentOb;
+		    }
+			echo $this->pageToCache;
+		    // Apply any filters to the final output
+		    // $this->pageToCache = apply_filters( 'final_output', $this->pageToCache );
+			
+			// var_dump('last?');
+			
+			// $cachedPage = get_transient( 'cmbntr_p' . $this->pageHash );
+			
+			// var_dump($this->pageToCache);
+			// var_dump($cachedPage);
+			// if ( empty( $cachedPage ) ) {
+
+				// var_dump($this->pageToCache);
+				
+				// if ( ob_get_length() > 0 ) {
+				// 	ob_end_clean();
+				// }
+				// $this->pageToCache .= ob_get_contents();
+
+				// var_dump('huh123');
+				// var_dump($this->pageToCache);
+				// var_dump($page);
+				// set_transient( 'cmbntr_p' . $this->pageHash, $this->pageToCache, MINUTE_IN_SECONDS * 5 );
+				
+				if ( ! function_exists( '__c' ) ) {
+					require_once( 'combinator/phpfastcache/phpfastcache.php' );
+				}
+		        __c( "files" )->set( $this->pageHash, $this->pageToCache, 1800 );
+				
+				
+			// }
+			
 		}
 		
 		
@@ -88,8 +403,11 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 			if ( ! $this->isFrontEnd() ) {
 				return;
 			}
-			
+
 			ob_start();
+			// $content = ob_get_contents();
+			// $this->pageToCache .= $content;
+			// ob_flush();
 		}
 		
 		
@@ -110,8 +428,9 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 				return;
 			}
 			
-			$content = ob_get_contents();
+			$content = ob_get_contents();//ob_get_contents();
 			ob_end_clean();
+			// ob_flush();
 			
 			
 			// Get the scripts & output
@@ -121,7 +440,7 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 			
 			// Output the head/footer content
 			echo $content;
-			
+			// $this->pageToCache .= $content;
 			
 			// Output the compressed stuff
 			if ( ! empty( $output['js']['url'] ) ) {
@@ -860,14 +1179,18 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 			$this->settings['js_compression_level'] = $titan->getOption( 'js_compression_level' );
 			$this->settings['css_compression_level'] = $titan->getOption( 'css_compression_level' );
 			
-			$this->settings['js_include_includes'] = in_array( 'includes', $titan->getOption( 'js_includes' ) );
-			$this->settings['js_include_remote'] = in_array( 'remote', $titan->getOption( 'js_includes' ) );
-			$this->settings['js_include_inline'] = in_array( 'inline', $titan->getOption( 'js_includes' ) );
+			if ( is_array( $titan->getOption( 'js_includes' ) ) ) {
+				$this->settings['js_include_includes'] = in_array( 'includes', $titan->getOption( 'js_includes' ) );
+				$this->settings['js_include_remote'] = in_array( 'remote', $titan->getOption( 'js_includes' ) );
+				$this->settings['js_include_inline'] = in_array( 'inline', $titan->getOption( 'js_includes' ) );
+			}
 			$this->settings['js_exclude'] = $titan->getOption( 'js_exclude' );
 			
-			$this->settings['css_include_includes'] = in_array( 'includes', $titan->getOption( 'css_includes' ) );
-			$this->settings['css_include_remote'] = in_array( 'remote', $titan->getOption( 'css_includes' ) );
-			$this->settings['css_include_inline'] = in_array( 'inline', $titan->getOption( 'css_includes' ) );
+			if ( is_array( $titan->getOption( 'css_includes' ) ) ) {
+				$this->settings['css_include_includes'] = in_array( 'includes', $titan->getOption( 'css_includes' ) );
+				$this->settings['css_include_remote'] = in_array( 'remote', $titan->getOption( 'css_includes' ) );
+				$this->settings['css_include_inline'] = in_array( 'inline', $titan->getOption( 'css_includes' ) );
+			}
 			$this->settings['css_exclude'] = $titan->getOption( 'css_exclude' );
 			
 			

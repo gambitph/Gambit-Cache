@@ -29,6 +29,7 @@ defined( 'VERSION_GAMBIT_COMBINATOR' ) or define( 'VERSION_GAMBIT_COMBINATOR', '
 
 // Initializes the plugin translations.
 defined( 'GAMBIT_COMBINATOR' ) or define( 'GAMBIT_COMBINATOR', 'combinator' );
+defined( 'GAMBIT_COMBINATOR_PATH' ) or define( 'GAMBIT_COMBINATOR_PATH', __FILE__ );
 
 // Plugin automatic updates
 require_once( 'class-admin-license.php' );
