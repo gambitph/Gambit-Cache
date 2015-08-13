@@ -1,5 +1,12 @@
 <?php
 
+global $wpdb;
+
+$options = $wpdb->get_var( "SELECT option_value FROM $wpdb->options WHERE option_name = 'combinator_options'" );
+$options = maybe_unserialize( maybe_unserialize( $options ) );
+$objectCacheEnabled = ! empty( $options['object_cache_enabled'] ) ? $options['object_cache_enabled'] : false;
+
+if ( $objectCacheEnabled ) {
 require_once( 'gambit-cache/lib/phpfastcache.php' );
 
 /**
@@ -644,4 +651,8 @@ class GambitObjectCache {
 	public function __destruct() {
 		return true;
 	}
+}
+
+} else {
+	class GambitObjectCache { } // Dummy class
 }

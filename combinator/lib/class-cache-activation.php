@@ -23,8 +23,6 @@ class GambitCacheActivation {
 		add_action( 'admin_notices', array( $this, 'setupNotice' ) );
 		add_action( 'admin_notices', array( $this, 'setupDoneNotice' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueueScripts' ) );
-		// add_action( 'admin_notices', array( $this, 'setupObjectCacheFiles' ) );
-		// $this->setupObjectCacheFiles();
 		
 		// If our Object Cache isn't initialized, warn
 		if ( ! class_exists( 'GambitObjectCache' ) ) {
@@ -41,6 +39,9 @@ class GambitCacheActivation {
 	}
 	
 	public function performFileSystemActions() {
+		if ( empty( $_GET['gambit_cache_check'] ) ) {
+			return;
+		}
 		if ( ! empty( $_POST ) && check_admin_referer( 'gambitCachePerformFSActions' ) ) {
 			
 			global $wp_filesystem;
@@ -161,10 +162,12 @@ class GambitCacheActivation {
 			return;
 		}
 		
-		$this->checkObjectCache();
-		$this->checkAdvancedCache();
+		$update = ! empty( get_option( 'gambit_cache_setup_done' ) ) ? get_option( 'gambit_cache_setup_done' ) != VERSION_GAMBIT_COMBINATOR : false;
+		
+		$this->checkObjectCache( $update );
+		$this->checkAdvancedCache( $update );
 		$this->checkWPCache();
-		$this->checkCacheDir();
+		$this->checkCacheDir( $update );
 		
 		$this->checkFileSystemCredentials();
 		
@@ -244,7 +247,8 @@ class GambitCacheActivation {
 		
 		ob_start();
 		$in = true;
-		$url = wp_nonce_url( $_SERVER['REQUEST_URI'], 'gambitCachePerformFSActions' );
+		// $url = wp_nonce_url( $_SERVER['REQUEST_URI'], 'gambitCachePerformFSActions' );
+		$url = wp_nonce_url( add_query_arg( array( 'gambit_cache_check' => 1 ), $_SERVER['REQUEST_URI'] ), 'gambitCachePerformFSActions' );
         if (false === ($creds = request_filesystem_credentials( $url, $this->uploadMethod, false, false, array('SaveCBESettings')) ) ) {
             $in = false;
         }
