@@ -12,7 +12,17 @@ class GambitCacheAdminPage {
 		add_filter( 'plugin_action_links', array( $this, 'pluginSettingsLink' ), 10, 2 );
 		add_action( 'tf_create_options', array( $this, 'createAdminOptions' ) );
 		add_action( 'wp_ajax_user_clear_object_cache', array( $this, 'clearObjectCache' ) );
+		
+		add_action( 'wp_ajax_user_clear_all_caches', array( $this, 'clearAllCaches' ) );
 
+	}
+	
+	public function clearAllCaches() {
+		wp_cache_flush();
+		if ( GambitCachePageCache::ajaxClearPageCache() ) {
+			wp_send_json_success( __( 'All caches cleared', GAMBIT_COMBINATOR ) );
+		}
+		wp_send_json_error( __( 'Could not clear all caches', GAMBIT_COMBINATOR ) );
 	}
 	
 	
@@ -106,15 +116,46 @@ class GambitCacheAdminPage {
 			) );
 
 			$cachingTab->createOption( array(
-				'name' => __( 'Page Caching Settings', GAMBIT_COMBINATOR ),
+				'name' => __( 'Cache Control', GAMBIT_COMBINATOR ),
 				'type' => 'heading',
-				'desc' => __( 'Whole pages are kept for a short while so we can serve them faster to users who visit within a few minutes of each other.', GAMBIT_COMBINATOR ),
+				'desc' => __( 'Clear, enable and disable caches from here.', GAMBIT_COMBINATOR ),
+			) );
+			$cachingTab->createOption( array(
+				'name' => __( 'Clear Page Cache', GAMBIT_COMBINATOR ),
+				'type' => 'ajax-button',
+				'label' => array(
+					__( 'Clear All Caches', GAMBIT_COMBINATOR ),
+					__( 'Clear Page Cache', GAMBIT_COMBINATOR ),
+					__( 'Clear Object Cache', GAMBIT_COMBINATOR ),
+				),
+				'action' => array( 'user_clear_all_caches', 'user_clear_page_cache', 'user_clear_object_cache' ),
+				'class' => array( 'button-primary', 'button-default' ),
+				'desc' => __( 'Empty the whole page cache.', GAMBIT_COMBINATOR ),
 			) );
 			$cachingTab->createOption( array(
 				'name' => __( 'Page Caching', GAMBIT_COMBINATOR ),
 				'id' => 'page_cache_enabled',
 				'type' => 'enable',
 				'default' => true,
+				'desc' => __( 'Whole pages are kept for a short while so we can serve them faster to users who visit within a few minutes of each other.', GAMBIT_COMBINATOR ),
+			) );
+			$cachingTab->createOption( array(
+				'name' => __( 'Object Caching', GAMBIT_COMBINATOR ),
+				'id' => 'object_cache_enabled',
+				'type' => 'enable',
+				'default' => true,
+				'desc' => __( 'WordPress performs a lot of computationally expensive processes per page load. Object caching enables the caching of these heavy results.', GAMBIT_COMBINATOR ),
+			) );
+			$cachingTab->createOption( array(
+			    'type' => 'save',
+			) );
+			
+			
+
+			$cachingTab->createOption( array(
+				'name' => __( 'Page Caching Settings', GAMBIT_COMBINATOR ),
+				'type' => 'heading',
+				'desc' => __( 'Whole pages are kept for a short while so we can serve them faster to users who visit within a few minutes of each other.', GAMBIT_COMBINATOR ),
 			) );
 			$cachingTab->createOption( array(
 				'name' => __( 'Expiration', GAMBIT_COMBINATOR ),
@@ -132,30 +173,18 @@ class GambitCacheAdminPage {
 			    'type' => 'save',
 			) );
 			
+			
+			
 			$cachingTab->createOption( array(
 				'name' => __( 'Object Caching Settings', GAMBIT_COMBINATOR ),
 				'type' => 'heading',
 				'desc' => __( 'WordPress performs a lot of computationally expensive processes per page load. Object caching enables the caching of these heavy results.', GAMBIT_COMBINATOR ),
 			) );
 			$cachingTab->createOption( array(
-				'name' => __( 'Object Caching', GAMBIT_COMBINATOR ),
-				'id' => 'object_cache_enabled',
-				'type' => 'enable',
-				'default' => true,
-				'desc' => __( 'You can enable or disable the combining of scripts and stylesheets globally with this setting.', GAMBIT_COMBINATOR ),
-			) );
-			$cachingTab->createOption( array(
-				'name' => __( 'Clear Object Cache', GAMBIT_COMBINATOR ),
-				'type' => 'ajax-button',
-				'label' => __( 'Clear Object Cache', GAMBIT_COMBINATOR ),
-				'action' => 'user_clear_object_cache',
-				'desc' => __( 'Empty the whole object cache.', GAMBIT_COMBINATOR ),
-			) );
-			$cachingTab->createOption( array(
 				'name' => __( 'Expiration', GAMBIT_COMBINATOR ),
 				'id' => 'object_cache_expiration',
 				'type' => 'number',
-				'default' => '1800',
+				'default' => '18000',
 				'size' => 'medium',
 				'max' => '86400',
 				'min' => '0',

@@ -13,16 +13,6 @@ if ( ! defined( 'ABSPATH' ) ) die();
 
 	class GambitAdvancedCache { }
 
-	$wpLoggedInCookie = false;
-	foreach ( $_COOKIE as $key => $cookie ) {
-		if ( preg_match( "/^wordpress_logged_in/", $key ) ) {
-			$wpLoggedInCookie = true;
-			break;
-		}
-	}
-	if ( $wpLoggedInCookie || ! empty( $_POST ) ) {
-		return;
-	}
 	// return;
 	require_once( 'gambit-cache/lib/phpfastcache.php' );
 	
@@ -52,6 +42,18 @@ if ( ! defined( 'ABSPATH' ) ) die();
 	phpFastCache::setup( $config );
 	$gambitPageCache = phpFastCache( "files" );
 	// $gambitPageCache->option( 'path', ABSPATH . "wp-content/gambit-cache/page-cache" );
+
+
+	$wpLoggedInCookie = false;
+	foreach ( $_COOKIE as $key => $cookie ) {
+		if ( preg_match( "/^wordpress_logged_in/", $key ) ) {
+			$wpLoggedInCookie = true;
+			break;
+		}
+	}
+	if ( $wpLoggedInCookie || ! empty( $_POST ) ) {
+		return;
+	}
 
 	$url  = isset( $_SERVER['HTTPS'] ) && 'on' === $_SERVER['HTTPS'] ? 'https' : 'http';
 	$url .= '://' . $_SERVER['SERVER_NAME'];

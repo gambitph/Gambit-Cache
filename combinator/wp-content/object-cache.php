@@ -218,7 +218,7 @@ class GambitObjectCache {
 // public $cache_misses = 0;
 	// public $cache_hits = 0;
 	public $totalTime = 0;
-	
+	public $cacheExpire	= 0;
 
 
 	/**
@@ -409,6 +409,8 @@ class GambitObjectCache {
 		$redisDatabase = ! empty( $options['redis_database'] ) ? $options['redis_database'] : '';
 		$redisPassword = ! empty( $options['redis_password'] ) ? $options['redis_password'] : '';
 		
+		$this->cacheExpire = ! empty( $options['object_cache_expiration'] ) ? (int) $options['object_cache_expiration'] : 18000;
+		
 		$config = array(
 			'default_chmod' => 0755,
 			"storage" => 'auto',
@@ -560,6 +562,8 @@ class GambitObjectCache {
         }
 		
 		$this->cache[ $key ] = $data;
+		
+		$expire = $expire == 0 ? $this->cacheExpire : $expire;
 		
 		$this->cacher->set( $key, $data, $expire );
 		return true;

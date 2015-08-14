@@ -6,6 +6,7 @@ require_once( 'combinator/lib/class-cache-clearer.php' );
 require_once( 'combinator/lib/class-cache-activation.php' );
 require_once( 'combinator/lib/class-cache-deactivation.php' );
 require_once( 'combinator/lib/class-admin-page.php' );
+require_once( 'combinator/lib/class-page-cache.php' );
 
 // Initializes Titan Framework
 require_once( 'titan-framework-checker.php' );
@@ -62,6 +63,7 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 			new GambitCacheAdminPage();
 			new GambitCacheActivation();
 			new GambitCacheDeactivation();
+			new GambitCachePageCache();
 
 			if ( ! function_exists( '__c' ) ) {
 				require_once( 'combinator/phpfastcache.php' );
@@ -102,8 +104,8 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 				return;
 			} 
 			
-			add_action( 'plugins_loaded', array( $this, 'test' ), -1 );
-			add_action( 'shutdown', array( $this, 'test2' ), 0 );
+			// add_action( 'plugins_loaded', array( $this, 'test' ), -1 );
+			// add_action( 'shutdown', array( $this, 'test2' ), 0 );
 
 			add_action( 'wp_head', array( $this, 'startGatheringOutput' ), 0 );
 			add_action( 'wp_head', array( $this, 'endGatheringOutput' ), 9999 );
@@ -114,7 +116,7 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 
 			
 			if ( empty( $this->pageHash ) ) {
-				$this->pageHash = self::getHash( $this->getCurrentUrl() );
+				$this->pageHash = self::getHash( self::getCurrentUrl() );
 			}
 			
 			// $this->loadCached();
@@ -152,7 +154,7 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 			if ( ! empty( $_POST ) ) {
 				return;
 			}
-if ( preg_match( '/wp\-.*\.php/', $this->getCurrentUrl() ) ) {
+if ( preg_match( '/wp\-.*\.php/', self::getCurrentUrl() ) ) {
 	return;
 }
 			if ( is_admin() ) {
@@ -209,7 +211,7 @@ if ( preg_match( '/wp\-.*\.php/', $this->getCurrentUrl() ) ) {
 	      * @link http://css-tricks.com/snippets/php/get-current-page-url/
 	      * @version Refactored by @AlexParraSilva
 	      */
-	     public function getCurrentUrl() {
+	     public static function getCurrentUrl() {
 	         $url  = isset( $_SERVER['HTTPS'] ) && 'on' === $_SERVER['HTTPS'] ? 'https' : 'http';
 	         $url .= '://' . $_SERVER['SERVER_NAME'];
 	         $url .= in_array( $_SERVER['SERVER_PORT'], array('80', '443') ) ? '' : ':' . $_SERVER['SERVER_PORT'];
@@ -221,89 +223,67 @@ if ( preg_match( '/wp\-.*\.php/', $this->getCurrentUrl() ) ) {
 		 public $pageHash = '';
 		 public $pageToCache = '';
 		 public $cachingStarted = false;
-		public function test() {
-
-			if ( is_admin() ) {
-				return;
-			}
-			if ( is_user_logged_in() ) {
-				return;
-			}
-			// if ( is_404() ) {
-			// 	return;
-			// }
-
-			
-			if ( $this->firstCalled ) {
-				return;
-			}
-			$this->firstCalled = true;
-			
-				$this->cachingStarted = true;
-				ob_start();
-
-				
-		}
-		public function test2() {
-			
-			if ( ! $this->cachingStarted ) {
-				return;
-			}
-			// return;
-			
-			$this->pageToCache = '';
-
-		    // We'll need to get the number of ob levels we're in, so that we can iterate over each, collecting
-		    // that buffer's output into the final output.
-		    $levels = ob_get_level();
-
-			// @see http://stackoverflow.com/questions/772510/wordpress-filter-to-modify-final-html-output/22818089#22818089
-		    for ($i = 0; $i < $levels; $i++)
-		    {
-				$currentOb = ob_get_clean();
-		        $this->pageToCache .= $currentOb;
-				// echo $currentOb;
-		    }
-			echo $this->pageToCache;
-		    // Apply any filters to the final output
-		    // $this->pageToCache = apply_filters( 'final_output', $this->pageToCache );
-			
-			// var_dump('last?');
-			
-			// $cachedPage = get_transient( 'cmbntr_p' . $this->pageHash );
-			
-			// var_dump($this->pageToCache);
-			// var_dump($cachedPage);
-			// if ( empty( $cachedPage ) ) {
-
-				// var_dump($this->pageToCache);
-				
-				// if ( ob_get_length() > 0 ) {
-				// 	ob_end_clean();
-				// }
-				// $this->pageToCache .= ob_get_contents();
-
-				// var_dump('huh123');
-				// var_dump($this->pageToCache);
-				// var_dump($page);
-				// set_transient( 'cmbntr_p' . $this->pageHash, $this->pageToCache, MINUTE_IN_SECONDS * 5 );
-				if ( is_404() ) {
-					return;
-				}
-				var_dump('memorizing page', $this->pageHash);
-				// if ( ! function_exists( '__c' ) ) {
-				// 	require_once( 'combinator/phpfastcache/phpfastcache.php' );
-				// }
-				global $gambitPageCache;
-				if ( ! empty( $gambitPageCache ) ) {
-			        $gambitPageCache->set( $this->pageHash, $this->pageToCache, 1800 );
-				}
-				
-				
-			// }
-			
-		}
 		
+		// public function test2() {
+		//
+		// 	if ( ! $this->cachingStarted ) {
+		// 		return;
+		// 	}
+		// 	// return;
+		//
+		// 	$this->pageToCache = '';
+		//
+		//     // We'll need to get the number of ob levels we're in, so that we can iterate over each, collecting
+		//     // that buffer's output into the final output.
+		//     $levels = ob_get_level();
+		//
+		// 	// @see http://stackoverflow.com/questions/772510/wordpress-filter-to-modify-final-html-output/22818089#22818089
+		//     for ($i = 0; $i < $levels; $i++)
+		//     {
+		// 		$currentOb = ob_get_clean();
+		//         $this->pageToCache .= $currentOb;
+		// 		// echo $currentOb;
+		//     }
+		// 	echo $this->pageToCache;
+		//     // Apply any filters to the final output
+		//     // $this->pageToCache = apply_filters( 'final_output', $this->pageToCache );
+		//
+		// 	// var_dump('last?');
+		//
+		// 	// $cachedPage = get_transient( 'cmbntr_p' . $this->pageHash );
+		//
+		// 	// var_dump($this->pageToCache);
+		// 	// var_dump($cachedPage);
+		// 	// if ( empty( $cachedPage ) ) {
+		//
+		// 		// var_dump($this->pageToCache);
+		//
+		// 		// if ( ob_get_length() > 0 ) {
+		// 		// 	ob_end_clean();
+		// 		// }
+		// 		// $this->pageToCache .= ob_get_contents();
+		//
+		// 		// var_dump('huh123');
+		// 		// var_dump($this->pageToCache);
+		// 		// var_dump($page);
+		// 		// set_transient( 'cmbntr_p' . $this->pageHash, $this->pageToCache, MINUTE_IN_SECONDS * 5 );
+		// 		if ( is_404() ) {
+		// 			return;
+		// 		}
+		// 		var_dump('memorizing page', $this->pageHash);
+		// 		// if ( ! function_exists( '__c' ) ) {
+		// 		// 	require_once( 'combinator/phpfastcache/phpfastcache.php' );
+		// 		// }
+		// 		global $gambitPageCache;
+		// 		if ( ! empty( $gambitPageCache ) ) {
+		// 	        $gambitPageCache->set( $this->pageHash, $this->pageToCache, 1800 );
+		// 		}
+		//
+		//
+		// 	// }
+		//
+		// }
+		//
 		
 		/**
 		 * Starts gathering outputted data. To be used in conjunction with $this->endGatheringOutput()
