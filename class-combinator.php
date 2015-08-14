@@ -67,6 +67,8 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 				require_once( 'combinator/phpfastcache.php' );
 			}
 			
+			add_action( 'admin_enqueue_scripts', array( $this, 'adminEnqueueScripts' ) );
+			
 			// Admin notice for when the uploads folder is unwritable
 			add_action( 'admin_notices', array( $this, 'adminNotices' ) );
 			add_action( 'wp_ajax_combinator_notice_dismiss', array( $this, 'dismissAdminNotice' ) );
@@ -124,106 +126,10 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 				///updated_{$post_type}_meta
 				
 
-			// Post-induced flushing
-	        // if ($this->_do_flush()) {
-// 	            global $wp_version;
-// 	            if (version_compare($wp_version,'3.5', '>=')) {
-// 	                add_action('clean_post_cache', array(
-// 	                    &$this,
-// 	                    'on_post_change'
-// 	                ), 0, 2);
-// 	            } else {
-// 	                add_action('wp_trash_post', array(
-// 	                    &$this,
-// 	                    'on_post_change'
-// 	                ), 0);
-//
-// 	                add_action('save_post', array(
-// 	                    &$this,
-// 	                    'on_post_change'
-// 	                ), 0);
-//
-// 	                add_action('delete_post', array(
-// 	                    &$this,
-// 	                    'on_post_change'
-// 	                ), 0);
-//
-// 	                add_action('publish_phone', array(
-// 	                    &$this,
-// 	                    'on_post_change'
-// 	                ), 0);
-// 	            }
-// 	        }
-//
-// 	        if ($this->_do_flush()) {
-// 	            add_action('comment_post', array(
-// 	                &$this,
-// 	                'on_comment_change'
-// 	            ), 0);
-//
-// 	            add_action('edit_comment', array(
-// 	                &$this,
-// 	                'on_comment_change'
-// 	            ), 0);
-//
-// 	            add_action('delete_comment', array(
-// 	                &$this,
-// 	                'on_comment_change'
-// 	            ), 0);
-//
-// 	            add_action('wp_set_comment_status', array(
-// 	                &$this,
-// 	                'on_comment_status'
-// 	            ), 0, 2);
-//
-// 	            add_action('trackback_post', array(
-// 	                &$this,
-// 	                'on_comment_change'
-// 	            ), 0);
-//
-// 	            add_action('pingback_post', array(
-// 	                &$this,
-// 	                'on_comment_change'
-// 	            ), 0);
-// 	        }
-//
-// 	        add_action('switch_theme', array(
-// 	            &$this,
-// 	            'on_change'
-// 	        ), 0);
-//
-// 	        if ($this->_do_flush()) {
-// 	            add_action('updated_option', array(
-// 	                &$this,
-// 	                'on_change_option'
-// 	            ), 0, 1);
-// 	            add_action('added_option', array(
-// 	                &$this,
-// 	                'on_change_option'
-// 	            ), 0, 1);
-//
-// 	            add_action('delete_option', array(
-// 	                &$this,
-// 	                'on_change_option'
-// 	            ), 0, 1);
-// 	        }
-//
-// 	        add_action('edit_user_profile_update', array(
-// 	            &$this,
-// 	            'on_change_profile'
-// 	        ), 0);
-//
-// 	        if (w3_is_multisite()) {
-// 	            add_action('delete_blog', array(
-// 	                &$this,
-// 	                'on_change'
-// 	            ), 0);
-//
-// 	            add_action('switch_blog', array(
-// 	                &$this,
-// 	                'switch_blog'
-// 	            ), 0, 2);
-// 	        }
+		}
+		
+		public function adminEnqueueScripts() {
+			wp_enqueue_style( 'gambit_cache_admin', plugins_url( 'combinator/css/admin.css', GAMBIT_COMBINATOR_PATH ) );
 		}
 		
 		
@@ -323,6 +229,9 @@ if ( preg_match( '/wp\-.*\.php/', $this->getCurrentUrl() ) ) {
 			if ( is_user_logged_in() ) {
 				return;
 			}
+			// if ( is_404() ) {
+			// 	return;
+			// }
 
 			
 			if ( $this->firstCalled ) {
@@ -378,11 +287,17 @@ if ( preg_match( '/wp\-.*\.php/', $this->getCurrentUrl() ) ) {
 				// var_dump($this->pageToCache);
 				// var_dump($page);
 				// set_transient( 'cmbntr_p' . $this->pageHash, $this->pageToCache, MINUTE_IN_SECONDS * 5 );
-				
-				if ( ! function_exists( '__c' ) ) {
-					require_once( 'combinator/phpfastcache/phpfastcache.php' );
+				if ( is_404() ) {
+					return;
 				}
-		        __c( "files" )->set( $this->pageHash, $this->pageToCache, 1800 );
+				var_dump('memorizing page', $this->pageHash);
+				// if ( ! function_exists( '__c' ) ) {
+				// 	require_once( 'combinator/phpfastcache/phpfastcache.php' );
+				// }
+				global $gambitPageCache;
+				if ( ! empty( $gambitPageCache ) ) {
+			        $gambitPageCache->set( $this->pageHash, $this->pageToCache, 1800 );
+				}
 				
 				
 			// }

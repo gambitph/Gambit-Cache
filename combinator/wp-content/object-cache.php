@@ -25,7 +25,7 @@ function wp_cache_init() {
  */
 function wp_cache_close() {
 	global $wp_object_cache;
-	$wp_object_cache->stats();
+	// $wp_object_cache->stats();
     return true;
 }
 
@@ -198,6 +198,8 @@ class GambitObjectCache {
 	// 1. Non-global groups (ones using the current blog id)
 	// 2. Global groups (ones using blog id = 0)
 	// 3. Non-persistent groups (ignored)
+	
+	public $connectionLog = array();
 
     /**
      * Config
@@ -342,7 +344,71 @@ class GambitObjectCache {
 		register_shutdown_function( array( $this, '__destruct' ) );
     }
 	
+	
+	/**
+	 * Checks whether the current cacher is working, places connection messages in
+	 * $this->connectionLog
+	 *
+	 * @param	$cachingTypeName	string	The connection name to enter in the connection log
+	 * @return	void
+	 */
+	private function testCaching( $cachingTypeName ) {
+		ob_start();
+		try {
+			$this->cacher->set( 'gc_cache_tester', 'woot' );
+			$testCheck = $this->cacher->get( 'gc_cache_tester' );
+			$this->cacher->delete( 'gc_cache_tester' );
+			$errors = ob_get_contents();
+			if ( $testCheck != 'woot' ) {
+				$errors = true;
+			}
+		} catch ( Exception $e ) {
+			$errors = true;
+		}
+		ob_end_clean();
+		
+		if ( ! empty( $errors ) ) {
+			$this->connectionLog[] = sprintf( 'Failed to connect to %s', $cachingTypeName );
+			$this->cacher = null;
+		} else {
+			$this->connectionLog[] = sprintf( 'Successfully connected to %s', $cachingTypeName );
+		}
+	}
+	
+	public function getLog() {
+		if ( empty( $this->connectionLog ) ) {
+			return;
+		}
+		$ret = '';
+		foreach ( $this->connectionLog as $log ) {
+			$ret .= $log . "\n";
+		}
+		return $ret;
+	}
+	
 	public function initCache() {
+		global $wpdb;
+
+		$options = $wpdb->get_var( "SELECT option_value FROM $wpdb->options WHERE option_name = 'combinator_options'" );
+		$options = maybe_unserialize( maybe_unserialize( $options ) );
+		
+		$memcacheHosts = ! empty( $options['memcache_host'] ) ? $options['memcache_host'] : '';
+		$memcacheHosts = explode( ',', $memcacheHosts );
+		$memcachePorts = ! empty( $options['memcache_port'] ) ? $options['memcache_port'] : '';
+		$memcachePorts = explode( ',', $memcachePorts );
+		while ( count( $memcachePorts ) < count( $memcacheHosts ) ) {
+			$memcachePorts[] = $memcachePorts[ count( $memcachePorts ) - 1 ];
+		}
+		$memcacheSettings = array();
+		foreach ( $memcacheHosts as $i => $host ) {
+			$memcacheSettings[] = array( trim( $host ), trim( $memcachePorts[ $i ] ), 1 );
+		}
+		
+		$redisHost = ! empty( $options['redis_host'] ) ? $options['redis_host'] : '';
+		$redisPort = ! empty( $options['redis_port'] ) ? $options['redis_port'] : '';
+		$redisDatabase = ! empty( $options['redis_database'] ) ? $options['redis_database'] : '';
+		$redisPassword = ! empty( $options['redis_password'] ) ? $options['redis_password'] : '';
+		
 		$config = array(
 			'default_chmod' => 0755,
 			"storage" => 'auto',
@@ -350,37 +416,53 @@ class GambitObjectCache {
 
 			"securityKey" => "auto",
 			"htaccess" => true,
-			"path" => ABSPATH . "wp-content/uploads/combinator-cache",
+			"path" => ABSPATH . "wp-content/gambit-cache/object-cache",
 		
-			// TODO Caching settings e.g. memcached
-			"memcache" => array(
-				array( "127.0.0.1", 11211, 1 ),
-			),
+			"memcache" => $memcacheSettings,
 
 			"redis" => array(
-				"host" => "127.0.0.1",
-				"port" => "",
-				"password" => "",
-				"database" => "",
+				"host" => $redisHost,
+				"port" => $redisPort,
+				"password" => $redisPassword,
+				"database" => $redisDatabase,
 				"timeout" => ""
 			),
 		);
-				
-		phpFastCache::setup( $config );
 
-		if ( class_exists( 'Redis' ) ) {
+		phpFastCache::setup( $config );
+		
+		$this->cacher = null;
+		if ( class_exists( 'Redis' ) && ! empty( $config['redis']['host'] ) ) {
 			$this->cacher = phpFastCache( 'redis' );
-		} else if ( class_exists( 'Memcache' ) ) {
+			$this->testCaching( 'Redis server' );
+		}
+		
+		if ( empty( $this->cacher ) && class_exists( 'Memcache' ) && ! empty( $config['memcache'][0][0] ) ) {
 			$this->cacher = phpFastCache( 'memcache' );
-		} else if ( class_exists( 'Memcached' ) ) {
+			$this->testCaching( 'Memcache server' );
+		}
+
+		if ( empty( $this->cacher ) && class_exists( 'Memcached' ) && ! empty( $config['memcache'][0][0] ) ) {
 			$this->cacher = phpFastCache( 'memcached' );
-		} else if ( extension_loaded( 'apc' ) && ini_get( 'apc.enabled' ) ) {
+			$this->testCaching( 'Memcached server' );
+		}
+		
+		if ( empty( $this->cacher ) && extension_loaded( 'apc' ) && ini_get( 'apc.enabled' ) ) {
 			$this->cacher = phpFastCache( 'apc' );
-		} else if ( function_exists( "wincache_ucache_set" ) ) {
+			$this->testCaching( 'APC' );
+		}
+		
+		if ( empty( $this->cacher ) && function_exists( "wincache_ucache_set" ) ) {
 			$this->cacher = phpFastCache( 'wincache' );
-		} else if ( function_exists( "xcache_get" ) ) {
+			$this->testCaching( 'WinCache' );
+		}
+		
+		if ( empty( $this->cacher ) && function_exists( "xcache_get" ) ) {
 			$this->cacher = phpFastCache( 'xcache' );
-		} else {
+			$this->testCaching( 'XCache' );
+		}
+		
+		if ( empty( $this->cacher ) ) {
 			
 			if ( ! @file_exists( $config['path'] ) ) {
 				@mkdir( $config['path'], 0755 );
@@ -390,6 +472,7 @@ class GambitObjectCache {
             }
 			
 			$this->cacher = phpFastCache( 'files' );
+			$this->connectionLog[] = 'Using filesystem caching';
 		}
 		
 	}

@@ -11,9 +11,15 @@ class GambitCacheAdminPage {
 		// Initializes settings panel
 		add_filter( 'plugin_action_links', array( $this, 'pluginSettingsLink' ), 10, 2 );
 		add_action( 'tf_create_options', array( $this, 'createAdminOptions' ) );
+		add_action( 'wp_ajax_user_clear_object_cache', array( $this, 'clearObjectCache' ) );
 
 	}
-
+	
+	
+	public function clearObjectCache() {
+		wp_cache_flush();
+		wp_send_json_success( __( 'Object cache cleared!', GAMBIT_COMBINATOR ) );
+	}
 
 	/**
 	 * Adds plugin settings link
@@ -89,7 +95,6 @@ class GambitCacheAdminPage {
 			}
 
 
-
 			$adminPanel = $titan->createAdminPanel( array(
 			    'name' => 'Combinator',
 				'id' => GAMBIT_COMBINATOR,
@@ -110,7 +115,18 @@ class GambitCacheAdminPage {
 				'id' => 'page_cache_enabled',
 				'type' => 'enable',
 				'default' => true,
-				'desc' => __( 'You can enable or disable the combining of scripts and stylesheets globally with this setting.', GAMBIT_COMBINATOR ),
+			) );
+			$cachingTab->createOption( array(
+				'name' => __( 'Expiration', GAMBIT_COMBINATOR ),
+				'id' => 'page_cache_expiration',
+				'type' => 'number',
+				'default' => '86400',
+				'size' => 'medium',
+				'max' => '604800',
+				'min' => '0',
+				'step' => '1',
+				'unit' => 'seconds',
+				'desc' => __( 'The amount of time to keep whole cached pages before rebuilding them.', GAMBIT_COMBINATOR ),
 			) );
 			$cachingTab->createOption( array(
 			    'type' => 'save',
@@ -127,6 +143,85 @@ class GambitCacheAdminPage {
 				'type' => 'enable',
 				'default' => true,
 				'desc' => __( 'You can enable or disable the combining of scripts and stylesheets globally with this setting.', GAMBIT_COMBINATOR ),
+			) );
+			$cachingTab->createOption( array(
+				'name' => __( 'Clear Object Cache', GAMBIT_COMBINATOR ),
+				'type' => 'ajax-button',
+				'label' => __( 'Clear Object Cache', GAMBIT_COMBINATOR ),
+				'action' => 'user_clear_object_cache',
+				'desc' => __( 'Empty the whole object cache.', GAMBIT_COMBINATOR ),
+			) );
+			$cachingTab->createOption( array(
+				'name' => __( 'Expiration', GAMBIT_COMBINATOR ),
+				'id' => 'object_cache_expiration',
+				'type' => 'number',
+				'default' => '1800',
+				'size' => 'medium',
+				'max' => '86400',
+				'min' => '0',
+				'step' => '1',
+				'unit' => 'seconds',
+				'desc' => __( 'The amount of time to keep objects are cached before rebuilding them.', GAMBIT_COMBINATOR ),
+			) );
+			
+			$cachingTab->createOption( array(
+				'name' => __( 'Object Caching Server Settings', GAMBIT_COMBINATOR ),
+				'type' => 'heading',
+				'desc' => __( 'These are the settings used to connect to your caching servers. The caching setup is auto-detected depending on what is available from your setup. You normally would not have to adjust these since these are usually the default connection details.', GAMBIT_COMBINATOR ),
+			) );
+			global $wp_object_cache;
+			$cachingTab->createOption( array(
+				'name' => __( 'Connection Log', GAMBIT_COMBINATOR ),
+				'paragraph' => false,
+				'type' => 'note',
+				'desc' => '<pre class="gc-conn-log">' . ( method_exists( $wp_object_cache, 'getLog' ) ? $wp_object_cache->getLog() : __( 'No logs available, object caching is disabled', GAMBIT_COMBINATOR ) ) . '</pre>',
+			) );
+			$cachingTab->createOption( array(
+				'name' => __( 'Memcache Host', GAMBIT_COMBINATOR ),
+				'id' => 'memcache_host',
+				'type' => 'text',
+				'default' => '127.0.0.1',
+				'desc' => __( 'The IP address or host name of your Memcache server. If you have multiple Memcached servers, you can enter multiple comma-separated host names.', GAMBIT_COMBINATOR ) .
+					'<br>' .
+					__( 'Gambit Cache will try to connect to Memcache if it is installed, make this field blank if you want us to stop connecting to Memcache.', GAMBIT_COMBINATOR ),
+			) );
+			$cachingTab->createOption( array(
+				'name' => __( 'Memcache Port', GAMBIT_COMBINATOR ),
+				'id' => 'memcache_port',
+				'type' => 'text',
+				'default' => '11211',
+				'desc' => __( 'The port of your Memcache server, the default is 11211. If you have multiple Memcached servers, you can enter multiple comma-separated ports', GAMBIT_COMBINATOR ),
+			) );
+			$cachingTab->createOption( array(
+				'name' => __( 'Redis Host', GAMBIT_COMBINATOR ),
+				'id' => 'redis_host',
+				'type' => 'text',
+				'default' => '127.0.0.1',
+				'desc' => __( 'The IP address or host name of your Redis server.', GAMBIT_COMBINATOR ) .
+					'<br>' .
+					__( 'Gambit Cache will try to connect to Redis if it is installed, make this field blank if you want us to stop connecting to Redis.', GAMBIT_COMBINATOR ),
+			) );
+			$cachingTab->createOption( array(
+				'name' => __( 'Redis Port', GAMBIT_COMBINATOR ),
+				'id' => 'redis_port',
+				'type' => 'text',
+				'default' => '',
+				'desc' => __( 'The port of your Redis server.', GAMBIT_COMBINATOR ),
+			) );
+			$cachingTab->createOption( array(
+				'name' => __( 'Redis Database', GAMBIT_COMBINATOR ),
+				'id' => 'redis_database',
+				'type' => 'text',
+				'default' => '',
+				'desc' => __( 'If you have a specific database name, enter it here.', GAMBIT_COMBINATOR ),
+			) );
+			$cachingTab->createOption( array(
+				'name' => __( 'Redis Password', GAMBIT_COMBINATOR ),
+				'id' => 'redis_password',
+				'type' => 'text',
+				'is_password' => true,
+				'default' => '',
+				'desc' => __( 'If you are required a password in order to connect to your Redis server, enter it here.', GAMBIT_COMBINATOR ),
 			) );
 			$cachingTab->createOption( array(
 			    'type' => 'save',

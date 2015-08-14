@@ -35,7 +35,7 @@ class GambitCacheActivation {
 		if ( count( $this->missing ) == 0 ) {
 			return;
 		}
-		wp_enqueue_style( __CLASS__, plugins_url( 'combinator/css/admin.css', GAMBIT_COMBINATOR_PATH ) );
+		wp_enqueue_style( 'gambit_cache_admin', plugins_url( 'combinator/css/admin.css', GAMBIT_COMBINATOR_PATH ) );
 	}
 	
 	public function performFileSystemActions() {
