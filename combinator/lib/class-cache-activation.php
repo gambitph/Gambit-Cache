@@ -1,16 +1,10 @@
 <?php
 
-// TODO add an option for version update for advanced-cache.php & object-cache.php
-// TODO add option for finished version update so as not to do process heavy checks
-
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 if ( ! class_exists( 'GambitCacheActivation' ) ) {
 
 class GambitCacheActivation {
-	
-	public $objectCacheEnabled = true;
-	public $advancedCacheEnabled = true;
 	
 	public $missing = array();
 	public $filesystemPermissionAction = '';
@@ -60,28 +54,27 @@ class GambitCacheActivation {
 			foreach ( $this->missing as $missing ) {
 				if ( $missing['who'] == 'me' ) {
 					
+					// Update, delete the gambit-cache folder
+					if ( $missing['what'] == 'gambit-cache' && $missing['why'] == 'update' ) {
+						
+						$dest = $wp_filesystem->wp_content_dir() . 'gambit-cache';
+ 						if ( $wp_filesystem->exists( $dest ) ) {
+ 							if ( ! $wp_filesystem->rmdir( $dest, true ) ) {
+								$creationErrors[] = new WP_Error( 'cannotdelete', sprintf( __( "Could not replace %s, please perform this manually", GAMBIT_COMBINATOR ), '<code>' . $dest . '</code>' ) );
+								continue;
+ 							}
+ 						}
+						
+						// Set the why to notfound so that we trigger a folder write
+						$missing['why'] = 'notfound';
+					}
+					
+					
 					// Create gambit-cache
 					if ( $missing['what'] == 'gambit-cache' && $missing['why'] == 'notfound' ) {
 
 						$dest = $wp_filesystem->wp_content_dir() . 'gambit-cache';
 						$src = trailingslashit( trailingslashit( plugin_dir_path( GAMBIT_COMBINATOR_PATH ) . 'combinator' ) . 'wp-content' ) . 'gambit-cache';
-						
-						if ( ! $wp_filesystem->exists( $dest ) ) {
-							$wp_filesystem->mkdir( $dest, 0755 );
-						}
-						
-						$result = copy_dir( $src, $dest );
-						if ( is_wp_error( $result ) ) {
-							$creationErrors[] = new WP_Error( 'cannotcopy', sprintf( __( "Could not copy %s to %s, please perform this manually via FTP", GAMBIT_COMBINATOR ), '<code>' . $src . '</code>', '<code>' . $dest . '</code>' ) );
-						}
-						
-					// gambit-cache/lib, gambit-cache/object-cache, gambit-cache/page-cache
-					} else if ( in_array( $missing['what'], array( 'gambit-cache/lib', 'gambit-cache/object-cache', 'gambit-cache/page-cache' ) ) && $missing['why'] == 'notfound' ) {
-
-						$dir = explode( '/', $missing['what'] );
-						$dir = $dir[1];
-						$dest = trailingslashit( $wp_filesystem->wp_content_dir() . 'gambit-cache' ) . $dir[1];
-						$src = trailingslashit( trailingslashit( trailingslashit( plugin_dir_path( GAMBIT_COMBINATOR_PATH ) . 'combinator' ) . 'wp-content' ) . 'gambit-cache' ) . $dir[1];
 						
 						if ( ! $wp_filesystem->exists( $dest ) ) {
 							$wp_filesystem->mkdir( $dest, 0755 );
@@ -125,6 +118,8 @@ class GambitCacheActivation {
 				}
 			}
 			
+			update_option( 'gambit_cache_setup_done', VERSION_GAMBIT_COMBINATOR );
+			
 			if ( ! empty( $creationErrors ) ) {
 				set_transient( 'gambit_cache_activation_errors', serialize( $creationErrors ), MINUTE_IN_SECONDS * 5 );
 			} else {
@@ -163,7 +158,7 @@ class GambitCacheActivation {
 		}
 		
 		$update = ! empty( get_option( 'gambit_cache_setup_done' ) ) ? get_option( 'gambit_cache_setup_done' ) != VERSION_GAMBIT_COMBINATOR : false;
-		
+
 		$this->checkObjectCache( $update );
 		$this->checkAdvancedCache( $update );
 		$this->checkWPCache();
@@ -189,7 +184,7 @@ class GambitCacheActivation {
 	}
 	
 	public function checkWPCache() {
-		if ( $this->advancedCacheEnabled && ! WP_CACHE && empty( $_GET['gambit_cache_activation'] ) ) {
+		if ( ! WP_CACHE && empty( $_GET['gambit_cache_activation'] ) ) {
 			
 			global $wp_filesystem;
 			WP_Filesystem( $_SERVER['REQUEST_URI'] );
@@ -269,17 +264,24 @@ class GambitCacheActivation {
 		}
 	}
 	
-	public function _checkCacheDir( $name, $dir, $parentDir ) {
+	
+	public function checkCacheDir( $update = false ) {
+		
+		global $wp_filesystem;
+		WP_Filesystem( $_SERVER['REQUEST_URI'] );
+		$cachePath = $wp_filesystem->wp_content_dir() . 'gambit-cache';
+		$parentDir = $wp_filesystem->wp_content_dir();
+
 		global $wp_filesystem;
 
-		if ( ! $wp_filesystem->exists( $dir ) ) {
+		if ( ! $wp_filesystem->exists( $cachePath ) ) {
 
 			if ( ! $wp_filesystem->is_writable( $parentDir ) ) {
 				
 				if ( ! $wp_filesystem->chmod( $parentDir, 0755 ) ) {
 				
 					$this->missing[] = array(
-						'what' => $name,
+						'what' => 'gambit-cache',
 						'why' => 'unwritable',
 						'how' => 'We cannot create the folder <strong><em>gambit-cache</em></strong> inside your contents folder, you will have to make the directory <code>' . $parentDir . '</code> writable first by setting its permissions to <strong>755</strong>, then refresh this page,',
 						'who' => 'user',
@@ -289,56 +291,42 @@ class GambitCacheActivation {
 			}
 			
 			$this->missing[] = array(
-				'what' => $name,
+				'what' => 'gambit-cache',
 				'why' => 'notfound',
 				'how' => 'We need to create a folder called <strong><em>gambit-cache</em></strong> in your contents folder, this will contain your cached data along with some stuff that we need to work,',
 				'who' => 'me',
 			);
 			return false;
 		}
-		if ( ! $wp_filesystem->is_writable( $dir ) ) {
-			if ( ! $wp_filesystem->chmod( $dir, 0755 ) ) {
+		if ( ! $wp_filesystem->is_writable( $cachePath ) ) {
+			if ( ! $wp_filesystem->chmod( $cachePath, 0755 ) ) {
 			
-				$this->missing[] = array(
-					'what' => $name,
-					'why' => 'unwritable',
-					'how' => 'The folder <code>' . $dir . '</code> is unwritable, you will have to change its permissions to <strong>755</strong> so we can write to it,',
-					'who' => 'user',
-				);
+				if ( ! $update ) {
+					$this->missing[] = array(
+						'what' => 'gambit-cache',
+						'why' => 'unwritable',
+						'how' => 'The folder <code>' . $cachePath . '</code> is unwritable, you will have to change its permissions to <strong>755</strong> so we can write to it,',
+						'who' => 'user',
+					);
+				} else {
+					$this->missing[] = array(
+						'what' => 'gambit-cache',
+						'why' => 'unwritable',
+						'how' => 'The folder <code>' . $cachePath . '</code> is unwritable, you will have to change its permissions to <strong>755</strong> so we can update it,',
+						'who' => 'user',
+					);
+				}
 				return false;
 			}
 		}
-		return true;
-	}
-	
-	public function checkCacheDir() {
-		if ( $this->advancedCacheEnabled || $this->objectCacheEnabled ) {
-			
-			global $wp_filesystem;
-			WP_Filesystem( $_SERVER['REQUEST_URI'] );
-			
-			$cachePath = $wp_filesystem->wp_content_dir() . 'gambit-cache';
-			$parentDir = $wp_filesystem->wp_content_dir();
-			if ( ! $this->_checkCacheDir( 'gambit-cache', $cachePath, $parentDir ) ) {
-				return false;
-			}
-			
-			$cachePath = trailingslashit( $wp_filesystem->wp_content_dir() . 'gambit-cache' ) . 'lib';
-			$parentDir = trailingslashit( $wp_filesystem->wp_content_dir() . 'gambit-cache' );
-			if ( ! $this->_checkCacheDir( 'gambit-cache/lib', $cachePath, $parentDir ) ) {
-				return false;
-			}
-			
-			$cachePath = trailingslashit( $wp_filesystem->wp_content_dir() . 'gambit-cache' ) . 'object-cache';
-			if ( ! $this->_checkCacheDir( 'gambit-cache/object-cache', $cachePath, $parentDir ) ) {
-				return false;
-			}
-			
-			$cachePath = trailingslashit( $wp_filesystem->wp_content_dir() . 'gambit-cache' ) . 'page-cache';
-			if ( ! $this->_checkCacheDir( 'gambit-cache/page-cache', $cachePath, $parentDir ) ) {
-				return false;
-			}
-			
+		if ( $update ) {
+			$this->missing[] = array(
+				'what' => 'gambit-cache',
+				'why' => 'update',
+				'how' => 'We need to update the folder <strong><em>gambit-cache</em></strong> in your contents folder, we will replace all of its contents with the newer one,',
+				'who' => 'me',
+			);
+			return false;
 		}
 		return true;
 	}
@@ -355,19 +343,23 @@ class GambitCacheActivation {
 	// 	}
 	// }
 	
-	public function checkAdvancedCache() {
-		if ( $this->advancedCacheEnabled ) { //&& ! class_exists( 'GambitAdvancedCache' ) ) {
+	public function checkAdvancedCache( $update = false ) {
+		global $wp_filesystem;
+		WP_Filesystem( $_SERVER['REQUEST_URI'] );
+		$cachePath = $wp_filesystem->wp_content_dir() . 'advanced-cache.php';
+		
+		if ( ! $wp_filesystem->exists( $cachePath ) || $update ) {
 			
-			global $wp_filesystem;
-			WP_Filesystem( $_SERVER['REQUEST_URI'] );
-			$cachePath = $wp_filesystem->wp_content_dir() . 'advanced-cache.php';
+			// global $wp_filesystem;
+			// WP_Filesystem( $_SERVER['REQUEST_URI'] );
+			// $cachePath = $wp_filesystem->wp_content_dir() . 'advanced-cache.php';
 			
-			if ( ! WP_CACHE && $wp_filesystem->exists( $cachePath ) ) {
-				return true;
-			}
-			if ( WP_CACHE && class_exists( 'GambitAdvancedCache' ) ) {
-				return true;
-			}
+			// if ( ! WP_CACHE && $wp_filesystem->exists( $cachePath ) ) {
+			// 	return true;
+			// }
+			// if ( WP_CACHE && class_exists( 'GambitAdvancedCache' ) ) {
+			// 	return true;
+			// }
 			
 			// Check if there is an object-cache.php
 			if ( ! $wp_filesystem->exists( $cachePath ) ) {
@@ -396,42 +388,71 @@ class GambitCacheActivation {
 			// If it exists, and not writable
 			if ( ! $wp_filesystem->is_writable( $cachePath ) ) {
 				if ( ! $wp_filesystem->chmod( $cachePath, 0644 ) ) {
-					$this->missing[] = array(
-						'what' => 'advanced-cache.php',
-						'why' => 'unwritable',
-						'how' => 'An existing <strong><em>advanced-cache.php</em></strong> was found in your contents folder, but we cannot remove it, please remove it manually.',
-						'who' => 'user',
-					);
+					
+					if ( ! $update ) {
+						$this->missing[] = array(
+							'what' => 'advanced-cache.php',
+							'why' => 'unwritable',
+							'how' => 'An existing <strong><em>advanced-cache.php</em></strong> was found in your contents folder, but we cannot remove it, please remove it manually.',
+							'who' => 'user',
+						);
+					} else {
+						$this->missing[] = array(
+							'what' => 'advanced-cache.php',
+							'why' => 'unwritable',
+							'how' => 'We need to update your <strong><em>advanced-cache.php</em></strong>, but we cannot remove it, please remove it manually.',
+							'who' => 'user',
+						);
+					}
 					return false;
 				}
 			}
 			
 			if ( ! $wp_filesystem->is_writable( $wp_filesystem->wp_content_dir() ) ) {
 				if ( ! $wp_filesystem->chmod( $wp_filesystem->wp_content_dir(), 0755 ) ) {
-					$this->missing[] = array(
-						'what' => 'advanced-cache.php',
-						'why' => 'unwritable',
-						'how' => 'An existing <strong><em>advanced-cache.php</em></strong> was found, but we cannot write files to the content directory so we cannot back it up, please change the permissions of <code>' . $wp_filesystem->wp_content_dir() . '</code> to <strong>755</strong>, then refresh this page.',
-						'who' => 'user',
-					);
+					
+					if ( ! $update ) {
+						$this->missing[] = array(
+							'what' => 'advanced-cache.php',
+							'why' => 'unwritable',
+							'how' => 'An existing <strong><em>advanced-cache.php</em></strong> was found, but we cannot write files to the content directory so we cannot back it up, please change the permissions of <code>' . $wp_filesystem->wp_content_dir() . '</code> to <strong>755</strong>, then refresh this page.',
+							'who' => 'user',
+						);
+					} else {
+						$this->missing[] = array(
+							'what' => 'advanced-cache.php',
+							'why' => 'unwritable',
+							'how' => 'We need to update your <strong><em>advanced-cache.php</em></strong>, but we cannot write files to the content directory so we cannot back it up, please change the permissions of <code>' . $wp_filesystem->wp_content_dir() . '</code> to <strong>755</strong>, then refresh this page.',
+							'who' => 'user',
+						);
+					}
 					return false;
 				}
 			}
 			
 			// If it exists, then it's not ours
-			$this->missing[] = array(
-				'what' => 'advanced-cache.php',
-				'why' => 'exists',
-				'how' => 'An existing <strong><em>advanced-cache.php</em></strong> was found in your contents folder, we will back this up and add our own,',
-				'who' => 'me',
-			);
+			if ( ! $update ) {
+				$this->missing[] = array(
+					'what' => 'advanced-cache.php',
+					'why' => 'exists',
+					'how' => 'An existing <strong><em>advanced-cache.php</em></strong> was found in your contents folder, we will back this up and add our own,',
+					'who' => 'me',
+				);
+			} else {
+				$this->missing[] = array(
+					'what' => 'advanced-cache.php',
+					'why' => 'exists',
+					'how' => 'We need to update your <strong><em>advanced-cache.php</em></strong>, we will back this up and add the newer one,',
+					'who' => 'me',
+				);
+			}
 			return false;
 		}
 		return true;
 	}
 	
-	public function checkObjectCache() {
-		if ( $this->objectCacheEnabled && ! class_exists( 'GambitObjectCache' ) ) {
+	public function checkObjectCache( $update = false ) {
+		if ( ! class_exists( 'GambitObjectCache' ) || $update ) {
 			
 			global $wp_filesystem;
 			WP_Filesystem( $_SERVER['REQUEST_URI'] );
@@ -442,6 +463,7 @@ class GambitCacheActivation {
 				
 				if ( ! $wp_filesystem->is_writable( $wp_filesystem->wp_content_dir() ) ) {
 					if ( ! $wp_filesystem->chmod( $wp_filesystem->wp_content_dir(), 0755 ) ) {
+					
 						$this->missing[] = array(
 							'what' => 'object-cache.php',
 							'why' => 'unwritable',
@@ -449,6 +471,7 @@ class GambitCacheActivation {
 							'who' => 'user',
 						);
 						return false;
+						
 					}
 				}
 				
@@ -464,35 +487,64 @@ class GambitCacheActivation {
 			// If it exists, and not writable
 			if ( ! $wp_filesystem->is_writable( $cachePath ) ) {
 				if ( ! $wp_filesystem->chmod( $cachePath, 0644 ) ) {
-					$this->missing[] = array(
-						'what' => 'object-cache.php',
-						'why' => 'unwritable',
-						'how' => 'An existing <strong><em>object-cache.php</em></strong> was found, but we cannot remove it, please remove it manually.',
-						'who' => 'user',
-					);
+					
+					if ( ! $update ) {
+						$this->missing[] = array(
+							'what' => 'object-cache.php',
+							'why' => 'unwritable',
+							'how' => 'An existing <strong><em>object-cache.php</em></strong> was found, but we cannot remove it, please remove it manually.',
+							'who' => 'user',
+						);
+					} else {
+						$this->missing[] = array(
+							'what' => 'object-cache.php',
+							'why' => 'unwritable',
+							'how' => 'We need to update your <strong><em>object-cache.php</em></strong>, but we cannot remove it, please remove it manually.',
+							'who' => 'user',
+						);
+					}
 					return false;
 				}
 			}
 			
 			if ( ! $wp_filesystem->is_writable( $wp_filesystem->wp_content_dir() ) ) {
 				if ( ! $wp_filesystem->chmod( $wp_filesystem->wp_content_dir(), 0755 ) ) {
-					$this->missing[] = array(
-						'what' => 'object-cache.php',
-						'why' => 'unwritable',
-						'how' => 'An existing <strong><em>object-cache.php</em></strong> was found, but we cannot write files to the content directory so we cannot back it up, please change the permissions of <code>' . $wp_filesystem->wp_content_dir() . '</code> to <strong>755</strong>, then refresh this page.',
-						'who' => 'user',
-					);
+					
+					if ( ! $update ) {
+						$this->missing[] = array(
+							'what' => 'object-cache.php',
+							'why' => 'unwritable',
+							'how' => 'An existing <strong><em>object-cache.php</em></strong> was found, but we cannot write files to the content directory so we cannot back it up, please change the permissions of <code>' . $wp_filesystem->wp_content_dir() . '</code> to <strong>755</strong>, then refresh this page.',
+							'who' => 'user',
+						);
+					} else {
+						$this->missing[] = array(
+							'what' => 'object-cache.php',
+							'why' => 'unwritable',
+							'how' => 'We need to update your <strong><em>object-cache.php</em></strong>, but we cannot write files to the content directory so we cannot back it up, please change the permissions of <code>' . $wp_filesystem->wp_content_dir() . '</code> to <strong>755</strong>, then refresh this page.',
+							'who' => 'user',
+						);
+					}
 					return false;
 				}
 			}
 			
 			// If it exists, then it's not ours
-			$this->missing[] = array(
-				'what' => 'object-cache.php',
-				'why' => 'exists',
-				'how' => 'An existing <strong><em>object-cache.php</em></strong> was found, we will back this up and add our own,',
-				'who' => 'me',
-			);
+			if ( ! $update ) {
+				$this->missing[] = array(
+					'what' => 'object-cache.php',
+					'why' => 'exists',
+					'how' => 'An existing <strong><em>object-cache.php</em></strong> was found, we will back this up and add our own,',
+					'who' => 'me',
+				);
+			} else {
+				$this->missing[] = array(
+					'what' => 'object-cache.php',
+					'why' => 'exists',
+					'how' => 'We need to update your <strong><em>object-cache.php</em></strong>, we will back this up and add the newer one,',
+					'who' => 'me',
+				);
+			}
 			return false;
 		}
 		return true;

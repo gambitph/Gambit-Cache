@@ -122,24 +122,6 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 		
 		
 		
-	    /**
-	      * Get the current Url taking into account Https and Port
-	      * @link http://css-tricks.com/snippets/php/get-current-page-url/
-	      * @version Refactored by @AlexParraSilva
-	      */
-	     public static function getCurrentUrl() {
-	         $url  = isset( $_SERVER['HTTPS'] ) && 'on' === $_SERVER['HTTPS'] ? 'https' : 'http';
-	         $url .= '://' . $_SERVER['SERVER_NAME'];
-	         $url .= in_array( $_SERVER['SERVER_PORT'], array('80', '443') ) ? '' : ':' . $_SERVER['SERVER_PORT'];
-	         $url .= $_SERVER['REQUEST_URI'];
-	         return $url;
-	     }
-		
-		 public $firstCalled = false;
-		 public $pageToCache = '';
-		 public $cachingStarted = false;
-		
-		
 		/**
 		 * Starts gathering outputted data. To be used in conjunction with $this->endGatheringOutput()
 		 * If $this->endGatheringOutput() isn't called, no HTML will be rendered in the page.
