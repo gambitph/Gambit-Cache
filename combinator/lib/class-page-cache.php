@@ -11,15 +11,18 @@ if ( ! class_exists( 'GambitCachePageCache' ) ) {
 
 		function __construct() {
 			
+			// Ajax handler for when the page cache is cleared
 			add_action( 'wp_ajax_user_clear_page_cache', array( __CLASS__, 'ajaxClearPageCache' ) );
 			
 			if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
 				return;
 			} 
 			
+			// Record the contents of the page
 			add_action( 'plugins_loaded', array( $this, 'startRecordingPage' ), -1 );
 			add_action( 'shutdown', array( $this, 'endRecordingPage' ), 0 );
 			
+			// Load page cache settings
 			add_action( 'tf_done', array( $this, 'gatherSettings' ), 10 );
 			
 		}
@@ -66,6 +69,10 @@ if ( ! class_exists( 'GambitCachePageCache' ) ) {
 			$url .= in_array( $_SERVER['SERVER_PORT'], array('80', '443') ) ? '' : ':' . $_SERVER['SERVER_PORT'];
 			$url .= $_SERVER['REQUEST_URI'];
 			
+			return self::getHash( $url );
+		}
+		
+		public static function getHash( $url ) {
 			$url = preg_replace( '/\#.*$/', '', $url );
 			return substr( md5( $url ), 0, 8 );
 		}

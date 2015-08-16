@@ -38,11 +38,29 @@
 		"outputPathIsOutsideProject": 0,
 		"outputPathIsSetByUser": 0
 		},
-	"\/combinator\/lib\/class-cache-checker.php": {
+	"\/combinator\/css\/admin.css": {
+		"fileType": 16,
+		"ignore": 1,
+		"ignoreWasSetByUser": 0,
+		"inputAbbreviatedPath": "\/combinator\/css\/admin.css",
+		"outputAbbreviatedPath": "No Output Path",
+		"outputPathIsOutsideProject": 0,
+		"outputPathIsSetByUser": 0
+		},
+	"\/combinator\/lib\/class-admin-page.php": {
 		"fileType": 8192,
 		"ignore": 0,
 		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/lib\/class-cache-checker.php",
+		"inputAbbreviatedPath": "\/combinator\/lib\/class-admin-page.php",
+		"outputAbbreviatedPath": "No Output Path",
+		"outputPathIsOutsideProject": 0,
+		"outputPathIsSetByUser": 0
+		},
+	"\/combinator\/lib\/class-cache-activation.php": {
+		"fileType": 8192,
+		"ignore": 0,
+		"ignoreWasSetByUser": 0,
+		"inputAbbreviatedPath": "\/combinator\/lib\/class-cache-activation.php",
 		"outputAbbreviatedPath": "No Output Path",
 		"outputPathIsOutsideProject": 0,
 		"outputPathIsSetByUser": 0
@@ -52,6 +70,24 @@
 		"ignore": 0,
 		"ignoreWasSetByUser": 0,
 		"inputAbbreviatedPath": "\/combinator\/lib\/class-cache-clearer.php",
+		"outputAbbreviatedPath": "No Output Path",
+		"outputPathIsOutsideProject": 0,
+		"outputPathIsSetByUser": 0
+		},
+	"\/combinator\/lib\/class-cache-deactivation.php": {
+		"fileType": 8192,
+		"ignore": 0,
+		"ignoreWasSetByUser": 0,
+		"inputAbbreviatedPath": "\/combinator\/lib\/class-cache-deactivation.php",
+		"outputAbbreviatedPath": "No Output Path",
+		"outputPathIsOutsideProject": 0,
+		"outputPathIsSetByUser": 0
+		},
+	"\/combinator\/lib\/class-combiner.php": {
+		"fileType": 8192,
+		"ignore": 0,
+		"ignoreWasSetByUser": 0,
+		"inputAbbreviatedPath": "\/combinator\/lib\/class-combiner.php",
 		"outputAbbreviatedPath": "No Output Path",
 		"outputPathIsOutsideProject": 0,
 		"outputPathIsSetByUser": 0
@@ -83,155 +119,20 @@
 		"outputPathIsOutsideProject": 0,
 		"outputPathIsSetByUser": 0
 		},
+	"\/combinator\/lib\/class-page-cache.php": {
+		"fileType": 8192,
+		"ignore": 0,
+		"ignoreWasSetByUser": 0,
+		"inputAbbreviatedPath": "\/combinator\/lib\/class-page-cache.php",
+		"outputAbbreviatedPath": "No Output Path",
+		"outputPathIsOutsideProject": 0,
+		"outputPathIsSetByUser": 0
+		},
 	"\/combinator\/phpfastcache.php": {
 		"fileType": 8192,
 		"ignore": 0,
 		"ignoreWasSetByUser": 0,
 		"inputAbbreviatedPath": "\/combinator\/phpfastcache.php",
-		"outputAbbreviatedPath": "No Output Path",
-		"outputPathIsOutsideProject": 0,
-		"outputPathIsSetByUser": 0
-		},
-	"\/combinator\/phpfastcache\/3.0.0\/abstract.php": {
-		"fileType": 8192,
-		"ignore": 0,
-		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/phpfastcache\/3.0.0\/abstract.php",
-		"outputAbbreviatedPath": "No Output Path",
-		"outputPathIsOutsideProject": 0,
-		"outputPathIsSetByUser": 0
-		},
-	"\/combinator\/phpfastcache\/3.0.0\/driver.php": {
-		"fileType": 8192,
-		"ignore": 0,
-		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/phpfastcache\/3.0.0\/driver.php",
-		"outputAbbreviatedPath": "No Output Path",
-		"outputPathIsOutsideProject": 0,
-		"outputPathIsSetByUser": 0
-		},
-	"\/combinator\/phpfastcache\/3.0.0\/drivers\/apc.php": {
-		"fileType": 8192,
-		"ignore": 0,
-		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/phpfastcache\/3.0.0\/drivers\/apc.php",
-		"outputAbbreviatedPath": "No Output Path",
-		"outputPathIsOutsideProject": 0,
-		"outputPathIsSetByUser": 0
-		},
-	"\/combinator\/phpfastcache\/3.0.0\/drivers\/cookie.php": {
-		"fileType": 8192,
-		"ignore": 0,
-		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/phpfastcache\/3.0.0\/drivers\/cookie.php",
-		"outputAbbreviatedPath": "No Output Path",
-		"outputPathIsOutsideProject": 0,
-		"outputPathIsSetByUser": 0
-		},
-	"\/combinator\/phpfastcache\/3.0.0\/drivers\/example.php": {
-		"fileType": 8192,
-		"ignore": 0,
-		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/phpfastcache\/3.0.0\/drivers\/example.php",
-		"outputAbbreviatedPath": "No Output Path",
-		"outputPathIsOutsideProject": 0,
-		"outputPathIsSetByUser": 0
-		},
-	"\/combinator\/phpfastcache\/3.0.0\/drivers\/files.php": {
-		"fileType": 8192,
-		"ignore": 0,
-		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/phpfastcache\/3.0.0\/drivers\/files.php",
-		"outputAbbreviatedPath": "No Output Path",
-		"outputPathIsOutsideProject": 0,
-		"outputPathIsSetByUser": 0
-		},
-	"\/combinator\/phpfastcache\/3.0.0\/drivers\/memcache.php": {
-		"fileType": 8192,
-		"ignore": 0,
-		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/phpfastcache\/3.0.0\/drivers\/memcache.php",
-		"outputAbbreviatedPath": "No Output Path",
-		"outputPathIsOutsideProject": 0,
-		"outputPathIsSetByUser": 0
-		},
-	"\/combinator\/phpfastcache\/3.0.0\/drivers\/memcached.php": {
-		"fileType": 8192,
-		"ignore": 0,
-		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/phpfastcache\/3.0.0\/drivers\/memcached.php",
-		"outputAbbreviatedPath": "No Output Path",
-		"outputPathIsOutsideProject": 0,
-		"outputPathIsSetByUser": 0
-		},
-	"\/combinator\/phpfastcache\/3.0.0\/drivers\/predis.php": {
-		"fileType": 8192,
-		"ignore": 0,
-		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/phpfastcache\/3.0.0\/drivers\/predis.php",
-		"outputAbbreviatedPath": "No Output Path",
-		"outputPathIsOutsideProject": 0,
-		"outputPathIsSetByUser": 0
-		},
-	"\/combinator\/phpfastcache\/3.0.0\/drivers\/redis.php": {
-		"fileType": 8192,
-		"ignore": 0,
-		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/phpfastcache\/3.0.0\/drivers\/redis.php",
-		"outputAbbreviatedPath": "No Output Path",
-		"outputPathIsOutsideProject": 0,
-		"outputPathIsSetByUser": 0
-		},
-	"\/combinator\/phpfastcache\/3.0.0\/drivers\/sqlite.php": {
-		"fileType": 8192,
-		"ignore": 0,
-		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/phpfastcache\/3.0.0\/drivers\/sqlite.php",
-		"outputAbbreviatedPath": "No Output Path",
-		"outputPathIsOutsideProject": 0,
-		"outputPathIsSetByUser": 0
-		},
-	"\/combinator\/phpfastcache\/3.0.0\/drivers\/wincache.php": {
-		"fileType": 8192,
-		"ignore": 0,
-		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/phpfastcache\/3.0.0\/drivers\/wincache.php",
-		"outputAbbreviatedPath": "No Output Path",
-		"outputPathIsOutsideProject": 0,
-		"outputPathIsSetByUser": 0
-		},
-	"\/combinator\/phpfastcache\/3.0.0\/drivers\/xcache.php": {
-		"fileType": 8192,
-		"ignore": 0,
-		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/phpfastcache\/3.0.0\/drivers\/xcache.php",
-		"outputAbbreviatedPath": "No Output Path",
-		"outputPathIsOutsideProject": 0,
-		"outputPathIsSetByUser": 0
-		},
-	"\/combinator\/phpfastcache\/3.0.0\/extensions.php": {
-		"fileType": 8192,
-		"ignore": 0,
-		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/phpfastcache\/3.0.0\/extensions.php",
-		"outputAbbreviatedPath": "No Output Path",
-		"outputPathIsOutsideProject": 0,
-		"outputPathIsSetByUser": 0
-		},
-	"\/combinator\/phpfastcache\/3.0.0\/index.html": {
-		"fileType": 8192,
-		"ignore": 0,
-		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/phpfastcache\/3.0.0\/index.html",
-		"outputAbbreviatedPath": "No Output Path",
-		"outputPathIsOutsideProject": 0,
-		"outputPathIsSetByUser": 0
-		},
-	"\/combinator\/phpfastcache\/3.0.0\/phpfastcache.php": {
-		"fileType": 8192,
-		"ignore": 0,
-		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/phpfastcache\/3.0.0\/phpfastcache.php",
 		"outputAbbreviatedPath": "No Output Path",
 		"outputPathIsOutsideProject": 0,
 		"outputPathIsSetByUser": 0
@@ -2836,150 +2737,6 @@
 		"ignore": 0,
 		"ignoreWasSetByUser": 0,
 		"inputAbbreviatedPath": "\/combinator\/wp-content\/gambit-cache\/lib\/phpfastcache.php",
-		"outputAbbreviatedPath": "No Output Path",
-		"outputPathIsOutsideProject": 0,
-		"outputPathIsSetByUser": 0
-		},
-	"\/combinator\/wp-content\/gambit-cache\/lib\/phpfastcache\/3.0.0\/abstract.php": {
-		"fileType": 8192,
-		"ignore": 0,
-		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/wp-content\/gambit-cache\/lib\/phpfastcache\/3.0.0\/abstract.php",
-		"outputAbbreviatedPath": "No Output Path",
-		"outputPathIsOutsideProject": 0,
-		"outputPathIsSetByUser": 0
-		},
-	"\/combinator\/wp-content\/gambit-cache\/lib\/phpfastcache\/3.0.0\/driver.php": {
-		"fileType": 8192,
-		"ignore": 0,
-		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/wp-content\/gambit-cache\/lib\/phpfastcache\/3.0.0\/driver.php",
-		"outputAbbreviatedPath": "No Output Path",
-		"outputPathIsOutsideProject": 0,
-		"outputPathIsSetByUser": 0
-		},
-	"\/combinator\/wp-content\/gambit-cache\/lib\/phpfastcache\/3.0.0\/drivers\/apc.php": {
-		"fileType": 8192,
-		"ignore": 0,
-		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/wp-content\/gambit-cache\/lib\/phpfastcache\/3.0.0\/drivers\/apc.php",
-		"outputAbbreviatedPath": "No Output Path",
-		"outputPathIsOutsideProject": 0,
-		"outputPathIsSetByUser": 0
-		},
-	"\/combinator\/wp-content\/gambit-cache\/lib\/phpfastcache\/3.0.0\/drivers\/cookie.php": {
-		"fileType": 8192,
-		"ignore": 0,
-		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/wp-content\/gambit-cache\/lib\/phpfastcache\/3.0.0\/drivers\/cookie.php",
-		"outputAbbreviatedPath": "No Output Path",
-		"outputPathIsOutsideProject": 0,
-		"outputPathIsSetByUser": 0
-		},
-	"\/combinator\/wp-content\/gambit-cache\/lib\/phpfastcache\/3.0.0\/drivers\/example.php": {
-		"fileType": 8192,
-		"ignore": 0,
-		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/wp-content\/gambit-cache\/lib\/phpfastcache\/3.0.0\/drivers\/example.php",
-		"outputAbbreviatedPath": "No Output Path",
-		"outputPathIsOutsideProject": 0,
-		"outputPathIsSetByUser": 0
-		},
-	"\/combinator\/wp-content\/gambit-cache\/lib\/phpfastcache\/3.0.0\/drivers\/files.php": {
-		"fileType": 8192,
-		"ignore": 0,
-		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/wp-content\/gambit-cache\/lib\/phpfastcache\/3.0.0\/drivers\/files.php",
-		"outputAbbreviatedPath": "No Output Path",
-		"outputPathIsOutsideProject": 0,
-		"outputPathIsSetByUser": 0
-		},
-	"\/combinator\/wp-content\/gambit-cache\/lib\/phpfastcache\/3.0.0\/drivers\/memcache.php": {
-		"fileType": 8192,
-		"ignore": 0,
-		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/wp-content\/gambit-cache\/lib\/phpfastcache\/3.0.0\/drivers\/memcache.php",
-		"outputAbbreviatedPath": "No Output Path",
-		"outputPathIsOutsideProject": 0,
-		"outputPathIsSetByUser": 0
-		},
-	"\/combinator\/wp-content\/gambit-cache\/lib\/phpfastcache\/3.0.0\/drivers\/memcached.php": {
-		"fileType": 8192,
-		"ignore": 0,
-		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/wp-content\/gambit-cache\/lib\/phpfastcache\/3.0.0\/drivers\/memcached.php",
-		"outputAbbreviatedPath": "No Output Path",
-		"outputPathIsOutsideProject": 0,
-		"outputPathIsSetByUser": 0
-		},
-	"\/combinator\/wp-content\/gambit-cache\/lib\/phpfastcache\/3.0.0\/drivers\/predis.php": {
-		"fileType": 8192,
-		"ignore": 0,
-		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/wp-content\/gambit-cache\/lib\/phpfastcache\/3.0.0\/drivers\/predis.php",
-		"outputAbbreviatedPath": "No Output Path",
-		"outputPathIsOutsideProject": 0,
-		"outputPathIsSetByUser": 0
-		},
-	"\/combinator\/wp-content\/gambit-cache\/lib\/phpfastcache\/3.0.0\/drivers\/redis.php": {
-		"fileType": 8192,
-		"ignore": 0,
-		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/wp-content\/gambit-cache\/lib\/phpfastcache\/3.0.0\/drivers\/redis.php",
-		"outputAbbreviatedPath": "No Output Path",
-		"outputPathIsOutsideProject": 0,
-		"outputPathIsSetByUser": 0
-		},
-	"\/combinator\/wp-content\/gambit-cache\/lib\/phpfastcache\/3.0.0\/drivers\/sqlite.php": {
-		"fileType": 8192,
-		"ignore": 0,
-		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/wp-content\/gambit-cache\/lib\/phpfastcache\/3.0.0\/drivers\/sqlite.php",
-		"outputAbbreviatedPath": "No Output Path",
-		"outputPathIsOutsideProject": 0,
-		"outputPathIsSetByUser": 0
-		},
-	"\/combinator\/wp-content\/gambit-cache\/lib\/phpfastcache\/3.0.0\/drivers\/wincache.php": {
-		"fileType": 8192,
-		"ignore": 0,
-		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/wp-content\/gambit-cache\/lib\/phpfastcache\/3.0.0\/drivers\/wincache.php",
-		"outputAbbreviatedPath": "No Output Path",
-		"outputPathIsOutsideProject": 0,
-		"outputPathIsSetByUser": 0
-		},
-	"\/combinator\/wp-content\/gambit-cache\/lib\/phpfastcache\/3.0.0\/drivers\/xcache.php": {
-		"fileType": 8192,
-		"ignore": 0,
-		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/wp-content\/gambit-cache\/lib\/phpfastcache\/3.0.0\/drivers\/xcache.php",
-		"outputAbbreviatedPath": "No Output Path",
-		"outputPathIsOutsideProject": 0,
-		"outputPathIsSetByUser": 0
-		},
-	"\/combinator\/wp-content\/gambit-cache\/lib\/phpfastcache\/3.0.0\/extensions.php": {
-		"fileType": 8192,
-		"ignore": 0,
-		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/wp-content\/gambit-cache\/lib\/phpfastcache\/3.0.0\/extensions.php",
-		"outputAbbreviatedPath": "No Output Path",
-		"outputPathIsOutsideProject": 0,
-		"outputPathIsSetByUser": 0
-		},
-	"\/combinator\/wp-content\/gambit-cache\/lib\/phpfastcache\/3.0.0\/index.html": {
-		"fileType": 8192,
-		"ignore": 0,
-		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/wp-content\/gambit-cache\/lib\/phpfastcache\/3.0.0\/index.html",
-		"outputAbbreviatedPath": "No Output Path",
-		"outputPathIsOutsideProject": 0,
-		"outputPathIsSetByUser": 0
-		},
-	"\/combinator\/wp-content\/gambit-cache\/lib\/phpfastcache\/3.0.0\/phpfastcache.php": {
-		"fileType": 8192,
-		"ignore": 0,
-		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/wp-content\/gambit-cache\/lib\/phpfastcache\/3.0.0\/phpfastcache.php",
 		"outputAbbreviatedPath": "No Output Path",
 		"outputPathIsOutsideProject": 0,
 		"outputPathIsSetByUser": 0

@@ -2,11 +2,12 @@
 
 require_once( 'combinator/lib/class-js.php' );
 require_once( 'combinator/lib/class-css.php' );
-require_once( 'combinator/lib/class-cache-clearer.php' );
 require_once( 'combinator/lib/class-cache-activation.php' );
 require_once( 'combinator/lib/class-cache-deactivation.php' );
 require_once( 'combinator/lib/class-admin-page.php' );
 require_once( 'combinator/lib/class-page-cache.php' );
+require_once( 'combinator/lib/class-page-cache-cleaner.php' );
+require_once( 'combinator/lib/class-object-cache-cleaner.php' );
 
 // Initializes Titan Framework
 require_once( 'titan-framework-checker.php' );
@@ -64,10 +65,8 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 			new GambitCacheActivation();
 			new GambitCacheDeactivation();
 			new GambitCachePageCache();
-
-			if ( ! function_exists( '__c' ) ) {
-				require_once( 'combinator/phpfastcache.php' );
-			}
+			new GambitCachePageCacheCleaner();
+			new GambitCacheObjectCacheCleaner();
 			
 			add_action( 'admin_enqueue_scripts', array( $this, 'adminEnqueueScripts' ) );
 			
@@ -86,18 +85,6 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 			} );
 				
 				
-			add_action( 'switch_theme', 'wp_cache_flush' );
-			add_action( 'customize_save_after', 'wp_cache_flush' );
-			
-			// Option change
-			add_action( 'updated_option', 'wp_cache_flush' );
-			add_action( 'added_option', 'wp_cache_flush' );
-			add_action( 'delete_option', 'wp_cache_flush' );
-			
-			if ( is_multisite() ) {
-				add_action( 'delete_blog', 'wp_cache_flush' );
-				add_action( 'switch_blog', 'wp_cache_flush' );
-			}
 
 			
 			if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
@@ -115,16 +102,10 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 			
 
 			
-			if ( empty( $this->pageHash ) ) {
-				$this->pageHash = self::getHash( self::getCurrentUrl() );
-			}
-			
-			// $this->loadCached();
 			
 			// add_action( 'init', array( $this, 'setLoggedInCookie' ) );
 			// add_action( 'wp_logout', array( $this, 'removeLoggedInCookie' ) );
 			
-			new GambitCacheCleaner();
 				///updated_{$post_type}_meta
 				
 
@@ -135,75 +116,10 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 		}
 		
 		
-		public static function getHash( $url ) {
-			
-			$url = preg_replace( '/\#.*$/', '', $url );
-			
-			return substr( md5( $url ), 0, 8 );
-		}
-		
 		
 		public function removeLoggedInCookie() {
 		}
 		
-		
-		public function loadCached() {
-			return;
-			global $wpdb;
-			
-			if ( ! empty( $_POST ) ) {
-				return;
-			}
-if ( preg_match( '/wp\-.*\.php/', self::getCurrentUrl() ) ) {
-	return;
-}
-			if ( is_admin() ) {
-				return;
-			}
-			require_once( ABSPATH . 'wp-includes/pluggable.php' );
-			if ( is_user_logged_in() ) {
-				return;
-			}
-			
-			
-			if ( ! function_exists( '__c' ) ) {
-				require_once( 'combinator/phpfastcache/phpfastcache.php' );
-			}
-
-			$html = __c("files")->get( $this->pageHash );
-
-			if ( $html ) {
-				echo $html;
-				echo "<!-- Cached by Combinator -->";
-				die();
-			}
-			
-			return;
-			
-			/*
-			$timeout = $wpdb->get_var( $wpdb->prepare( 'SELECT option_value FROM ' . $wpdb->options . ' WHERE option_name = %s', '_transient_timeout_cmbntr_p' . $this->pageHash ) );
-			if ( empty( $timeout ) ) {
-				return;
-			}
-			$timeout = (int) $timeout;
-
-			// Cached transient is expired
-			if ( time() > $timeout ) {
-				$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . $wpdb->options . ' WHERE option_name = %s', '_transient_timeout_cmbntr_p' . $this->pageHash ) );
-				$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . $wpdb->options . ' WHERE option_name = %s', '_transient_cmbntr_p' . $this->pageHash ) );
-				return;
-			}
-			
-			$cachedPage = $wpdb->get_var( $wpdb->prepare( 'SELECT option_value FROM ' . $wpdb->options . ' WHERE option_name = %s', '_transient_cmbntr_p' . $this->pageHash ) );
-			if ( empty( $cachedPage ) ) {
-				return;
-			}
-			
-			echo $cachedPage;
-			echo '<!-- Cached by Combinator -->';
-			die();
-			*/
-		}
 		
 		
 	    /**
@@ -220,70 +136,9 @@ if ( preg_match( '/wp\-.*\.php/', self::getCurrentUrl() ) ) {
 	     }
 		
 		 public $firstCalled = false;
-		 public $pageHash = '';
 		 public $pageToCache = '';
 		 public $cachingStarted = false;
 		
-		// public function test2() {
-		//
-		// 	if ( ! $this->cachingStarted ) {
-		// 		return;
-		// 	}
-		// 	// return;
-		//
-		// 	$this->pageToCache = '';
-		//
-		//     // We'll need to get the number of ob levels we're in, so that we can iterate over each, collecting
-		//     // that buffer's output into the final output.
-		//     $levels = ob_get_level();
-		//
-		// 	// @see http://stackoverflow.com/questions/772510/wordpress-filter-to-modify-final-html-output/22818089#22818089
-		//     for ($i = 0; $i < $levels; $i++)
-		//     {
-		// 		$currentOb = ob_get_clean();
-		//         $this->pageToCache .= $currentOb;
-		// 		// echo $currentOb;
-		//     }
-		// 	echo $this->pageToCache;
-		//     // Apply any filters to the final output
-		//     // $this->pageToCache = apply_filters( 'final_output', $this->pageToCache );
-		//
-		// 	// var_dump('last?');
-		//
-		// 	// $cachedPage = get_transient( 'cmbntr_p' . $this->pageHash );
-		//
-		// 	// var_dump($this->pageToCache);
-		// 	// var_dump($cachedPage);
-		// 	// if ( empty( $cachedPage ) ) {
-		//
-		// 		// var_dump($this->pageToCache);
-		//
-		// 		// if ( ob_get_length() > 0 ) {
-		// 		// 	ob_end_clean();
-		// 		// }
-		// 		// $this->pageToCache .= ob_get_contents();
-		//
-		// 		// var_dump('huh123');
-		// 		// var_dump($this->pageToCache);
-		// 		// var_dump($page);
-		// 		// set_transient( 'cmbntr_p' . $this->pageHash, $this->pageToCache, MINUTE_IN_SECONDS * 5 );
-		// 		if ( is_404() ) {
-		// 			return;
-		// 		}
-		// 		var_dump('memorizing page', $this->pageHash);
-		// 		// if ( ! function_exists( '__c' ) ) {
-		// 		// 	require_once( 'combinator/phpfastcache/phpfastcache.php' );
-		// 		// }
-		// 		global $gambitPageCache;
-		// 		if ( ! empty( $gambitPageCache ) ) {
-		// 	        $gambitPageCache->set( $this->pageHash, $this->pageToCache, 1800 );
-		// 		}
-		//
-		//
-		// 	// }
-		//
-		// }
-		//
 		
 		/**
 		 * Starts gathering outputted data. To be used in conjunction with $this->endGatheringOutput()

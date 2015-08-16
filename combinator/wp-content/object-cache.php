@@ -120,6 +120,8 @@ function wp_cache_reset() {
  */
 function wp_cache_flush() {
     global $wp_object_cache;
+	
+	do_action( 'gc_cache_flush' );
 
     return $wp_object_cache->flush();
 }
