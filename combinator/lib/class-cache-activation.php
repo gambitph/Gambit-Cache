@@ -85,6 +85,16 @@ class GambitCacheActivation {
 							$creationErrors[] = new WP_Error( 'cannotcopy', sprintf( __( "Could not copy %s to %s, please perform this manually via FTP", GAMBIT_COMBINATOR ), '<code>' . $src . '</code>', '<code>' . $dest . '</code>' ) );
 						}
 						
+						if ( ! $wp_filesystem->exists( trailingslashit( $dest ) . 'minify-cache' ) ) {
+							$wp_filesystem->mkdir( trailingslashit( $dest ) . 'minify-cache', 0755 );
+						}
+						if ( ! $wp_filesystem->exists( trailingslashit( $dest ) . 'object-cache' ) ) {
+							$wp_filesystem->mkdir( trailingslashit( $dest ) . 'object-cache', 0755 );
+						}
+						if ( ! $wp_filesystem->exists( trailingslashit( $dest ) . 'page-cache' ) ) {
+							$wp_filesystem->mkdir( trailingslashit( $dest ) . 'page-cache', 0755 );
+						}
+						
 					// advanced-cache.php & object-cache.php
 					} else if ( $missing['what'] == 'advanced-cache.php' || $missing['what'] == 'object-cache.php' ) {
 						
@@ -153,11 +163,12 @@ class GambitCacheActivation {
 	
 	
 	public function checkStatus() {
-		if ( get_option( 'gambit_cache_setup_done' ) == VERSION_GAMBIT_COMBINATOR || get_transient( 'gambit_cache_activation_errors' ) ) {
+		$cacheSetupDone = get_option( 'gambit_cache_setup_done' );
+		if ( $cacheSetupDone == VERSION_GAMBIT_COMBINATOR || get_transient( 'gambit_cache_activation_errors' ) ) {
 			return;
 		}
 		
-		$update = ! empty( get_option( 'gambit_cache_setup_done' ) ) ? get_option( 'gambit_cache_setup_done' ) != VERSION_GAMBIT_COMBINATOR : false;
+		$update = ! empty( $cacheSetupDone ) ? $cacheSetupDone != VERSION_GAMBIT_COMBINATOR : false;
 
 		$this->checkObjectCache( $update );
 		$this->checkAdvancedCache( $update );

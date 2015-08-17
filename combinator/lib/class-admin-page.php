@@ -139,7 +139,7 @@ class GambitCacheAdminPage {
 			$cachingTab->createOption( array(
 				'name' => __( 'Cache Control', GAMBIT_COMBINATOR ),
 				'type' => 'heading',
-				'desc' => __( 'Clear, enable and disable caches from here.', GAMBIT_COMBINATOR ),
+				'desc' => __( 'Clear, enable and disable caches & minification from here.', GAMBIT_COMBINATOR ),
 			) );
 			$cachingTab->createOption( array(
 				'name' => __( 'Clear Page Cache', GAMBIT_COMBINATOR ),

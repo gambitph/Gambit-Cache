@@ -16,7 +16,7 @@ if ( ! class_exists( 'GambitCachePageCache' ) ) {
 			} 
 			
 			// Record the contents of the page
-			add_action( 'plugins_loaded', array( $this, 'startRecordingPage' ), -1 );
+			add_action( 'plugins_loaded', array( $this, 'startRecordingPage' ), 1 );
 			add_action( 'shutdown', array( $this, 'endRecordingPage' ), 0 );
 			
 			// Load page cache settings

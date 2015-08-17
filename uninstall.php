@@ -17,7 +17,5 @@ update_user_meta( get_current_user_id(), 'dismissed_wp_pointers', $dismissedAdmi
 global $wpdb;
 $wpdb->query( "DELETE FROM $wpdb->options WHERE option_name LIKE '_transient_%' AND option_name LIKE '%cmbntr%'" );
 
-// TODO delete wp-content/gambit-cache directory
-
 delete_option( 'combinator_found_js' );
 delete_option( 'combinator_found_css' );

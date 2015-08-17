@@ -53,6 +53,21 @@ class GambitCacheDeactivation {
 				$wp_filesystem->put_contents( $path, $content );
 			}
 		}
+		
+		// Remove gambit-cache
+		$path = $wp_filesystem->wp_content_dir() . 'gambit-cache';
+		if ( $wp_filesystem->exists( $path ) ) {
+			if ( ! $wp_filesystem->is_writable( $path ) ) {
+				$wp_filesystem->chmod( $path, 0755 );
+			}
+			if ( $wp_filesystem->is_writable( $path ) ) {
+				$wp_filesystem->rmdir( $path, true );
+			}
+		}
+
+		// Clear transients
+		global $wpdb;
+		$wpdb->query( "DELETE FROM $wpdb->options WHERE option_name LIKE '_transient_%' AND option_name LIKE '%cmbntr%'" );
 	}
 	
 	public static function removeWPCacheInConfig( $content ) {

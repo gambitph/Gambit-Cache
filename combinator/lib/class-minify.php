@@ -43,18 +43,12 @@ if ( ! class_exists( 'GambitCacheMinify' ) ) {
 		function __construct() {
 			add_action( 'tf_done', array( $this, 'gatherSettings' ), 10 );
 
-			
-			apply_filters( 'gc_blacklisted_plugins', function( $plugins ) {
-				$plugins = array_merge( $plugins, $this->blackListedPlugins );
-				return array_unique( $plugins );
-			} );
-				
+			apply_filters( 'gc_blacklisted_plugins', array( $this, 'addBlackListedPlugins' ), 1 );
 				
 
-			
 			if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
 				return;
-			} 
+			}
 
 
 			add_action( 'wp_head', array( $this, 'startGatheringOutput' ), 0 );
@@ -63,6 +57,13 @@ if ( ! class_exists( 'GambitCacheMinify' ) ) {
 			add_action( 'wp_footer', array( $this, 'startGatheringOutput' ), 0 );
 			add_action( 'wp_footer', array( $this, 'endGatheringOutput' ), 9999 );
 		}
+		
+		public function addBlackListedPlugins( $plugins ) {
+			$plugins = array_merge( $plugins, $this->blackListedPlugins );
+			return array_unique( $plugins );
+		}
+		
+		
 	
 		public static function clearMinifyCache() {
 			global $wp_filesystem;
