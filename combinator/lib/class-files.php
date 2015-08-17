@@ -4,8 +4,6 @@ if ( ! class_exists( 'GambitCombinatorFiles' ) ) {
 
 class GambitCombinatorFiles {
 	
-	public static $filesystemInitialized = false;
-	
 	/**
 	 * Convets a relative URL to an absolute URL
 	 * @see http://www.gambit.ph/converting-relative-urls-to-absolute-urls-in-php/
@@ -127,43 +125,13 @@ class GambitCombinatorFiles {
 	}
 	
 	
-	public static function deleteAllFiles() {
-		global $wp_filesystem;
-		self::initFilesystem();
-
-		$upload_dir = wp_upload_dir(); // Grab uploads folder array
-		$dir = trailingslashit( $wp_filesystem->wp_content_dir() . 'gambit-cache' ) . 'minify-cache';
+	public static function createFile( $contents, $filename ) {
 		
-		if ( $wp_filesystem->is_dir( $dir ) ) {
-			if ( $wp_filesystem->is_writable( $dir ) ) {
-				if ( $wp_filesystem->rmdir( $dir, true ) ) {
-					$wp_filesystem->mkdir( $dir );
-					return true;
-				}
-			}
-		}
-		
-		return false;
-	}
-	
-	
-	public static function initFilesystem() {
-		if ( self::$filesystemInitialized ) {
-			return;
-		}
 		global $wp_filesystem;
 		if ( empty( $wp_filesystem ) ) {
 		    require_once ( ABSPATH . '/wp-admin/includes/file.php' );
 		    WP_Filesystem();
 		}
-		self::$filesystemInitialized = true;
-	}
-	
-	
-	public static function createFile( $contents, $filename ) {
-		
-		global $wp_filesystem;
-		self::initFilesystem();
 		
 		$upload_dir = wp_upload_dir(); // Grab uploads folder array
 		$subDir = substr( $filename, 0, 2 );

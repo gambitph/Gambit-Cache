@@ -40,10 +40,9 @@ if ( ! class_exists( 'GambitCachePageCache' ) ) {
 			global $gambitPageCache;
 			if ( ! empty( $gambitPageCache ) ) {
 				$gambitPageCache->clean();
-				wp_send_json_success( __( 'Page cache cleared', GAMBIT_COMBINATOR ) );
+				return true;
 			}
-			
-			wp_send_json_error( __( 'Could not clear the page cache', GAMBIT_COMBINATOR ) );
+			return false;
 		}
 		
 		

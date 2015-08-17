@@ -7,14 +7,27 @@ if ( ! class_exists( 'GambitCacheAdminPage' ) ) {
 class GambitCacheAdminPage {
 
 	function __construct() {
+		
+		add_action( 'admin_enqueue_scripts', array( $this, 'adminEnqueueScripts' ) );
 
 		// Initializes settings panel
 		add_filter( 'plugin_action_links', array( $this, 'pluginSettingsLink' ), 10, 2 );
 		add_action( 'tf_create_options', array( $this, 'createAdminOptions' ) );
 		
-		add_action( 'wp_ajax_user_clear_all_caches', array( $this, 'clearAllCaches' ) );
+		add_action( 'wp_ajax_user_clear_all_caches', array( $this, 'ajaxClearAllCaches' ) );
 		add_action( 'tf_save_options_' . GAMBIT_COMBINATOR, array( $this, 'clearAllCaches' ) );
 
+	}
+	
+	public function adminEnqueueScripts() {
+		wp_enqueue_style( __CLASS__, plugins_url( 'combinator/css/admin.css', GAMBIT_COMBINATOR_PATH ) );
+	}
+	
+	public function ajaxClearAllCaches() {
+		if ( ! $this->clearAllCaches() ) {
+			wp_send_json_error( __( 'Could not clear all caches', GAMBIT_COMBINATOR ) );
+		}
+		wp_send_json_success( __( 'All caches cleared', GAMBIT_COMBINATOR ) );
 	}
 	
 	public function clearAllCaches() {
@@ -25,22 +38,18 @@ class GambitCacheAdminPage {
 		wp_cache_flush();
 		
 		// Clear page cache
-		if ( ! GambitCachePageCache::ajaxClearPageCache() ) {
+		if ( ! GambitCachePageCache::clearPageCache() ) {
 			$hasError = true;
 		}
 		
 		// Clear minify cache
 		global $wpdb;
 		$wpdb->query( "DELETE FROM $wpdb->options WHERE option_name LIKE '_transient_%' AND option_name LIKE '%cmbntr%'" );
-	    if ( ! GambitCombinatorFiles::deleteAllFiles() ) {
+	    if ( ! GambitCacheMinify::clearMinifyCache() ) {
 	    	$hasError = true;
 	    }
 		
-		if ( ! $hasError ) {
-			wp_send_json_success( __( 'All caches cleared', GAMBIT_COMBINATOR ) );
-		} else {
-			wp_send_json_error( __( 'Could not clear all caches', GAMBIT_COMBINATOR ) );
-		}
+		return ! $hasError;
 	}
 
 	/**
