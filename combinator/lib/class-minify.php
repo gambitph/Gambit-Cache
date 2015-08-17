@@ -2,9 +2,9 @@
 	
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-if ( ! class_exists( 'GambitCacheCombiner' ) ) {
+if ( ! class_exists( 'GambitCacheMinify' ) ) {
 
-	class GambitCacheCombiner {
+	class GambitCacheMinify {
 
 		function __construct() {
 		

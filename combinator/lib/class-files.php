@@ -4,8 +4,6 @@ if ( ! class_exists( 'GambitCombinatorFiles' ) ) {
 
 class GambitCombinatorFiles {
 	
-	const UPLOADS_SUBDIR = 'combinator';
-	
 	public static $filesystemInitialized = false;
 	
 	/**
@@ -134,11 +132,18 @@ class GambitCombinatorFiles {
 		self::initFilesystem();
 
 		$upload_dir = wp_upload_dir(); // Grab uploads folder array
-		$dir = trailingslashit( trailingslashit( $upload_dir['basedir'] ) . self::UPLOADS_SUBDIR ); // Set storage directory path
+		$dir = trailingslashit( $wp_filesystem->wp_content_dir() . 'gambit-cache' ) . 'minify-cache';
 		
 		if ( $wp_filesystem->is_dir( $dir ) ) {
-			$wp_filesystem->rmdir( $dir, true );
+			if ( $wp_filesystem->is_writable( $dir ) ) {
+				if ( $wp_filesystem->rmdir( $dir, true ) ) {
+					$wp_filesystem->mkdir( $dir );
+					return true;
+				}
+			}
 		}
+		
+		return false;
 	}
 	
 	
@@ -155,39 +160,24 @@ class GambitCombinatorFiles {
 	}
 	
 	
-	public static function canWriteCombinatorFiles() {
-		
-		global $wp_filesystem;
-		self::initFilesystem();
-		
-		$upload_dir = wp_upload_dir(); // Grab uploads folder array
-		$combinatorDir = trailingslashit( $upload_dir['basedir'] ) . self::UPLOADS_SUBDIR;
-		
-		if ( ! $wp_filesystem->is_writable( $upload_dir['basedir'] ) ) {
-			return $combinatorDir;
-		}
-		if ( $wp_filesystem->is_dir( $combinatorDir ) ) {
-			return $wp_filesystem->is_writable( $combinatorDir ) ? true : $combinatorDir;
-		}
-		return true;
-	}
-	
-	
 	public static function createFile( $contents, $filename ) {
 		
 		global $wp_filesystem;
 		self::initFilesystem();
 		
 		$upload_dir = wp_upload_dir(); // Grab uploads folder array
-		$dir = trailingslashit( trailingslashit( $upload_dir['basedir'] ) . self::UPLOADS_SUBDIR ); // Set storage directory path
+		$subDir = substr( $filename, 0, 2 );
+		$dir = trailingslashit( $wp_filesystem->wp_content_dir() . 'gambit-cache' ) . 'minify-cache';
 
-		$filePath = $dir . $filename;
-		$fileURL = trailingslashit( trailingslashit( $upload_dir['baseurl'] ) . self::UPLOADS_SUBDIR ) . $filename;
+		$filePath = trailingslashit( trailingslashit( $dir ) . $subDir ) . $filename;
+		$fileURL = trailingslashit( trailingslashit( trailingslashit( trailingslashit( content_url() ) . 'gambit-cache' ) . 'minify-cache' ) . $subDir ) . $filename;
 
-		if ( ! $wp_filesystem->is_dir( $dir ) ) {
-			$wp_filesystem->mkdir( $dir ); // Make a new folder for storing our file
+		if ( ! $wp_filesystem->exists( trailingslashit( $dir ) . $subDir ) ) {
+			$wp_filesystem->mkdir( trailingslashit( $dir ) . $subDir );
 		}
-		$wp_filesystem->put_contents( $filePath, $contents, 0644 ); // Finally, store the file :)
+		if ( $wp_filesystem->is_writable( $dir ) ) {
+			$wp_filesystem->put_contents( $filePath, $contents, 0644 ); // Finally, store the file :)
+		}
 		
 		return array(
 			'path' => $filePath,

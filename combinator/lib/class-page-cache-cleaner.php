@@ -15,26 +15,30 @@ class GambitCachePageCacheCleaner {
 		}
 	}
 	
-	public function deleteCache( $url ) {
+	public function deleteCache( $url, $postID = false ) {
 		global $gambitPageCache;
 		if ( ! empty( $gambitPageCache ) ) {
 			$pageHash = GambitCachePageCache::getHash( $url );
 			$gambitPageCache->delete( $pageHash );
+			
+			do_action( 'gc_page_cache_deleted', $postID );
 			return true;
 		}
 		return false;
 	}
 	
 	public function clearOnUpdatedMeta( $metaID, $objectID, $metaKey, $metaValue ) {
-		$this->deleteCache( get_permalink( $objectID ) );
+		$this->deleteCache( get_permalink( $objectID ), $objectID );
 	}
 	
 	public function clearOnInsertComment( $id, $comment ) {
-		$this->deleteCache( $_SERVER['HTTP_REFERER'] );
+		$comment = get_comment( $id ); 
+		$postID = $comment ? $comment->comment_post_ID : false;
+		$this->deleteCache( $_SERVER['HTTP_REFERER'], $postID );
 	}
 	
 	public function clearOnSavePost( $postID ) {
-		$this->deleteCache( get_permalink( $postID ) );
+		$this->deleteCache( get_permalink( $postID ), $postID );
 	}
 	
 	

@@ -11,24 +11,36 @@ class GambitCacheAdminPage {
 		// Initializes settings panel
 		add_filter( 'plugin_action_links', array( $this, 'pluginSettingsLink' ), 10, 2 );
 		add_action( 'tf_create_options', array( $this, 'createAdminOptions' ) );
-		add_action( 'wp_ajax_user_clear_object_cache', array( $this, 'clearObjectCache' ) );
 		
 		add_action( 'wp_ajax_user_clear_all_caches', array( $this, 'clearAllCaches' ) );
+		add_action( 'tf_save_options_' . GAMBIT_COMBINATOR, array( $this, 'clearAllCaches' ) );
 
 	}
 	
 	public function clearAllCaches() {
+		
+		$hasError = false;
+		
+		// Clear object cache
 		wp_cache_flush();
-		if ( GambitCachePageCache::ajaxClearPageCache() ) {
-			wp_send_json_success( __( 'All caches cleared', GAMBIT_COMBINATOR ) );
+		
+		// Clear page cache
+		if ( ! GambitCachePageCache::ajaxClearPageCache() ) {
+			$hasError = true;
 		}
-		wp_send_json_error( __( 'Could not clear all caches', GAMBIT_COMBINATOR ) );
-	}
-	
-	
-	public function clearObjectCache() {
-		wp_cache_flush();
-		wp_send_json_success( __( 'Object cache cleared!', GAMBIT_COMBINATOR ) );
+		
+		// Clear minify cache
+		global $wpdb;
+		$wpdb->query( "DELETE FROM $wpdb->options WHERE option_name LIKE '_transient_%' AND option_name LIKE '%cmbntr%'" );
+	    if ( ! GambitCombinatorFiles::deleteAllFiles() ) {
+	    	$hasError = true;
+	    }
+		
+		if ( ! $hasError ) {
+			wp_send_json_success( __( 'All caches cleared', GAMBIT_COMBINATOR ) );
+		} else {
+			wp_send_json_error( __( 'Could not clear all caches', GAMBIT_COMBINATOR ) );
+		}
 	}
 
 	/**
@@ -125,11 +137,9 @@ class GambitCacheAdminPage {
 				'type' => 'ajax-button',
 				'label' => array(
 					__( 'Clear All Caches', GAMBIT_COMBINATOR ),
-					__( 'Clear Page Cache', GAMBIT_COMBINATOR ),
-					__( 'Clear Object Cache', GAMBIT_COMBINATOR ),
 				),
-				'action' => array( 'user_clear_all_caches', 'user_clear_page_cache', 'user_clear_object_cache' ),
-				'class' => array( 'button-primary', 'button-default' ),
+				'action' => array( 'user_clear_all_caches' ),
+				'class' => array( 'button-default' ),
 				'desc' => __( 'Empty the whole page cache.', GAMBIT_COMBINATOR ),
 			) );
 			$cachingTab->createOption( array(
@@ -145,6 +155,13 @@ class GambitCacheAdminPage {
 				'type' => 'enable',
 				'default' => true,
 				'desc' => __( 'WordPress performs a lot of computationally expensive processes per page load. Object caching enables the caching of these heavy results.', GAMBIT_COMBINATOR ),
+			) );
+			$cachingTab->createOption( array(
+				'name' => __( 'CSS & JS Minify', GAMBIT_COMBINATOR ),
+				'id' => 'minify_enabled',
+				'type' => 'enable',
+				'default' => true,
+				'desc' => __( 'If you have a lot of plugins, then your site most likely loads a lot of different Javascript and Stylesheet files. Minify combines these files together and makes the filesize smaller for less browser requests.', GAMBIT_COMBINATOR ),
 			) );
 			$cachingTab->createOption( array(
 			    'type' => 'save',
@@ -261,39 +278,6 @@ class GambitCacheAdminPage {
 			$minifyTab = $adminPanel->createTab( array(
 			    'name' => __( 'Minify Settings', GAMBIT_COMBINATOR ),
 			) );
-			$minifyTab->createOption( array(
-				'name' => __( 'General Settings', GAMBIT_COMBINATOR ),
-				'type' => 'heading',
-			) );
-			
-			$minifyTab->createOption( array(
-				'name' => __( 'Enable Combinator', GAMBIT_COMBINATOR ),
-				'id' => 'global_enabled',
-				'type' => 'enable',
-				'default' => true,
-				'desc' => __( 'You can enable or disable the combining of scripts and stylesheets globally with this setting.', GAMBIT_COMBINATOR ),
-			) );
-			
-			$minifyTab->createOption( array(
-				'name' => __( 'Cache Control', GAMBIT_COMBINATOR ),
-				'type' => 'note',
-				'desc' => '<button id="combinator_cache_btn" name="action" class="button button-secondary" onclick="
-					var t = jQuery(this);
-  				wp.ajax.send( \'combinator_clear_cache\', {
-					success: function() { t.text(\'' . __( 'Cleared Generated Files & Database Caches', GAMBIT_COMBINATOR ) . '\'); },
-				    error:   function() { t.text(\'' . __( 'Something went wrong, try again', GAMBIT_COMBINATOR ) . '\'); },
-  				    data: {
-  				      nonce: \'' . wp_create_nonce( 'combinator_clear_cache' ) . '\'
-  				    }
-  				  }); 
-				  jQuery(this).text(\'' . __( 'Clearing...', GAMBIT_COMBINATOR ) . '\');
-    jQuery(this).blur(); return false;">' . __( 'Clear Generated Files & Database Caches', GAMBIT_COMBINATOR ) . '</button>
-	<p class="description">If you are getting <code>Uncaught SyntaxError: Unexpected token :</code> errors in Javascript, this can usually be fixed by clearing the cache with this button.</p>'
-			) );
-
-			$minifyTab->createOption( array(
-			    'type' => 'save',
-			) );
 			
 			
 			
@@ -332,9 +316,10 @@ class GambitCacheAdminPage {
 				'options' => array(
 					'includes' => __( 'WordPress wp-include files', GAMBIT_COMBINATOR ),
 					'remote' => __( 'Remote scripts', GAMBIT_COMBINATOR ),
+					'theme' => __( 'Theme scripts (sometimes distrupts theme behavior)', GAMBIT_COMBINATOR ),
 					'inline' => __( 'Script tags (small chance to give errors)', GAMBIT_COMBINATOR ),
 				),
-				'desc' => __( 'Check the types of scripts to combine. Scripts from plugins & themes are always combined.', GAMBIT_COMBINATOR ),
+				'desc' => __( 'Check the types of scripts to combine. Scripts from plugins are always combined.', GAMBIT_COMBINATOR ),
 			) );
 			
 			$minifyTab->createOption( array(
@@ -385,9 +370,10 @@ class GambitCacheAdminPage {
 				'options' => array(
 					'includes' => __( 'WordPress wp-include files', GAMBIT_COMBINATOR ),
 					'remote' => __( 'Remote stylesheets', GAMBIT_COMBINATOR ),
+					'theme' => __( 'Theme scripts (sometimes distrupts theme behavior)', GAMBIT_COMBINATOR ),
 					'inline' => __( 'Style tags (high chance to disrupt page styles)', GAMBIT_COMBINATOR ),
 				),
-				'desc' => __( 'Check the types of styles to combine. Styles from plugins & themes are always combined.', GAMBIT_COMBINATOR ),
+				'desc' => __( 'Check the types of styles to combine. Styles from plugins are always combined.', GAMBIT_COMBINATOR ),
 			) );
 			
 			$minifyTab->createOption( array(

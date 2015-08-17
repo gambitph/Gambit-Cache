@@ -11,9 +11,6 @@ if ( ! class_exists( 'GambitCachePageCache' ) ) {
 
 		function __construct() {
 			
-			// Ajax handler for when the page cache is cleared
-			add_action( 'wp_ajax_user_clear_page_cache', array( __CLASS__, 'ajaxClearPageCache' ) );
-			
 			if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
 				return;
 			} 
@@ -40,20 +37,15 @@ if ( ! class_exists( 'GambitCachePageCache' ) ) {
 		}
 		
 		public static function clearPageCache() {
-			if ( self::ajaxClearPageCache() ) {
-				wp_send_json_success( __( 'Page cache cleared', GAMBIT_COMBINATOR ) );
-			}
-			wp_send_json_error( __( 'Could not clear the page cache', GAMBIT_COMBINATOR ) );
-		}
-		
-		public static function ajaxClearPageCache() {
 			global $gambitPageCache;
 			if ( ! empty( $gambitPageCache ) ) {
 				$gambitPageCache->clean();
-				return true;
+				wp_send_json_success( __( 'Page cache cleared', GAMBIT_COMBINATOR ) );
 			}
-			return false;
+			
+			wp_send_json_error( __( 'Could not clear the page cache', GAMBIT_COMBINATOR ) );
 		}
+		
 		
 		public $cachingStarted = false;
 		public $pageToCache = '';

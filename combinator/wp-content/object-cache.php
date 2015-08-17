@@ -372,8 +372,10 @@ class GambitObjectCache {
 		if ( ! empty( $errors ) ) {
 			$this->connectionLog[] = sprintf( 'Failed to connect to %s', $cachingTypeName );
 			$this->cacher = null;
+			return false;
 		} else {
 			$this->connectionLog[] = sprintf( 'Successfully connected to %s', $cachingTypeName );
+			return true;
 		}
 	}
 	
@@ -438,32 +440,62 @@ class GambitObjectCache {
 		$this->cacher = null;
 		if ( class_exists( 'Redis' ) && ! empty( $config['redis']['host'] ) ) {
 			$this->cacher = phpFastCache( 'redis' );
-			$this->testCaching( 'Redis server' );
+			if ( $this->testCaching( 'Redis server' ) ) {
+				return;
+			}
+		} else if ( empty( $config['redis']['host'] ) ) {
+			$this->connectionLog[] = 'No server host given, skipping Redis';
+		} else {
+			$this->connectionLog[] = 'No Redis installation found';
 		}
 		
 		if ( empty( $this->cacher ) && class_exists( 'Memcache' ) && ! empty( $config['memcache'][0][0] ) ) {
 			$this->cacher = phpFastCache( 'memcache' );
-			$this->testCaching( 'Memcache server' );
+			if ( $this->testCaching( 'Memcache server' ) ) {
+				return;
+			}
+		} else if ( empty( $config['memcache'][0][0] ) ) {
+			$this->connectionLog[] = 'No server host given, skipping Memcache';
+		} else {
+			$this->connectionLog[] = 'No Memcache installation found';
 		}
 
 		if ( empty( $this->cacher ) && class_exists( 'Memcached' ) && ! empty( $config['memcache'][0][0] ) ) {
 			$this->cacher = phpFastCache( 'memcached' );
-			$this->testCaching( 'Memcached server' );
+			if ( $this->testCaching( 'Memcached server' ) ) {
+				return;
+			}
+		} else if ( empty( $config['memcache'][0][0] ) ) {
+			$this->connectionLog[] = 'No server host given, skipping Memcached';
+		} else {
+			$this->connectionLog[] = 'No Memcached installation found';
 		}
 		
 		if ( empty( $this->cacher ) && extension_loaded( 'apc' ) && ini_get( 'apc.enabled' ) ) {
 			$this->cacher = phpFastCache( 'apc' );
-			$this->testCaching( 'APC' );
+			if ( $this->testCaching( 'APC' ) ) {
+				return;
+			}
+		} else {
+			$this->connectionLog[] = 'No APC installation found';
 		}
 		
 		if ( empty( $this->cacher ) && function_exists( "wincache_ucache_set" ) ) {
 			$this->cacher = phpFastCache( 'wincache' );
-			$this->testCaching( 'WinCache' );
+			if ( $this->testCaching( 'WinCache' ) ) {
+				return;
+			}
+		} else {
+			$this->connectionLog[] = 'No WinCache installation found';
 		}
 		
 		if ( empty( $this->cacher ) && function_exists( "xcache_get" ) ) {
 			$this->cacher = phpFastCache( 'xcache' );
-			$this->testCaching( 'XCache' );
+			if ( $this->testCaching( 'XCache' ) ) {
+				return;
+			}
+		} else {
+			$this->connectionLog[] = 'No XCache installation found';
 		}
 		
 		if ( empty( $this->cacher ) ) {
@@ -477,6 +509,7 @@ class GambitObjectCache {
 			
 			$this->cacher = phpFastCache( 'files' );
 			$this->connectionLog[] = 'Using filesystem caching';
+			$this->connectionLog[] = 'Caching data will be stored in ' . $config['path'];
 		}
 		
 	}
