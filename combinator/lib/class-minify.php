@@ -219,7 +219,9 @@ if ( ! class_exists( 'GambitCacheMinify' ) ) {
 			
 			// Output the combined Google Fonts
 			if ( ! empty( $combinedGoogleFonts ) ) {
-				echo "<link rel='stylesheet' id='gambit-cache-google-font-css' href='" . esc_url( $combinedGoogleFonts ) . "' type='text/css' media='all' />";
+				// Need to encode the space into + or %20 since esc_url removes spaces.
+				// @see bug https://core.trac.wordpress.org/ticket/23605
+				echo "<link rel='stylesheet' id='gambit-cache-google-font-css' href='" . esc_url( str_replace( ' ', '+', $combinedGoogleFonts ) ) . "' type='text/css' media='all' />";
 			}
 			
 			// Output the compressed stuff
@@ -308,6 +310,10 @@ if ( ! class_exists( 'GambitCacheMinify' ) ) {
 			// Adjust the content to remove the combined stuff
 			foreach ( $googleFontsJoined as $i => $tag ) {
 				$content = str_replace( $tag, '', $content );
+			}
+			
+			if ( empty( $googleFontArgs['subset'] ) ) {
+				unset( $googleFontArgs['subset'] );
 			}
 			
 			// Return the combined Google Font URL
