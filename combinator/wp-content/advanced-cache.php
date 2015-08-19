@@ -70,8 +70,59 @@ if ( ! defined( 'ABSPATH' ) ) die();
 	$html = $gambitPageCache->get( $pageHash );
 
 	if ( $html ) {
+		// $headers = $gambitPageCache->get( $pageHash . '_headers' );
+		
+		
+		// Enable gzip compression
+		// if ( ! empty( $_SERVER['HTTP_ACCEPT_ENCODING'] ) && substr_count( $_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip' ) ) {
+// 			if ( ob_start( 'ob_gzhandler' ) ) {
+// 				ob_start();
+// 			}
+// 		} else {
+// 			ob_start();
+// 		}
+		header( "Content-type: text/html; charset=UTF-8" );
+		header( "Vary: Accept-Encoding, Cookie" );
+		header( "Cache-Control: max-age=3, must-revalidate" );
+		
+
+		$size = function_exists( 'mb_strlen' ) ? mb_strlen( $html, '8bit' ) : strlen( $html );
+		if ( function_exists( 'gzencode' ) ) {
+			header( 'Content-Encoding: gzip' );
+		}
+		header( 'Content-Length: ' . $size );
+		
+		
+		// SUPER CACHE DOES THIS
+
+		// don't try to match modified dates if using dynamic code.
+		// if ( $wp_cache_mfunc_enabled == 0 && $wp_supercache_304 ) {
+// 			if ( function_exists( 'apache_request_headers' ) ) {
+// 				$request = apache_request_headers();
+// 				$remote_mod_time = $request[ 'If-Modified-Since' ];
+// 			} else {
+// 				if ( isset( $_SERVER[ 'HTTP_IF_MODIFIED_SINCE' ] ) )
+// 					$remote_mod_time = $_SERVER[ 'HTTP_IF_MODIFIED_SINCE' ];
+// 				else
+// 					$remote_mod_time = 0;
+// 			}
+// 			$local_mod_time = gmdate("D, d M Y H:i:s",filemtime( $file )).' GMT';
+// 			if ( $remote_mod_time != 0 && $remote_mod_time == $local_mod_time ) {
+// 				header("HTTP/1.0 304 Not Modified");
+// 				exit();
+// 			}
+// 			header( 'Last-Modified: ' . $local_mod_time );
+// 		}
+		
+		
+		// if ( is_array( $headers ) ) {
+		// 	foreach ( $headers as $header ) {
+		// 		header( $header );
+		// 	}
+		// }
 		echo $html;
-		echo "<!-- Cached by Combinator -->";
+		// var_dump(function_exists( 'gzencode' ), $pageHash);
+		// echo "<!-- Cached by Combinator -->";
 		die();
 	}
 	

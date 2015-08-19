@@ -85,6 +85,7 @@ class GambitCacheActivation {
 							$creationErrors[] = new WP_Error( 'cannotcopy', sprintf( __( "Could not copy %s to %s, please perform this manually via FTP", GAMBIT_COMBINATOR ), '<code>' . $src . '</code>', '<code>' . $dest . '</code>' ) );
 						}
 						
+						// Create the caching directories
 						if ( ! $wp_filesystem->exists( trailingslashit( $dest ) . 'minify-cache' ) ) {
 							$wp_filesystem->mkdir( trailingslashit( $dest ) . 'minify-cache', 0755 );
 						}
@@ -93,6 +94,20 @@ class GambitCacheActivation {
 						}
 						if ( ! $wp_filesystem->exists( trailingslashit( $dest ) . 'page-cache' ) ) {
 							$wp_filesystem->mkdir( trailingslashit( $dest ) . 'page-cache', 0755 );
+						}
+						
+						// Create .htaccess
+						if ( ! $wp_filesystem->exists( trailingslashit( $dest ) . '.htaccess' ) ) {
+							$content = "Order Deny,Allow\n" .
+									   "Deny from all\n" .
+									   "Allow from 127.0.0.1\n" .
+									   "<FilesMatch \"\\.(js|css|gif|jpe?g|png)$\">\n" .
+										   "Order Deny,Allow\n" .
+										   "Allow from all\n" .
+									   "</FilesMatch>";
+							if ( ! $wp_filesystem->put_contents( trailingslashit( $dest ) . '.htaccess', $content ) ) {
+								$creationErrors[] = new WP_Error( 'cannotcopy', sprintf( __( "Could not create %s, please add this file manually via FTP", GAMBIT_COMBINATOR ), '<code>' . trailingslashit( $dest ) . '.htaccess' . '</code>' ) );
+							}
 						}
 						
 					// advanced-cache.php & object-cache.php

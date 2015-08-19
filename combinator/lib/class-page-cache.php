@@ -77,6 +77,14 @@ if ( ! class_exists( 'GambitCachePageCache' ) ) {
 			if ( is_user_logged_in() ) {
 				return;
 			}
+			if ( ! empty( $_POST ) ) {
+				return;
+			}
+			foreach ( $_COOKIE as $key => $cookie ) {
+				if ( preg_match( "/^wordpress_logged_in/", $key ) ) {
+					return;
+				}
+			}
 			
 			if ( $this->cachingStarted ) {
 				return;
@@ -113,6 +121,14 @@ if ( ! class_exists( 'GambitCachePageCache' ) ) {
 			global $gambitPageCache;
 			if ( ! empty( $gambitPageCache ) && $this->pageCacheEnabled ) {
 				$pageHash = $this->getCurrentUrlHash();
+				
+				// Add our note
+				$this->pageToCache .= "<!-- Cached by Combinator -->";
+				
+				if ( function_exists( 'gzencode' ) ) {
+					$this->pageToCache = gzencode( $this->pageToCache, 6, FORCE_GZIP );
+				}
+				
 		        $gambitPageCache->set( $pageHash, $this->pageToCache, $this->expiration );
 			}
 			

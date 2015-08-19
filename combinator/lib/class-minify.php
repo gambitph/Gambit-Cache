@@ -1,4 +1,7 @@
 <?php
+
+// TODO minify, combine Google Font css with pipe
+// <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,600,700,700italic|Roboto:400,500' rel='stylesheet' type='text/css'>
 	
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
@@ -123,7 +126,7 @@ if ( ! class_exists( 'GambitCacheMinify' ) ) {
 				$this->settings['css_include_inline'] = in_array( 'inline', $titan->getOption( 'css_includes' ) );
 			}
 			$this->settings['css_exclude'] = $titan->getOption( 'css_exclude' );
-			
+			$this->settings['css_exclude'] = trim( (string) $this->settings['css_exclude'] );
 			
 			/**
 			 * Blacklisted plugins are always included
@@ -207,11 +210,17 @@ if ( ! class_exists( 'GambitCacheMinify' ) ) {
 			// Get the scripts & output
 			$scriptsStyles = $this->getAllScriptsStyles( $content );
 			$output = $this->scriptStlyesLoader( $content, $scriptsStyles );
-			
+
+			// Combine Google Fonts
+			$combinedGoogleFonts = $this->combineGoogleFonts( $content );
 			
 			// Output the head/footer content
 			echo $content;
-			// $this->pageToCache .= $content;
+			
+			// Output the combined Google Fonts
+			if ( ! empty( $combinedGoogleFonts ) ) {
+				echo "<link rel='stylesheet' id='gambit-cache-google-font-css' href='" . esc_url( $combinedGoogleFonts ) . "' type='text/css' media='all' />";
+			}
 			
 			// Output the compressed stuff
 			if ( ! empty( $output['js']['url'] ) ) {
@@ -221,6 +230,88 @@ if ( ! class_exists( 'GambitCacheMinify' ) ) {
 				echo "<link rel='stylesheet' id='css_combinator_" . esc_attr( $output['css']['hash'] ) . "-css' href='" . esc_url( $output['css']['url'] ) . "' type='text/css' media='all' />";
 			}
 
+		}
+		
+		
+		/**
+		 * Generates a combined url of all the Google Fonts in the $content, also
+		 * removes the replaced stylesheets from $content
+		 *
+		 * @param	&$content	String	The head or footer content to look for the scripts & styles
+		 * @return				String	The URL of the combined Google Font stylesheet
+		 */
+		public function combineGoogleFonts( &$content ) {
+			
+			// Remove commented out stuff since we don't want to include those
+			$cleanedContent = preg_replace( "/<!--.*?-->/s", "", $content );
+			
+			$googleFontArgs = array(
+				'family' => array(),
+				'subset' => array()
+			);
+			
+			$googleFontsJoined = array();
+
+			preg_match_all( "/<link[^>]+fonts\.googleapis\.com[^>]+>/s", $cleanedContent, $matches );
+			if ( ! empty( $matches[0] ) ) {
+				foreach ( $matches[0] as $match ) {
+
+					$cleanedMatch = html_entity_decode( urldecode( $match ) );
+					preg_match( "/href=['\"][^\?'\"]+\?([^'\"]+)['\"]/", $cleanedMatch, $fontArgs );
+
+					if ( ! empty( $fontArgs[1] ) ) {
+						$fontArgs = $fontArgs[1];
+						
+						$fontArgs = wp_parse_args( $fontArgs );
+						
+						foreach ( $fontArgs as $key => $fontArg ) {
+							if ( $key == 'family' ) {
+								
+								$googleFontArgs[ $key ][] = $fontArg;
+								// Remember that we combined this family
+								$googleFontsJoined[] = $match;
+								
+							} else if ( $key == 'subset' ) {
+								
+								$fontArg = trim( $fontArg );
+								if ( ! empty( $fontArg ) ) {
+									$googleFontArgs[ $key ] = array_merge( explode( ',', $fontArg ), $googleFontArgs[ $key ] );
+								}
+								
+							} else if ( $key == 'ver' ) {
+								// ignore ver param
+
+							} else {
+								if ( empty( $googleFontArgs[ $key ] ) ) {
+									$googleFontArgs[ $key ] = $fontArg;
+								} else {
+									$googleFontArgs[ $key ] .= ',' . $fontArg;
+								}
+							}
+						}
+						
+					}
+				}
+			}
+			
+			// If no font families were joined, do nothing
+			if ( empty( $googleFontArgs['family'] ) ) {
+				return false;
+			}
+
+			$googleFontArgs['family'] = array_unique( $googleFontArgs['family'] );
+			$googleFontArgs['subset'] = array_unique( $googleFontArgs['subset'] );
+			
+			$googleFontArgs['family'] = implode( '|', $googleFontArgs['family'] );
+			$googleFontArgs['subset'] = implode( ',', $googleFontArgs['subset'] );
+			
+			// Adjust the content to remove the combined stuff
+			foreach ( $googleFontsJoined as $i => $tag ) {
+				$content = str_replace( $tag, '', $content );
+			}
+			
+			// Return the combined Google Font URL
+			return add_query_arg( $googleFontArgs, '//fonts.googleapis.com/css' );
 		}
 		
 		
