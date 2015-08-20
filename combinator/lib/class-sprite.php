@@ -104,7 +104,6 @@ if ( ! class_exists( 'GambitCacheSprite' ) ) {
 				return false;
 			}
 			
-			var_dump($implementation);
 			if ( method_exists( $implementation, 'gcCreateBlankImage' ) ) {
 				return call_user_func_array( array( $implementation, 'gcCreateBlankImage' ), array( $filePath, $imageType ) );
 			}
