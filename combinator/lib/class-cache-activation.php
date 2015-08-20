@@ -95,6 +95,9 @@ class GambitCacheActivation {
 						if ( ! $wp_filesystem->exists( trailingslashit( $dest ) . 'page-cache' ) ) {
 							$wp_filesystem->mkdir( trailingslashit( $dest ) . 'page-cache', 0755 );
 						}
+						if ( ! $wp_filesystem->exists( trailingslashit( $dest ) . 'sprite-cache' ) ) {
+							$wp_filesystem->mkdir( trailingslashit( $dest ) . 'sprite-cache', 0755 );
+						}
 						
 						// Create .htaccess
 						if ( ! $wp_filesystem->exists( trailingslashit( $dest ) . '.htaccess' ) ) {

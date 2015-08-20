@@ -140,10 +140,10 @@ class GambitCombinatorFiles {
 		$filePath = trailingslashit( trailingslashit( $dir ) . $subDir ) . $filename;
 		$fileURL = trailingslashit( trailingslashit( trailingslashit( trailingslashit( content_url() ) . 'gambit-cache' ) . 'minify-cache' ) . $subDir ) . $filename;
 
-		if ( ! $wp_filesystem->exists( trailingslashit( $dir ) . $subDir ) ) {
-			$wp_filesystem->mkdir( trailingslashit( $dir ) . $subDir );
-		}
 		if ( $wp_filesystem->is_writable( $dir ) ) {
+			if ( ! $wp_filesystem->exists( trailingslashit( $dir ) . $subDir ) ) {
+				$wp_filesystem->mkdir( trailingslashit( $dir ) . $subDir, 0755 );
+			}
 			$wp_filesystem->put_contents( $filePath, $contents, 0644 ); // Finally, store the file :)
 		}
 		

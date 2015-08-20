@@ -1,8 +1,5 @@
 <?php
 
-// TODO minify, combine Google Font css with pipe
-// <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,600,700,700italic|Roboto:400,500' rel='stylesheet' type='text/css'>
-	
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 if ( ! class_exists( 'GambitCacheMinify' ) ) {
@@ -55,9 +52,9 @@ if ( ! class_exists( 'GambitCacheMinify' ) ) {
 
 
 			add_action( 'wp_head', array( $this, 'startGatheringOutput' ), 0 );
-			add_action( 'wp_head', array( $this, 'endGatheringOutput' ), 9999 );
+			add_action( 'wp_head', array( $this, 'endGatheringOutput' ), 9998 ); // Needs to be 9998 since sprite starts at 9999
 
-			add_action( 'wp_footer', array( $this, 'startGatheringOutput' ), 0 );
+			add_action( 'wp_footer', array( $this, 'startGatheringOutput' ), 1 ); // Needs to be 1 since sprite ends at 0
 			add_action( 'wp_footer', array( $this, 'endGatheringOutput' ), 9999 );
 		}
 		
@@ -177,7 +174,7 @@ if ( ! class_exists( 'GambitCacheMinify' ) ) {
 			if ( ! $this->settings['js_enabled'] && ! $this->settings['css_enabled'] ) {
 				return;
 			}
-			if ( ! $this->isFrontEnd() ) {
+			if ( ! gambitCache_isFrontEnd() ) {
 				return;
 			}
 			$this->gatheringStarted = true;
@@ -738,41 +735,6 @@ if ( ! class_exists( 'GambitCacheMinify' ) ) {
 				'style_code_tags' => $styleTagsToReplace,
 				'style_codes' => $styleCodes,
 			);
-		}
-		
-		
-		
-		/**
-		 * Check whether we are currently in the frontend
-		 * Simply doing ! is_admin() doesn't cut it
-		 *
-		 * @return	void
-		 */
-		public function isFrontEnd() {
-			if ( is_admin() ) {
-				return false;
-			}
-			return is_404() ||
-				   is_archive() ||
-				   is_attachment() ||
-				   is_author() ||
-				   is_category() ||
-				   is_date() ||
-				   is_day() ||
-				   is_feed() ||
-				   is_front_page() ||
-				   is_home() ||
-				   is_month() ||
-				   is_page() ||
-				   is_page_template() ||
-				   is_preview() ||
-				   is_search() ||
-				   is_single() ||
-				   is_singular() ||
-				   is_tag() ||
-				   is_tax() ||
-				   is_time() ||
-				   is_year();
 		}
 		
 	}

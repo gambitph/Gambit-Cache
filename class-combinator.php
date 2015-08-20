@@ -1,5 +1,6 @@
 <?php
 
+require_once( 'combinator/lib/util.php' );
 require_once( 'combinator/lib/class-js.php' );
 require_once( 'combinator/lib/class-css.php' );
 require_once( 'combinator/lib/class-cache-activation.php' );
@@ -10,6 +11,9 @@ require_once( 'combinator/lib/class-page-cache-cleaner.php' );
 require_once( 'combinator/lib/class-object-cache-cleaner.php' );
 require_once( 'combinator/lib/class-minify.php' );
 require_once( 'combinator/lib/class-minify-cleaner.php' );
+require_once( 'combinator/lib/class-sprite.php' );
+require_once( 'combinator/lib/class-wp-image-editor-gd.php' );
+require_once( 'combinator/lib/class-wp-image-editor-imagick.php' );
 
 // Initializes Titan Framework
 require_once( 'titan-framework-checker.php' );
@@ -31,6 +35,7 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 			new GambitCachePageCacheCleaner();
 			new GambitCacheObjectCacheCleaner();
 			new GambitCacheMinifyCleaner();
+			new GambitCacheSprite();
 			
 		}
 		
@@ -38,4 +43,11 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 
 	new GambitCombinator();
 	
+}
+
+add_action('wp_footer', 'print_queries', 1000);
+function print_queries() {
+?>
+<!-- <?php echo get_num_queries(); ?> queries. <?php timer_stop(1); ?> seconds. -->
+<?php
 }
