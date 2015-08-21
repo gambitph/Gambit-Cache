@@ -21,12 +21,12 @@ if ( ! class_exists( 'GambitCacheImageEditorGD' ) ) {
 		 * @param	$height		Int		The image height of the blank image
 		 * @return				String	The path of the created blank image
 		 */
-		public static function gcCreateBlankImage( $filePath, $imageType, $width = 2000, $height = 2000 ) {
+		public static function gcCreateBlankImage( $filePath, $imageType, $width = 1000, $height = 1000 ) {
 			
 			$image = imagecreatetruecolor( $width, $height );
 			if ( $imageType == 'png' ) {
 				
-				// From // From http://webcodingeasy.com/PHP/Create-blank-transparent-PNG-images-using-PHP-GD-functions
+				// From http://webcodingeasy.com/PHP/Create-blank-transparent-PNG-images-using-PHP-GD-functions
 			    imagesavealpha( $image, true );
 			    $color = imagecolorallocatealpha( $image, 0, 0, 0, 127 );
 			    imagefill( $image, 0, 0, $color );

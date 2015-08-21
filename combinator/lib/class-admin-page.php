@@ -17,6 +17,14 @@ class GambitCacheAdminPage {
 		add_action( 'wp_ajax_user_clear_all_caches', array( $this, 'ajaxClearAllCaches' ) );
 		add_action( 'tf_save_options_' . GAMBIT_COMBINATOR, array( $this, 'clearAllCaches' ) );
 
+
+		// EWWW Image Optimizer compatibility, clear the cache when settings are saved
+		if ( ! empty( $_POST['option_page'] ) ) {
+			if ( $_POST['option_page'] == 'ewww_image_optimizer_options' ) {
+				add_action( 'admin_init', array( $this, 'clearImageCaches' ) );
+			}
+		}
+		
 	}
 	
 	public function adminEnqueueScripts() {
@@ -28,6 +36,24 @@ class GambitCacheAdminPage {
 			wp_send_json_error( __( 'Could not clear all caches', GAMBIT_COMBINATOR ) );
 		}
 		wp_send_json_success( __( 'All caches cleared', GAMBIT_COMBINATOR ) );
+	}
+	
+	
+	public function clearImageCaches() {
+		$hasError = false;
+		
+		// Clear page cache
+		if ( ! GambitCachePageCache::clearPageCache() ) {
+			$hasError = true;
+		}
+		
+		// Clear sprite cache
+	    if ( ! GambitCacheSprite::clearCache() ) {
+	    	$hasError = true;
+	    }
+		
+		return ! $hasError;
+		
 	}
 	
 	public function clearAllCaches() {
@@ -46,6 +72,11 @@ class GambitCacheAdminPage {
 		global $wpdb;
 		$wpdb->query( "DELETE FROM $wpdb->options WHERE option_name LIKE '_transient_%' AND option_name LIKE '%cmbntr%'" );
 	    if ( ! GambitCacheMinify::clearMinifyCache() ) {
+	    	$hasError = true;
+	    }
+		
+		// Clear sprite cache
+	    if ( ! GambitCacheSprite::clearCache() ) {
 	    	$hasError = true;
 	    }
 		

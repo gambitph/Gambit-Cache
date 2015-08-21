@@ -2,12 +2,12 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-if ( ! class_exists( 'GambitCacheImageEditorImagick' ) ) {
+if ( ! class_exists( 'GambitCacheEWWWImageEditorImagick' ) ) {
 	
 	require_once( ABSPATH . WPINC . "/class-wp-image-editor.php" );
-	require_once( ABSPATH . WPINC . "/class-wp-image-editor-imagick.php" );
+	// require_once( ABSPATH . WPINC . "/class-wp-image-editor-imagick.php" );
 
-	class GambitCacheImageEditorImagick extends WP_Image_Editor_Imagick {
+	class GambitCacheEWWWImageEditorImagick extends EWWWIO_Imagick_Editor {
 		
 		public static $trans64Generated = array();
 		

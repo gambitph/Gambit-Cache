@@ -10,14 +10,15 @@ if ( ! class_exists( 'GambitCacheSprite' ) ) {
 		
 		public $settings = array(
 			'sprite_enabled' => true,
-			'include_remotes' => true,
+			'include_remotes' => false,
 			'sprite_quality' => '60',
+			'sprite_size' => '1000',
 		);
 		
 		function __construct() {
 			
 			// Use our image editors instead of the default ones
-			add_filter( 'wp_image_editors', array( $this, 'addOurImageEditors' ) );
+			add_filter( 'wp_image_editors', array( $this, 'addOurImageEditors' ), 999 );
 
 			add_action( 'tf_done', array( $this, 'gatherSettings' ), 10 );
 			
@@ -34,26 +35,59 @@ if ( ! class_exists( 'GambitCacheSprite' ) ) {
 			// $this->settings['sprite_enabled'] = $titan->getOption( 'sprite_enabled' );
 			// $this->settings['include_remotes'] = $titan->getOption( 'sprite_include_remotes' );
 			// $this->settings['sprite_quality'] = $titan->getOption( 'sprite_quality' );
+			// $this->settings['sprite_size'] = $titan->getOption( 'sprite_size' );
 		}
 		
 		public function addOurImageEditors( $editors ) {
 
 			foreach ( $editors as $i => $editor ) {
 				if ( $editor == 'WP_Image_Editor_Imagick' ) {
+					require_once( 'class-wp-image-editor-imagick.php' );
 					$editors[ $i ] = 'GambitCacheImageEditorImagick';
-				} else if ( $editors == 'WP_Image_Editor_GD' ) {
+				} else if ( $editor == 'WP_Image_Editor_GD' ) {
+					require_once( 'class-wp-image-editor-gd.php' );
 					$editors[ $i ] = 'GambitCacheImageEditorGD';
+					
+				// Support for EWWW Image Optimizer
+				} else if ( $editor == 'EWWWIO_Imagick_Editor' ) {
+					require_once( 'class-ewww-image-editor-imagick.php' );
+					$editors[ $i ] = 'GambitCacheEWWWImageEditorImagick';
+				} else if ( $editor == 'EWWWIO_GD_Editor' ) {
+					require_once( 'class-ewww-image-editor-gd.php' );
+					$editors[ $i ] = 'GambitCacheEWWWImageEditorGD';
 				}
 			}
-			$editors = array( 'GambitCacheImageEditorGD' );
 
 			return $editors;
 		}
 		
+	
+		public static function clearCache() {
+			global $wp_filesystem;
+			if ( empty( $wp_filesystem ) ) {
+			    require_once ( ABSPATH . '/wp-admin/includes/file.php' );
+			    WP_Filesystem();
+			}
+
+			$upload_dir = wp_upload_dir(); // Grab uploads folder array
+			$dir = trailingslashit( $wp_filesystem->wp_content_dir() . 'gambit-cache' ) . 'sprite-cache';
+		
+			if ( $wp_filesystem->is_dir( $dir ) ) {
+				if ( $wp_filesystem->is_writable( $dir ) ) {
+					if ( $wp_filesystem->rmdir( $dir, true ) ) {
+						$wp_filesystem->mkdir( $dir );
+						return true;
+					}
+				}
+			}
+			
+			return false;
+		}
+		
 		public function startGatheringContent() {
-			// if ( ! $this->settings['minify_enabled'] ) {
-			// 	return;
-			// }
+			if ( ! $this->settings['sprite_enabled'] ) {
+				return;
+			}
 			if ( ! gambitCache_isFrontEnd() ) {
 				return;
 			}
@@ -105,7 +139,10 @@ if ( ! class_exists( 'GambitCacheSprite' ) ) {
 			}
 			
 			if ( method_exists( $implementation, 'gcCreateBlankImage' ) ) {
-				return call_user_func_array( array( $implementation, 'gcCreateBlankImage' ), array( $filePath, $imageType ) );
+				return call_user_func_array( 
+					array( $implementation, 'gcCreateBlankImage' ), 
+					array( $filePath, $imageType, (int) $this->settings['sprite_size'], (int) $this->settings['sprite_size'] )
+				);
 			}
 			
 			return false;
@@ -129,14 +166,14 @@ if ( ! class_exists( 'GambitCacheSprite' ) ) {
 				
 			}
 
-			// Pack the images inside 2000 x 2000 containers
+			// Pack the images inside sprite containers
 			$imagePacks = array();
 			foreach ( $imageTypes as $type => $imageArray ) {
 				
 				$numPacked = 0;
 				while ( $numPacked < count( $imageArray ) ) {
 					
-					$imagePack = new GambitCacheSpritePacker( 2000, 2000, $type );
+					$imagePack = new GambitCacheSpritePacker( (int) $this->settings['sprite_size'], (int) $this->settings['sprite_size'], $type );
 					$imagePacks[] = $imagePack;
 					
 					foreach ( $imageArray as $i => $imageData ) {
@@ -351,7 +388,7 @@ if ( ! class_exists( 'GambitCacheSprite' ) ) {
 				$height = (int) $matches[1];
 				
 				// Only entertain small images
-				if ( $width > 900 || $height > 900 ) {
+				if ( $width > (int) $this->settings['sprite_size'] / 2.5 || $height > (int) $this->settings['sprite_size'] / 2.5 ) {
 					continue;
 				}
 				
@@ -408,6 +445,7 @@ if ( ! class_exists( 'GambitCacheSprite' ) ) {
 			
 			// Change the src to a transparent pixel that has similar (but minimized dimensions)
 			$implementation = _wp_image_editor_choose();
+
 			if ( method_exists( $implementation, 'gcCreateTransBase64' ) ) {
 				$transBase64Data = call_user_func_array( array( $implementation, 'gcCreateTransBase64' ), array( $smallestFraction[0], $smallestFraction[1] ) );
 			
@@ -433,11 +471,11 @@ if ( ! class_exists( 'GambitCacheSprite' ) ) {
 			// $styles .= 'padding-bottom: ' . ( $imageData['tag_height'] / $imageData['tag_width'] * 100 ) . '%;';
 			
 			// [sprite-width] / [single-img-width-in-sprite] * 100 %
-			$styles .= 'background-size: ' . ( 2000 / $imageData['width'] * 100 ) . '%;';
+			$styles .= 'background-size: ' . ( (int) $this->settings['sprite_size'] / $imageData['width'] * 100 ) . '%;';
 			
 			// [image-offset-in-sprite] / ([sprite-width] - [single-image-width-in-sprite]) * 100
-			$styles .= 'background-position: ' . ( $imageData['x'] / ( 2000 - $imageData['width'] ) * 100 ) . '% ';
-			$styles .= ( $imageData['y'] / ( 2000 - $imageData['height'] ) * 100 ) . '%;';
+			$styles .= 'background-position: ' . ( $imageData['x'] / ( (int) $this->settings['sprite_size'] - $imageData['width'] ) * 100 ) . '% ';
+			$styles .= ( $imageData['y'] / ( (int) $this->settings['sprite_size'] - $imageData['height'] ) * 100 ) . '%;';
 			
 			// Add our styles
 			if ( preg_match( "/(style=['\"])([^'\"]*)(['\"])/", $newTag ) ) {
