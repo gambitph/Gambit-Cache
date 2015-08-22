@@ -10,7 +10,7 @@ if ( ! class_exists( 'GambitCacheSprite' ) ) {
 		
 		public $settings = array(
 			'sprite_enabled' => true,
-			'include_remotes' => false,
+			'sprite_include_remotes' => true,
 			'sprite_quality' => '60',
 			'sprite_size' => '1000',
 		);
@@ -31,11 +31,10 @@ if ( ! class_exists( 'GambitCacheSprite' ) ) {
 
 			$titan = TitanFramework::getInstance( GAMBIT_COMBINATOR );
 			
-			// TODO
-			// $this->settings['sprite_enabled'] = $titan->getOption( 'sprite_enabled' );
-			// $this->settings['include_remotes'] = $titan->getOption( 'sprite_include_remotes' );
-			// $this->settings['sprite_quality'] = $titan->getOption( 'sprite_quality' );
-			// $this->settings['sprite_size'] = $titan->getOption( 'sprite_size' );
+			$this->settings['sprite_enabled'] = $titan->getOption( 'sprite_enabled' );
+			$this->settings['sprite_include_remotes'] = $titan->getOption( 'sprite_include_remotes' );
+			$this->settings['sprite_quality'] = $titan->getOption( 'sprite_quality' );
+			$this->settings['sprite_size'] = $titan->getOption( 'sprite_size' );
 		}
 		
 		public function addOurImageEditors( $editors ) {
@@ -106,8 +105,11 @@ if ( ! class_exists( 'GambitCacheSprite' ) ) {
 			$content = ob_get_contents();
 			ob_end_clean();
 			
+			
 			// Gather all images
-			$this->gatherAllImages( $content );
+			if ( $this->settings['sprite_enabled'] ) {
+				$this->gatherAllImages( $content );
+			}
 			
 			// Output the head/footer content
 			echo $content;
@@ -393,7 +395,7 @@ if ( ! class_exists( 'GambitCacheSprite' ) ) {
 				}
 				
 				// Do not include remote images if set
-				if ( stripos( $url, get_site_url() ) === false && ! $this->settings['include_remotes'] ) {
+				if ( stripos( $url, get_site_url() ) === false && ! $this->settings['sprite_include_remotes'] ) {
 					continue;
 				}
 				

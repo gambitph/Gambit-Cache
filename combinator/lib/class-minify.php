@@ -19,6 +19,8 @@ if ( ! class_exists( 'GambitCacheMinify' ) ) {
 		
 		public $settings = array(
 			'minify_enabled' => true,
+			'remove_ver_from_urls' => true,
+			
 			'exclude_plugins' => array(),
 			'exclude_found_js' => array(),
 			'exclude_found_css' => array(),
@@ -100,6 +102,7 @@ if ( ! class_exists( 'GambitCacheMinify' ) ) {
 			$titan = TitanFramework::getInstance( GAMBIT_COMBINATOR );
 			
 			$this->settings['minify_enabled'] = $titan->getOption( 'minify_enabled' );
+			$this->settings['remove_ver_from_urls'] = $titan->getOption( 'remove_ver_from_urls' );
 			$this->settings['js_enabled'] = $titan->getOption( 'js_enabled' );
 			$this->settings['css_enabled'] = $titan->getOption( 'css_enabled' );
 			$this->settings['exclude_plugins'] = $titan->getOption( 'exclude_plugins' );
@@ -210,6 +213,11 @@ if ( ! class_exists( 'GambitCacheMinify' ) ) {
 
 			// Combine Google Fonts
 			$combinedGoogleFonts = $this->combineGoogleFonts( $content );
+
+			// Remove ver arg from styles & scripts
+			if ( $this->settings['remove_ver_from_urls'] ) {
+				$content = preg_replace( "/(<(script|link)[^>]+(src|href)=['\"][^'\"]+)(\?ver=[^#&'\"]+)(['\"])/", "$1$5", $content );
+			}
 			
 			// Output the head/footer content
 			echo $content;

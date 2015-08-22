@@ -204,6 +204,13 @@ class GambitCacheAdminPage {
 				'desc' => __( 'If you have a lot of plugins, then your site most likely loads a lot of different Javascript and Stylesheet files. Minify combines these files together and makes the filesize smaller for less browser requests.', GAMBIT_COMBINATOR ),
 			) );
 			$cachingTab->createOption( array(
+				'name' => __( 'Sprite Conversion', GAMBIT_COMBINATOR ),
+				'id' => 'sprite_enabled',
+				'type' => 'enable',
+				'default' => true,
+				'desc' => __( 'Small to medium sized images are automatically combined into larger sprite images. This lessens the number of browser requests since multiple image requests are replaced with one.', GAMBIT_COMBINATOR ),
+			) );
+			$cachingTab->createOption( array(
 			    'type' => 'save',
 			) );
 			
@@ -320,10 +327,28 @@ class GambitCacheAdminPage {
 			) );
 			
 			
+			$minifyTab->createOption( array(
+				'name' => __( 'General Settings', GAMBIT_COMBINATOR ),
+				'type' => 'heading',
+			) );
+			
+			$minifyTab->createOption( array(
+				'name' => sprintf( __( 'Remove %s from URLs', GAMBIT_COMBINATOR ), '<code>ver</code> arg' ),
+				'id' => 'remove_ver_from_urls',
+				'type' => 'enable',
+				'default' => true,
+				'desc' => __( 'Remove the version parameter from scripts and styles. This is to allow some proxy caching servers to cache your scripts and stylesheets. These are only removed if <code>ver</code> is the only parameter in the URL, this is to be safe so we do not affect other parameters.', GAMBIT_COMBINATOR ),
+			) );
+
+			$minifyTab->createOption( array(
+			    'type' => 'save',
+			) );
+			
 			
 			$minifyTab->createOption( array(
 				'name' => __( 'Javascript Settings', GAMBIT_COMBINATOR ),
 				'type' => 'heading',
+				'desc' => __( 'These settings are specific to minifying your Javascript files.', GAMBIT_COMBINATOR ),
 			) );
 			
 			$minifyTab->createOption( array(
@@ -380,6 +405,7 @@ class GambitCacheAdminPage {
 			$minifyTab->createOption( array(
 				'name' => __( 'CSS Settings', GAMBIT_COMBINATOR ),
 				'type' => 'heading',
+				'desc' => __( 'These settings are specific to minifying your stylesheets.', GAMBIT_COMBINATOR ),
 			) );
 			
 			$minifyTab->createOption( array(
@@ -434,6 +460,7 @@ class GambitCacheAdminPage {
 			$minifyTab->createOption( array(
 				'name' => __( 'Exclusion Settings', GAMBIT_COMBINATOR ),
 				'type' => 'heading',
+				'desc' => __( 'If some parts of your site stop working, or if you encounter Javascript errors, you can exclude parts of your site here from the minification process. This applies for both Javascript and stylesheets.', GAMBIT_COMBINATOR ),
 			) );
 			
 			$minifyTab->createOption( array(
@@ -491,6 +518,54 @@ class GambitCacheAdminPage {
 			) );
 
 			$minifyTab->createOption( array(
+			    'type' => 'save',
+			) );
+			
+			
+			
+			$spriteTab = $adminPanel->createTab( array(
+			    'name' => __( 'Sprite Settings', GAMBIT_COMBINATOR ),
+			) );
+			$spriteTab->createOption( array(
+				'name' => __( 'Sprite Settings', GAMBIT_COMBINATOR ),
+				'type' => 'heading',
+				'desc' => __( '', GAMBIT_COMBINATOR ),
+			) );
+			
+			$spriteTab->createOption( array(
+				'name' => __( 'Include Remote Images', GAMBIT_COMBINATOR ),
+				'id' => 'sprite_include_remotes',
+				'type' => 'checkbox',
+				'default' => true,
+				'desc' => __( 'Create sprites for remote images', GAMBIT_COMBINATOR ),
+			) );
+			
+			$spriteTab->createOption( array(
+				'name' => __( 'Sprite JPG Quality', GAMBIT_COMBINATOR ),
+				'id' => 'sprite_quality',
+				'type' => 'number',
+				'default' => '60',
+				'min' => '10',
+				'max' => '100',
+				'step' => '1',
+				'desc' => __( 'The quality of the image produced. Only applies for JPG sprites.', GAMBIT_COMBINATOR ),
+			) );
+			
+			$spriteTab->createOption( array(
+				'name' => __( 'Sprite Size', GAMBIT_COMBINATOR ),
+				'id' => 'sprite_size',
+				'type' => 'number',
+				'default' => '1000',
+				'unit' => 'px',
+				'min' => '1000',
+				'max' => '2000',
+				'step' => '100',
+				'desc' => __( 'The size (width & height) of sprites to create. A larger sprite can contain more images, but also requires more server memory.', GAMBIT_COMBINATOR ) .
+					'<br>' .
+					'<em><strong>' . __( 'WARNING:', GAMBIT_COMBINATOR ) . '</strong> ' . __( 'If you increase this and run out of memory, lower this value then clear the cache from the Caching Settings tab.', GAMBIT_COMBINATOR ) . '</em>',
+			) );
+
+			$spriteTab->createOption( array(
 			    'type' => 'save',
 			) );
 
