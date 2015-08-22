@@ -1,4 +1,6 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 	
 if ( ! function_exists( 'gambitCache_isFrontEnd' ) ) {
 	

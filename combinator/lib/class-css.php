@@ -1,5 +1,7 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 require_once( 'class-files.php' );
 	
 if ( ! class_exists( 'GambitCombinatorCSS' ) ) {
