@@ -23,6 +23,10 @@ if ( ! class_exists( 'GambitCacheSprite' ) ) {
 		);
 		
 		function __construct() {
+
+			if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+				return;
+			}
 			
 			// Use our image editors instead of the default ones
 			add_filter( 'wp_image_editors', array( $this, 'addOurImageEditors' ), 999 );

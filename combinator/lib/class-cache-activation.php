@@ -11,6 +11,10 @@ class GambitCacheActivation {
 	public $uploadMethod = '';
 	
 	function __construct() {
+
+		if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+			return;
+		}
 		
 		add_action( 'admin_init', array( $this, 'performFileSystemActions' ), 2 );
 		add_action( 'admin_init', array( $this, 'checkStatus' ), 1 );
