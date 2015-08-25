@@ -15,6 +15,7 @@ if ( ! class_exists( 'GambitCacheMinify' ) ) {
 			'Facebook Like Box',
 			'PopTrends',
 			'Smooth MouseWheel',
+			'Disqus Comment System',
 		);
 		
 		public $settings = array(
@@ -207,9 +208,15 @@ if ( ! class_exists( 'GambitCacheMinify' ) ) {
 			// ob_flush();
 			
 			
-			// Get the scripts & output
+			// Get the scripts
+			$timeStart = microtime( true );
 			$scriptsStyles = $this->getAllScriptsStyles( $content );
+			gambitCache_debug( ( microtime( true ) - $timeStart ) . ' Minify: to regex get all scripts & styles' );
+
+			// Get the output
+			$timeStart = microtime( true );
 			$output = $this->scriptStlyesLoader( $content, $scriptsStyles );
+			gambitCache_debug( ( microtime( true ) - $timeStart ) . ' Minify: combine & compress all scripts & styles' );
 
 			// Combine Google Fonts
 			$combinedGoogleFonts = $this->combineGoogleFonts( $content );
@@ -231,7 +238,11 @@ if ( ! class_exists( 'GambitCacheMinify' ) ) {
 			
 			// Output the compressed stuff
 			if ( ! empty( $output['js']['url'] ) ) {
-				echo "<script type='text/javascript' src='" . esc_url( $output['js']['url'] ) . "'></script>";
+				$defer = '';
+				// if ( current_filter() == 'wp_footer' ) {
+				// 	$defer = 'defer';
+				// }
+				echo "<script type='text/javascript' src='" . esc_url( $output['js']['url'] ) . "' " . $defer . "></script>";
 			}
 			if ( ! empty( $output['css']['url'] ) ) {
 				echo "<link rel='stylesheet' id='css_combinator_" . esc_attr( $output['css']['hash'] ) . "-css' href='" . esc_url( $output['css']['url'] ) . "' type='text/css' media='all' />";
@@ -361,10 +372,14 @@ if ( ! class_exists( 'GambitCacheMinify' ) ) {
 				$outputJS = get_transient( 'cmbntr_js' . $hash );
 				if ( empty( $outputJS ) && ( count( $files ) || ! empty( $inline ) ) ) {
 				
+					$timeStart = microtime( true );
 					$combined = GambitCombinatorJS::combineSources( $files, null, $inline );
+					gambitCache_debug( ( microtime( true ) - $timeStart ) . ' Minify: to combine scripts' );
 				
 					if ( $compressionLevel ) {
+						$timeStart = microtime( true );
 						$combined = GambitCombinatorJS::closureCompile( $combined, $compressionLevel );
+						gambitCache_debug( ( microtime( true ) - $timeStart ) . ' Minify: to closure compile (level ' . $compressionLevel . ') scripts' );
 					}
 				
 					$outputJS = GambitCombinatorJS::createFile(

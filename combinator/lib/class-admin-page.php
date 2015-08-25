@@ -5,6 +5,8 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 if ( ! class_exists( 'GambitCacheAdminPage' ) ) {
 
 class GambitCacheAdminPage {
+	
+	public static $previouslyCleared = false;
 
 	function __construct() {
 		
@@ -15,8 +17,14 @@ class GambitCacheAdminPage {
 		add_action( 'tf_create_options', array( $this, 'createAdminOptions' ) );
 		
 		add_action( 'wp_ajax_user_clear_all_caches', array( $this, 'ajaxClearAllCaches' ) );
+		add_action( 'wp_ajax_user_clear_image_caches', array( $this, 'ajaxClearImageCache') );
 		add_action( 'tf_save_options_' . GAMBIT_COMBINATOR, array( $this, 'clearAllCaches' ) );
-
+		add_action( 'tf_save_options_' . GAMBIT_COMBINATOR, array( $this, 'clearImageCacheOnSpriteSave' ) );
+		add_action( 'activated_plugin', array( $this, 'clearAllCaches' ) );
+		add_action( 'deactivated_plugin', array( $this, 'clearAllCaches' ) );
+		
+		// EWWW plugin activation check
+		add_action( 'activated_plugin', array( $this, 'clearImageCacheOnEWWW' ) );
 
 		// EWWW Image Optimizer compatibility, clear the cache when settings are saved
 		if ( ! empty( $_POST['option_page'] ) ) {
@@ -36,6 +44,29 @@ class GambitCacheAdminPage {
 			wp_send_json_error( __( 'Could not clear all caches', GAMBIT_COMBINATOR ) );
 		}
 		wp_send_json_success( __( 'All caches cleared', GAMBIT_COMBINATOR ) );
+	}
+	
+	public function ajaxClearImageCache() {
+		if ( ! $this->clearImageCaches() ) {
+			wp_send_json_error( __( 'Could not clear sprite cache', GAMBIT_COMBINATOR ) );
+		}
+		wp_send_json_success( __( 'Sprite cache cleared', GAMBIT_COMBINATOR ) );
+	}
+	
+	public function clearImageCacheOnEWWW( $plugin ) {
+		if ( stripos( $plugin, 'ewww-image-optimizer.php' ) !== false ) {
+			GambitCacheSprite::clearCache();
+		}
+	}
+	
+	public function clearImageCacheOnSpriteSave() {
+		if ( empty( $_POST['_wp_http_referer'] ) ) {
+			return;
+		}
+		
+		if ( stripos( $_POST['_wp_http_referer'], 'tab=sprite-settings' ) !== false ) {
+			GambitCacheSprite::clearCache();
+		}
 	}
 	
 	
@@ -58,6 +89,11 @@ class GambitCacheAdminPage {
 	
 	public function clearAllCaches() {
 		
+		if ( self::$previouslyCleared ) {
+			return;
+		}
+		self::$previouslyCleared = true;
+		
 		$hasError = false;
 		
 		// Clear object cache
@@ -76,9 +112,9 @@ class GambitCacheAdminPage {
 	    }
 		
 		// Clear sprite cache
-	    if ( ! GambitCacheSprite::clearCache() ) {
-	    	$hasError = true;
-	    }
+	    // if ( ! GambitCacheSprite::clearCache() ) {
+	    // 	$hasError = true;
+	    // }
 		
 		return ! $hasError;
 	}
@@ -177,10 +213,11 @@ class GambitCacheAdminPage {
 				'type' => 'ajax-button',
 				'label' => array(
 					__( 'Clear All Caches', GAMBIT_COMBINATOR ),
+					__( 'Clear Sprite Cache', GAMBIT_COMBINATOR ),
 				),
-				'action' => array( 'user_clear_all_caches' ),
+				'action' => array( 'user_clear_all_caches', 'user_clear_image_caches' ),
 				'class' => array( 'button-default' ),
-				'desc' => __( 'Empty the whole page cache.', GAMBIT_COMBINATOR ),
+				'desc' => __( 'Empty the cache. Sprite caches are different since images will be downloaded again for rebuilding.', GAMBIT_COMBINATOR ),
 			) );
 			$cachingTab->createOption( array(
 				'name' => __( 'Page Caching', GAMBIT_COMBINATOR ),
@@ -529,7 +566,7 @@ class GambitCacheAdminPage {
 			$spriteTab->createOption( array(
 				'name' => __( 'Sprite Settings', GAMBIT_COMBINATOR ),
 				'type' => 'heading',
-				'desc' => __( '', GAMBIT_COMBINATOR ),
+				'desc' => __( 'Multiple images are combined into a single image to save on the number of browser requests. This is only performed for <code>img</code> tags.', GAMBIT_COMBINATOR ),
 			) );
 			
 			$spriteTab->createOption( array(
@@ -538,6 +575,45 @@ class GambitCacheAdminPage {
 				'type' => 'checkbox',
 				'default' => true,
 				'desc' => __( 'Create sprites for remote images', GAMBIT_COMBINATOR ),
+			) );
+
+			$spriteTab->createOption( array(
+				'name' => __( 'Keep downloaded images', GAMBIT_COMBINATOR ),
+				'id' => 'sprite_seconds_redownload_images',
+				'type' => 'number',
+				'size' => 'medium',
+				'default' => '345600',
+				'unit' => 'seconds (default: 4 days)',
+				'min' => '3600',
+				'max' => '604800',
+				'step' => '60',
+				'desc' => __( 'Remote images are downloaded before being combined into a sprite, saved images are redownloaded after this amount of time. (Images will be redownloaded after page caching expires)', GAMBIT_COMBINATOR ),
+			) );
+			
+			$spriteTab->createOption( array(
+				'name' => __( 'Max Images to Combine', GAMBIT_COMBINATOR ),
+				'id' => 'sprite_combine_max',
+				'type' => 'number',
+				'default' => '30',
+				'unit' => 'images',
+				'min' => '5',
+				'max' => '100',
+				'step' => '1',
+				'desc' => __( 'The maximum number of images to combine into sprites per web page. Combining a large number of images will give you a lower number of browser requests, but will take more time & processing power to generate.', GAMBIT_COMBINATOR ),
+			) );
+			
+			$spriteTab->createOption( array(
+				'name' => __( 'Sprite Size', GAMBIT_COMBINATOR ),
+				'id' => 'sprite_size',
+				'type' => 'number',
+				'default' => '1000',
+				'unit' => 'px',
+				'min' => '1000',
+				'max' => '2000',
+				'step' => '100',
+				'desc' => __( 'The size (width & height) of sprites to create. A larger sprite can contain more images, but also requires more server memory.', GAMBIT_COMBINATOR ) .
+					'<br>' .
+					'<em><strong>' . __( 'WARNING:', GAMBIT_COMBINATOR ) . '</strong> ' . __( 'If you increase this and run out of memory, lower this value then clear the sprite cache from the Caching Settings tab.', GAMBIT_COMBINATOR ) . '</em>',
 			) );
 			
 			$spriteTab->createOption( array(
@@ -552,17 +628,12 @@ class GambitCacheAdminPage {
 			) );
 			
 			$spriteTab->createOption( array(
-				'name' => __( 'Sprite Size', GAMBIT_COMBINATOR ),
-				'id' => 'sprite_size',
-				'type' => 'number',
-				'default' => '1000',
-				'unit' => 'px',
-				'min' => '1000',
-				'max' => '2000',
-				'step' => '100',
-				'desc' => __( 'The size (width & height) of sprites to create. A larger sprite can contain more images, but also requires more server memory.', GAMBIT_COMBINATOR ) .
-					'<br>' .
-					'<em><strong>' . __( 'WARNING:', GAMBIT_COMBINATOR ) . '</strong> ' . __( 'If you increase this and run out of memory, lower this value then clear the cache from the Caching Settings tab.', GAMBIT_COMBINATOR ) . '</em>',
+				'name' => __( 'Exclude these Domains', GAMBIT_COMBINATOR ),
+				'id' => 'sprite_exclude',
+				'type' => 'textarea',
+				'default' => '',
+				'desc' => __( 'Enter a domain or part of a URL (one per line) that you want to exclude from the sprite creation process.', GAMBIT_COMBINATOR ),
+				'placeholder' => __( 'Enter a domain or part of a URL (one per line)', GAMBIT_COMBINATOR ),
 			) );
 
 			$spriteTab->createOption( array(

@@ -7,12 +7,19 @@ if ( ! class_exists( 'GambitCacheSprite' ) ) {
 	class GambitCacheSprite {
 		
 		public $gatheringStarted = false;
+		public static $stats = array(
+			'sprites' => 0,
+			'images' => 0,
+		);
 		
 		public $settings = array(
 			'sprite_enabled' => true,
 			'sprite_include_remotes' => true,
 			'sprite_quality' => '60',
 			'sprite_size' => '1000',
+			'sprite_combine_max' => '30',
+			'sprite_exclude' => '',
+			'sprite_seconds_redownload_images' => 345600,
 		);
 		
 		function __construct() {
@@ -35,6 +42,9 @@ if ( ! class_exists( 'GambitCacheSprite' ) ) {
 			$this->settings['sprite_include_remotes'] = $titan->getOption( 'sprite_include_remotes' );
 			$this->settings['sprite_quality'] = $titan->getOption( 'sprite_quality' );
 			$this->settings['sprite_size'] = $titan->getOption( 'sprite_size' );
+			$this->settings['sprite_combine_max'] = $titan->getOption( 'sprite_combine_max' );
+			$this->settings['sprite_exclude'] = $titan->getOption( 'sprite_exclude' );
+			$this->settings['sprite_seconds_redownload_images'] = $titan->getOption( 'sprite_seconds_redownload_images' );
 		}
 		
 		public function addOurImageEditors( $editors ) {
@@ -105,7 +115,6 @@ if ( ! class_exists( 'GambitCacheSprite' ) ) {
 			$content = ob_get_contents();
 			ob_end_clean();
 			
-			
 			// Gather all images
 			if ( $this->settings['sprite_enabled'] ) {
 				$this->gatherAllImages( $content );
@@ -113,9 +122,8 @@ if ( ! class_exists( 'GambitCacheSprite' ) ) {
 			
 			// Output the head/footer content
 			echo $content;
-
-			// var_dump($content);
 		}
+		
 		
 		public function createBlankSprite( $imageType, $filename ) {
 			$implementation = _wp_image_editor_choose();
@@ -200,10 +208,13 @@ if ( ! class_exists( 'GambitCacheSprite' ) ) {
 			$newImagesFound = array();
 			foreach ( $imagePacks as $imagePack ) {
 				
+				$timeStart = microtime( true );
+				
 				$allUrls = array();
-				// var_dump($imagePack->images);
+
 				foreach ( $imagePack->images as $image ) {
 					$allUrls[] = $image['url'];
+					self::$stats['images']++;
 				}
 				sort( $allUrls );
 			
@@ -227,8 +238,10 @@ if ( ! class_exists( 'GambitCacheSprite' ) ) {
 				
 					$filePath = $this->createBlankSprite( $imagePack->imageType, $hash );
 					if ( ! $filePath ) {
+						gambitCache_debug( sprintf( __( 'Sprite: [ERROR] Could not create blank sprite %s', GAMBIT_COMBINATOR ), $hash ) );
 						continue;
 					}
+					gambitCache_debug( sprintf( __( 'Sprite: Successfully created blank sprite %s', GAMBIT_COMBINATOR ), $filePath ) );
 				
 					$imageEditor = wp_get_image_editor( $filePath );
 					$imageEditor->gcCombineImages( $imagePack->images );
@@ -237,13 +250,19 @@ if ( ! class_exists( 'GambitCacheSprite' ) ) {
 				}
 				
 				if ( ! is_wp_error( $saved ) ) {
+					gambitCache_debug( sprintf( __( 'Sprite: Successfully combined %d images into %s', GAMBIT_COMBINATOR ), count( $imagePack->images ), $filePath ) );
 					foreach ( $imagePack->images as $image ) {
 						$image['combined_path'] = $filePath;
 						$image['combined_hash'] = $hash;
 						$image['combined_url'] = $fileURL;
 						$newImagesFound[] = $image;
 					}
+				} else {
+					gambitCache_debug( sprintf( __( 'Sprite: [ERROR] Could not combine %d images into %s', GAMBIT_COMBINATOR ), count( $imagePack->images ), $filePath ) );
 				}
+				
+				gambitCache_debug( ( microtime( true ) - $timeStart ) . ' Sprite: combine into sprite ' . $hash );
+				self::$stats['sprites']++;
 			}
 			
 			return $newImagesFound;
@@ -264,6 +283,7 @@ if ( ! class_exists( 'GambitCacheSprite' ) ) {
 			}
 			
 			$hash = substr( md5( $url ), 0, 16 );
+			$hashMini = substr( $hash, 0, 8 );
 			
 			$upload_dir = wp_upload_dir(); // Grab uploads folder array
 			$dir = trailingslashit( $wp_filesystem->wp_content_dir() . 'gambit-cache' ) . 'sprite-cache';
@@ -272,6 +292,27 @@ if ( ! class_exists( 'GambitCacheSprite' ) ) {
 			$imageType = '';
 			
 			$exists = false;
+			
+			// No need to download locally uploaded files
+			$isInUploadsDir = false;
+			$uploadDir = wp_upload_dir();
+			if ( stripos( $url, $upload_dir['baseurl'] ) !== false ) {
+				$localPath = str_replace( $upload_dir['baseurl'], $upload_dir['basedir'], $url );
+				$localPath = str_replace( '/', DIRECTORY_SEPARATOR, $localPath );
+				if ( $wp_filesystem->exists( $localPath ) ) {
+					$isInUploadsDir = true;
+					$exists = true;
+					$filePath = $localPath;
+					if ( stripos( $filePath, '.png' ) !== false ) {
+						$imageType = 'png';
+					} else if ( stripos( $filePath, '.gif' ) !== false ) {
+						$imageType = 'gif';
+					} else {
+						$imageType = 'jpg';
+					}
+				}
+			}
+				
 			if ( ! $exists && $wp_filesystem->exists( $filePath . '.jpg' ) ) {
 				$exists = true;
 				$filePath .= '.jpg';
@@ -288,8 +329,23 @@ if ( ! class_exists( 'GambitCacheSprite' ) ) {
 				$imageType = 'gif';
 			}
 			
+			// Check if transient expired
+			if ( ! $isInUploadsDir && $exists && get_transient( 'gc_sprt_' . $hashMini ) ) {
+				gambitCache_debug( sprintf( __( 'Sprite: Image already old, try and delete %s', GAMBIT_COMBINATOR ), $filePath ) );
+				if ( $wp_filesystem->is_writable( $filePath ) ) {
+					if ( $wp_filesystem->delete( $filePath, false, 'f' ) ) {
+						$exists = false;
+						gambitCache_debug( sprintf( __( 'Sprite: Successfully deleted old mimage %s', GAMBIT_COMBINATOR ), $filePath ) );
+					}
+				}
+				if ( $exists ) {
+					gambitCache_debug( sprintf( __( 'Sprite: [ERROR] Could not delete image, will still use old image in sprite %s', GAMBIT_COMBINATOR ), $filePath ) );
+				}
+			}
+			
 			$data = false;
 			if ( $exists ) {
+				gambitCache_debug( sprintf( __( 'Sprite: Image already exists in %s', GAMBIT_COMBINATOR ), $filePath ) );
 				$data = array(
 					'url' => $url,
 					'hash' => $hash,
@@ -301,11 +357,18 @@ if ( ! class_exists( 'GambitCacheSprite' ) ) {
 			
 				$response = wp_remote_get( $url );
 				if ( is_wp_error( $response ) ) {
+					gambitCache_debug( sprintf( __( 'Sprite: [ERROR] Could not download image for caching %s', GAMBIT_COMBINATOR ), $url ) );
 					return false;
 				}
+				gambitCache_debug( sprintf( __( 'Sprite: Successfully downloaded image for caching %s', GAMBIT_COMBINATOR ), $url ) );
 				
 				if ( ! preg_match( '/\/(png|jpeg|gif)$/', $response['headers']['content-type'] ) ) {
 					return false;
+				}
+				
+				// Set transient so we can re-download the image if necessary
+				if ( ! $isInUploadsDir ) {
+					set_transient( 'gc_sprt_' . $hashMini, 1, $this->settings['sprite_seconds_redownload_images'] );
 				}
 				
 				if ( $response['headers']['content-type'] == 'image/gif' ) {
@@ -326,7 +389,11 @@ if ( ! class_exists( 'GambitCacheSprite' ) ) {
 					$wp_filesystem->chmod( trailingslashit( $dir ) . $subDir, 0755 );
 				}
 				if ( $wp_filesystem->is_writable( trailingslashit( $dir ) . $subDir ) ) {
-					$wp_filesystem->put_contents( $filePath, $response['body'], 0644 ); // Finally, store the file :)
+					if ( $wp_filesystem->put_contents( $filePath, $response['body'], 0644 ) ) {
+						gambitCache_debug( sprintf( __( 'Sprite: Image saved in %s', GAMBIT_COMBINATOR ), $filePath ) );
+					} else {
+						gambitCache_debug( sprintf( __( 'Sprite: [ERROR] Could not save image at %s', GAMBIT_COMBINATOR ), $filePath ) );
+					}
 				}
 				
 				$data = array(
@@ -369,7 +436,18 @@ if ( ! class_exists( 'GambitCacheSprite' ) ) {
 				return;
 			}
 			
-			foreach ( $imageTags[0] as $imageTag ) {
+			// Form exclude regex
+			$excludeURLs = '';
+			if ( ! empty( $this->settings['sprite_exclude'] ) ) {
+				$excludeURLs = preg_replace( "/\n/", "|", $this->settings['sprite_exclude'] );
+				$excludeURLs = preg_replace( "/ /", "", $excludeURLs );
+			}
+			
+			foreach ( $imageTags[0] as $i => $imageTag ) {
+				
+				if ( $i >= $this->settings['sprite_combine_max'] ) {
+					break;
+				}
 				
 				// Only do this to images with width & heights
 				if ( ! preg_match( "/(width=['\"]\d+['\"].*height=['\"]\d+['\"]|height=['\"]\d+['\"].*width=['\"]\d+['\"])/", $imageTag ) ) {
@@ -383,6 +461,22 @@ if ( ! class_exists( 'GambitCacheSprite' ) ) {
 				}
 				$url = $matches[1];
 				
+				// Do not include remote images if set
+				if ( stripos( $url, get_site_url() ) === false && ! $this->settings['sprite_include_remotes'] ) {
+					continue;
+				}
+				
+				// Do not include excluded urls
+				if ( ! empty( $excludeURLs ) ) {
+					try {
+						if ( preg_match( '/(' . $excludeURLs . ')/', $url ) ) {
+							continue;
+						}
+					} catch ( Exception $e ) {
+						// regex failed, ignore
+					}
+				}
+				
 				// Get image dimensions
 				preg_match( "/width=['\"](\d+)['\"]/", $imageTag, $matches );
 				$width = (int) $matches[1];
@@ -394,16 +488,13 @@ if ( ! class_exists( 'GambitCacheSprite' ) ) {
 					continue;
 				}
 				
-				// Do not include remote images if set
-				if ( stripos( $url, get_site_url() ) === false && ! $this->settings['sprite_include_remotes'] ) {
-					continue;
-				}
-				
 				// Check whether we already have the image downloaded in sprite-cache
+				$timeStart = microtime( true );
 				$imageData = $this->saveCachedImageCopy( $url );
 				if ( empty( $imageData ) ) {
 					continue;
 				}
+				gambitCache_debug( ( microtime( true ) - $timeStart ) . ' Sprite: download ' . $url . ' to ' . $imageData['path'] );
 				
 				$imageData['tag_width'] = $width;
 				$imageData['tag_height'] = $height;
@@ -417,7 +508,6 @@ if ( ! class_exists( 'GambitCacheSprite' ) ) {
 			// $cssStyles = array();
 			foreach ( $imagesFound as $imageFound ) {
 				if ( ! empty( $imageFound['combined_hash'] ) ) {
-					// var_dump($imageFound);
 					
 					$newTag = $this->formNewTag( $imageFound );
 					

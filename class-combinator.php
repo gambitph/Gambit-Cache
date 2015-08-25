@@ -12,6 +12,7 @@ require_once( 'combinator/lib/class-object-cache-cleaner.php' );
 require_once( 'combinator/lib/class-minify.php' );
 require_once( 'combinator/lib/class-minify-cleaner.php' );
 require_once( 'combinator/lib/class-sprite.php' );
+require_once( 'combinator/lib/class-debug.php' );
 
 // Initializes Titan Framework
 require_once( 'titan-framework-checker.php' );
@@ -34,6 +35,7 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 			new GambitCacheObjectCacheCleaner();
 			new GambitCacheMinifyCleaner();
 			new GambitCacheSprite();
+			new GambitCacheDebug();
 			
 		}
 		

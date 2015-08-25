@@ -32,14 +32,20 @@ if ( ! class_exists( 'GambitCachePageCache' ) ) {
 
 			global $gambitPageCache;
 			if ( ! $this->pageCacheEnabled ) {
-				$gambitPageCache->clean();
+				try {
+					$gambitPageCache->clean();
+				} catch ( Exception $e ) {
+				}
 			}
 		}
 		
 		public static function clearPageCache() {
 			global $gambitPageCache;
 			if ( ! empty( $gambitPageCache ) ) {
-				$gambitPageCache->clean();
+				try {
+					$gambitPageCache->clean();
+				} catch ( Exception $e ) {
+				}
 				return true;
 			}
 			return false;
@@ -112,6 +118,7 @@ if ( ! class_exists( 'GambitCachePageCache' ) ) {
 				$currentOb = ob_get_clean();
 		        $this->pageToCache .= $currentOb;
 		    }
+
 			echo $this->pageToCache;
 			
 			if ( is_404() ) {

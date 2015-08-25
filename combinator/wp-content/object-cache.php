@@ -664,7 +664,10 @@ class GambitObjectCache {
 		
 		do_action( 'gambit_objectcache_reset' );
 		
-		$this->cacher->clean();
+		try {
+			$this->cacher->clean();
+		} catch ( Exception $e ) {
+		}
 		return true;
     }
 

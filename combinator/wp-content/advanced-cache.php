@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) die();
 
 	// return;
 	require_once( 'gambit-cache/lib/phpfastcache.php' );
-	
+
 	$config = array(
 		'default_chmod' => 0755,
 		"storage" => 'auto',
@@ -60,7 +60,7 @@ if ( ! defined( 'ABSPATH' ) ) die();
 	$url .= in_array( $_SERVER['SERVER_PORT'], array('80', '443') ) ? '' : ':' . $_SERVER['SERVER_PORT'];
 	$url .= $_SERVER['REQUEST_URI'];
 
-	if ( preg_match( '/wp\-.*\.php/', $url ) ) {
+	if ( preg_match( '/\/wp\-/', $url ) ) {
 		return;
 	}
 
