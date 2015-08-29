@@ -65,7 +65,7 @@ if ( ! class_exists( 'GambitCacheEWWWImageEditorImagick' ) ) {
 				$subImage = wp_get_image_editor( $imageData['path'] );
 				$this->image->compositeImage( 
 					$subImage->image, 
-					Imagick::COMPOSITE_DEFAULT, 
+					Imagick::COMPOSITE_COPY, //Imagick::COMPOSITE_DEFAULT, 
 					$imageData['x'], 
 					$imageData['y']
 				);
