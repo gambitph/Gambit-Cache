@@ -14,6 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) die();
 	class GambitAdvancedCache { }
 
 	// return;
+	$continue = true;
 	require_once( 'gambit-cache/lib/phpfastcache.php' );
 
 	$config = array(
@@ -22,52 +23,53 @@ if ( ! defined( 'ABSPATH' ) ) die();
 		"fallback" => "files", // Doesn't work anymore, see if statement below
 
 		"securityKey" => "auto",
-		"htaccess" => true,
+		"htaccess" => false,
 		"path" => ABSPATH . "wp-content/gambit-cache/page-cache",
-	
-		// "memcache" => array(
-		// 	array( "127.0.0.1", 11211, 1 ),
-		// ),
-		//
-		// "redis" => array(
-		// 	"host" => "127.0.0.1",
-		// 	"port" => "",
-		// 	"password" => "",
-		// 	"database" => "",
-		// 	"timeout" => ""
-		// ),
 	);
 	
 	global $gambitPageCache;
-	phpFastCache::setup( $config );
-	$gambitPageCache = phpFastCache( "files" );
+	
+	try {
+		phpFastCache::setup( $config );
+		$gambitPageCache = phpFastCache( "files" );
+	} catch ( Exception $e ) {
+		$continue = false;
+	}
 	// $gambitPageCache->option( 'path', ABSPATH . "wp-content/gambit-cache/page-cache" );
 
-
-	$wpLoggedInCookie = false;
-	foreach ( $_COOKIE as $key => $cookie ) {
-		if ( preg_match( "/^wordpress_logged_in/", $key ) ) {
-			$wpLoggedInCookie = true;
-			break;
+	if ( $continue ) {
+		foreach ( $_COOKIE as $key => $cookie ) {
+			if ( preg_match( "/^wordpress_logged_in/", $key ) ) {
+				$continue = false;
+				break;
+			}
 		}
 	}
-	if ( $wpLoggedInCookie || ! empty( $_POST ) ) {
-		return;
+	if ( ! empty( $_POST ) ) {
+		$continue = false;
 	}
 
-	$url  = isset( $_SERVER['HTTPS'] ) && 'on' === $_SERVER['HTTPS'] ? 'https' : 'http';
-	$url .= '://' . $_SERVER['SERVER_NAME'];
-	$url .= in_array( $_SERVER['SERVER_PORT'], array('80', '443') ) ? '' : ':' . $_SERVER['SERVER_PORT'];
-	$url .= $_SERVER['REQUEST_URI'];
+	if ( $continue ) {
+		$url  = isset( $_SERVER['HTTPS'] ) && 'on' === $_SERVER['HTTPS'] ? 'https' : 'http';
+		$url .= '://' . $_SERVER['SERVER_NAME'];
+		$url .= in_array( $_SERVER['SERVER_PORT'], array('80', '443') ) ? '' : ':' . $_SERVER['SERVER_PORT'];
+		$url .= $_SERVER['REQUEST_URI'];
 
-	if ( preg_match( '/\/wp\-/', $url ) ) {
-		return;
+		if ( preg_match( '/\/wp\-/', $url ) ) {
+			$continue = false;
+		}
 	}
 
-	$url = preg_replace( '/\#.*$/', '', $url );
-	$pageHash = substr( md5( $url ), 0, 8 );
-
-	$html = $gambitPageCache->get( $pageHash );
+	$html = '';
+	if ( $continue ) {
+		$url = preg_replace( '/\#.*$/', '', $url );
+		$pageHash = substr( md5( $url ), 0, 8 );
+	
+		try {
+			$html = $gambitPageCache->get( $pageHash );
+		} catch ( Exception $e ) {
+		}
+	}
 
 	if ( $html ) {
 		// $headers = $gambitPageCache->get( $pageHash . '_headers' );

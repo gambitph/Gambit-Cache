@@ -13,6 +13,7 @@ class GambitCombinatorJS extends GambitCombinatorFiles {
 		$codeHash = substr( md5( $code ), 0, 8 );
 		$failedBefore = get_transient( 'cmbntr_fail' . $codeHash );
 		if ( $failedBefore ) {
+			gambitCache_debug( sprintf( __( 'Minify: Closure Compile previously failed, skipping %s', GAMBIT_COMBINATOR ), $codeHash ) );
 			return $code;
 		}
 	
@@ -41,12 +42,15 @@ class GambitCombinatorJS extends GambitCombinatorFiles {
 		    )
 		);
 		
-		if ( class_exists( 'WP_Error' ) && function_exists( 'is_wp_error' ) ) {
+		// if ( class_exists( 'WP_Error' ) && function_exists( 'is_wp_error' ) ) {
 			if ( is_wp_error( $response ) ) {
 				set_transient( 'cmbntr_fail' . $codeHash, '1', MINUTE_IN_SECONDS );
+				gambitCache_debug( sprintf( __( 'Minify: [ERROR] Closure Compile post failed %s', GAMBIT_COMBINATOR ), $codeHash ) );
 				return $code;
+			} else {
+				gambitCache_debug( sprintf( __( 'Minify: Successfully compiled with Closure Compile %s', GAMBIT_COMBINATOR ), $codeHash ) );
 			}
-		}
+		// }
 
 		if ( is_array( $response ) && ! empty( $response['response']['code'] ) && ! empty( $response['body'] ) ) {
 			if ( $response['response']['code'] == 200 
@@ -54,6 +58,7 @@ class GambitCombinatorJS extends GambitCombinatorFiles {
 				$code = $response['body'];
 			} else {
 				set_transient( 'cmbntr_fail' . $codeHash, '1', MINUTE_IN_SECONDS );
+				gambitCache_debug( sprintf( __( 'Minify: [ERROR] Closure Compile post failed: Too many compiles performed recently %s', GAMBIT_COMBINATOR ), $codeHash ) );
 			}
 		} else {
 			set_transient( 'cmbntr_fail' . $codeHash, '1', MINUTE_IN_SECONDS );

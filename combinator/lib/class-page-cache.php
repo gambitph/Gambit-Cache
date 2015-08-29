@@ -11,9 +11,9 @@ if ( ! class_exists( 'GambitCachePageCache' ) ) {
 
 		function __construct() {
 			
-			if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
-				return;
-			} 
+			// if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+			// 	return;
+			// }
 			
 			// Record the contents of the page
 			add_action( 'plugins_loaded', array( $this, 'startRecordingPage' ), 1 );
@@ -31,7 +31,7 @@ if ( ! class_exists( 'GambitCachePageCache' ) ) {
 			$this->expiration = $titan->getOption( 'page_cache_expiration' );
 
 			global $gambitPageCache;
-			if ( ! $this->pageCacheEnabled ) {
+			if ( ! empty( $gambitPageCache ) && $this->pageCacheEnabled ) {
 				try {
 					$gambitPageCache->clean();
 				} catch ( Exception $e ) {
@@ -45,10 +45,11 @@ if ( ! class_exists( 'GambitCachePageCache' ) ) {
 				try {
 					$gambitPageCache->clean();
 				} catch ( Exception $e ) {
+					return false;
 				}
 				return true;
 			}
-			return false;
+			return true;
 		}
 		
 		
@@ -81,6 +82,9 @@ if ( ! class_exists( 'GambitCachePageCache' ) ) {
 				return;
 			}
 			if ( is_user_logged_in() ) {
+				return;
+			}
+			if ( is_customize_preview() ) {
 				return;
 			}
 			if ( ! empty( $_POST ) ) {
@@ -121,6 +125,9 @@ if ( ! class_exists( 'GambitCachePageCache' ) ) {
 
 			echo $this->pageToCache;
 			
+			if ( is_preview() ) {
+				return;
+			}
 			if ( is_404() ) {
 				return;
 			}
@@ -136,7 +143,11 @@ if ( ! class_exists( 'GambitCachePageCache' ) ) {
 					$this->pageToCache = gzencode( $this->pageToCache, 6, FORCE_GZIP );
 				}
 				
-		        $gambitPageCache->set( $pageHash, $this->pageToCache, $this->expiration );
+				try {
+					$gambitPageCache->set( $pageHash, $this->pageToCache, $this->expiration );
+				} catch ( Exception $e ) {
+				}
+		        
 			}
 			
 		}

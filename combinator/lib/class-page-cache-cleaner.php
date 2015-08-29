@@ -3,8 +3,13 @@
 if ( ! class_exists( 'GambitCachePageCacheCleaner' ) ) {
 	
 class GambitCachePageCacheCleaner {
+	
+	public $pageCacheEnabled = true;
 
 	function __construct() {
+		// Load page cache settings
+		add_action( 'tf_done', array( $this, 'gatherSettings' ), 10 );
+		
 		// Erase the cache for the current page on comment
 		add_action( 'wp_insert_comment', array( $this, 'clearOnInsertComment' ), 10, 2 );
 		// Delete cache for the post that was updated
@@ -15,11 +20,21 @@ class GambitCachePageCacheCleaner {
 		}
 	}
 	
+	public function gatherSettings() {
+		$titan = TitanFramework::getInstance( GAMBIT_COMBINATOR );
+		
+		$this->pageCacheEnabled = $titan->getOption( 'page_cache_enabled' );
+	}
+	
 	public function deleteCache( $url, $postID = false ) {
 		global $gambitPageCache;
 		if ( ! empty( $gambitPageCache ) ) {
 			$pageHash = GambitCachePageCache::getHash( $url );
-			$gambitPageCache->delete( $pageHash );
+			
+			try {
+				$gambitPageCache->delete( $pageHash );
+			} catch ( Exception $e ) {
+			}
 			
 			do_action( 'gc_page_cache_deleted', $postID );
 			return true;
@@ -28,17 +43,23 @@ class GambitCachePageCacheCleaner {
 	}
 	
 	public function clearOnUpdatedMeta( $metaID, $objectID, $metaKey, $metaValue ) {
-		$this->deleteCache( get_permalink( $objectID ), $objectID );
+		if ( $this->pageCacheEnabled ) {
+			$this->deleteCache( get_permalink( $objectID ), $objectID );
+		}
 	}
 	
 	public function clearOnInsertComment( $id, $comment ) {
-		$comment = get_comment( $id ); 
-		$postID = $comment ? $comment->comment_post_ID : false;
-		$this->deleteCache( $_SERVER['HTTP_REFERER'], $postID );
+		if ( $this->pageCacheEnabled ) {
+			$comment = get_comment( $id ); 
+			$postID = $comment ? $comment->comment_post_ID : false;
+			$this->deleteCache( $_SERVER['HTTP_REFERER'], $postID );
+		}
 	}
 	
 	public function clearOnSavePost( $postID ) {
-		$this->deleteCache( get_permalink( $postID ), $postID );
+		if ( $this->pageCacheEnabled ) {
+			$this->deleteCache( get_permalink( $postID ), $postID );
+		}
 	}
 	
 	

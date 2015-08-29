@@ -24,9 +24,9 @@ if ( ! class_exists( 'GambitCacheSprite' ) ) {
 		
 		function __construct() {
 
-			if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
-				return;
-			}
+			// if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+			// 	return;
+			// }
 			
 			// Use our image editors instead of the default ones
 			add_filter( 'wp_image_editors', array( $this, 'addOurImageEditors' ), 999 );
@@ -102,6 +102,12 @@ if ( ! class_exists( 'GambitCacheSprite' ) ) {
 				return;
 			}
 			if ( ! gambitCache_isFrontEnd() ) {
+				return;
+			}
+			if ( is_preview() ) {
+				return;
+			}
+			if ( is_customize_preview() ) {
 				return;
 			}
 			$this->gatheringStarted = true;

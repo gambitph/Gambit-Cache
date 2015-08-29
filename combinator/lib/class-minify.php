@@ -49,9 +49,9 @@ if ( ! class_exists( 'GambitCacheMinify' ) ) {
 			apply_filters( 'gc_blacklisted_plugins', array( $this, 'addBlackListedPlugins' ), 1 );
 				
 
-			if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
-				return;
-			}
+			// if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+			// 	return;
+			// }
 
 
 			add_action( 'wp_head', array( $this, 'startGatheringOutput' ), 0 );
@@ -176,6 +176,12 @@ if ( ! class_exists( 'GambitCacheMinify' ) ) {
 				return;
 			}
 			if ( ! $this->settings['js_enabled'] && ! $this->settings['css_enabled'] ) {
+				return;
+			}
+			if ( is_preview() ) {
+				return;
+			}
+			if ( is_customize_preview() ) {
 				return;
 			}
 			if ( ! gambitCache_isFrontEnd() ) {
@@ -607,6 +613,9 @@ if ( ! class_exists( 'GambitCacheMinify' ) ) {
 						
 						$scriptTagsToReplace[] = $scriptTag;
 						$scriptSrcs[] = $src;
+						
+						gambitCache_debug( sprintf( __( 'Minify: Found script %s', GAMBIT_COMBINATOR ), $src ) );
+						
 						continue;
 					}
 					
@@ -692,6 +701,8 @@ if ( ! class_exists( 'GambitCacheMinify' ) ) {
 						
 						$linkTagsToReplace[] = $linkTag;
 						$linkSrcs[] = $src;
+						
+						gambitCache_debug( sprintf( __( 'Minify: Found style %s', GAMBIT_COMBINATOR ), $src ) );
 					}
 				}
 			}

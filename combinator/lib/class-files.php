@@ -98,11 +98,21 @@ class GambitCombinatorFiles {
 				$failedBefore = get_transient( 'cmbntr_fail' . $srcHash );
 				if ( $failedBefore ) {
 					$continueLoad = false;
+					gambitCache_debug( sprintf( __( 'Minify: File download previously failed, skipping %s', GAMBIT_COMBINATOR ), $src ) );
 				}
 			}
 			
 			if ( $continueLoad ) {
-				$content = wp_remote_fopen( $src );
+				// $content = wp_remote_fopen( $src );
+				$content = '';
+				$response = wp_remote_get( $src );
+				if ( ! is_wp_error( $response ) ) {
+					$content = $response['body'];
+					
+					gambitCache_debug( sprintf( __( 'Minify: Successfully downloaded %s', GAMBIT_COMBINATOR ), $src ) );
+				} else {
+					gambitCache_debug( sprintf( __( 'Minify: [ERROR] Could not download %s', GAMBIT_COMBINATOR ), $src ) );
+				}
 			}
 			
 			if ( $type == 'css' ) {

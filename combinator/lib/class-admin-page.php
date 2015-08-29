@@ -1,4 +1,10 @@
 <?php
+
+// TODO download (remote) files to minify first for future faster minification
+// TODO toggle for debug mode
+// TODO stats on bottom of page
+// FIXME saving becomes 404 sometimes
+
 	
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
@@ -22,6 +28,7 @@ class GambitCacheAdminPage {
 		add_action( 'tf_save_options_' . GAMBIT_COMBINATOR, array( $this, 'clearImageCacheOnSpriteSave' ) );
 		add_action( 'activated_plugin', array( $this, 'clearAllCaches' ) );
 		add_action( 'deactivated_plugin', array( $this, 'clearAllCaches' ) );
+		add_action( 'customize_save_after', array( $this, 'clearAllCaches' ) );
 		
 		// EWWW plugin activation check
 		add_action( 'activated_plugin', array( $this, 'clearImageCacheOnEWWW' ) );
@@ -299,12 +306,15 @@ class GambitCacheAdminPage {
 				'type' => 'heading',
 				'desc' => __( 'These are the settings used to connect to your caching servers. The caching setup is auto-detected depending on what is available from your setup. You normally would not have to adjust these since these are usually the default connection details.', GAMBIT_COMBINATOR ),
 			) );
-			global $wp_object_cache;
+			// global $wp_object_cache;
+			global $gcObjectCacheLog;
 			$cachingTab->createOption( array(
 				'name' => __( 'Connection Log', GAMBIT_COMBINATOR ),
 				'paragraph' => false,
 				'type' => 'note',
-				'desc' => '<pre class="gc-conn-log">' . ( method_exists( $wp_object_cache, 'getLog' ) ? $wp_object_cache->getLog() : __( 'No logs available, object caching is disabled', GAMBIT_COMBINATOR ) ) . '</pre>',
+				// 'desc' => '<pre class="gc-conn-log">' . ( method_exists( $wp_object_cache, 'getLog' ) ? $wp_object_cache->getLog() : __( 'No logs available, object caching is either disabled, or no caching solution was found.', GAMBIT_COMBINATOR ) ) . '</pre>',
+				'desc' => '<pre class="gc-conn-log">' . ( ! empty( $gcObjectCacheLog ) ? join( "\n", $gcObjectCacheLog ) : __( 'No logs available, object caching is disabled.', GAMBIT_COMBINATOR ) ) . '</pre>',
+				
 			) );
 			$cachingTab->createOption( array(
 				'name' => __( 'Memcache Host', GAMBIT_COMBINATOR ),
