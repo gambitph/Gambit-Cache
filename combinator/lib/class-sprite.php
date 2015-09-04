@@ -419,15 +419,19 @@ if ( ! class_exists( 'GambitCacheSprite' ) ) {
 			if ( ! empty( $data ) ) {
 				$implementation = _wp_image_editor_choose();
 				
-				if ( $implementation == 'GambitCacheImageEditorImagick' ) {
-					$image = new Imagick( $data['path'] ); 
-					$dim = $image->getImageGeometry();
-					$data['width'] = $dim['width'];
-					$data['height'] = $dim['height'];
-				} else {
-					$dim = getimagesize( $data['path'] );
-					$data['width'] = $dim[0];
-					$data['height'] = $dim[1];
+				try {
+					if ( $implementation == 'GambitCacheImageEditorImagick' ) {
+						$image = new Imagick( $data['path'] ); 
+						$dim = $image->getImageGeometry();
+						$data['width'] = $dim['width'];
+						$data['height'] = $dim['height'];
+					} else {
+						$dim = getimagesize( $data['path'] );
+						$data['width'] = $dim[0];
+						$data['height'] = $dim[1];
+					}
+				} catch ( Exception $e ) {
+					return false;
 				}
 			}
 			

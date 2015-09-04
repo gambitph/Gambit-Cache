@@ -40,7 +40,7 @@ if ( ! function_exists( 'gambitCache_debug' ) ) {
 	function gambitCache_debug( $message ) {
 		GambitCacheDebug::$messages[] = $message;
 		// if ( is_admin() ) {
-			error_log( $message );
+			// error_log( $message );
 		// }
 	}	
 }
