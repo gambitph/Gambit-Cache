@@ -16,6 +16,7 @@ if ( ! class_exists( 'GambitCacheMinify' ) ) {
 			'PopTrends',
 			'Smooth MouseWheel',
 			'Disqus Comment System',
+			'The Loading Bar',
 		);
 		
 		public $settings = array(
@@ -157,7 +158,11 @@ if ( ! class_exists( 'GambitCacheMinify' ) ) {
 					$this->settings['exclude_plugins'][] = $slug;
 				}
 			}
-			$this->settings['exclude_plugins'] = array_unique( $this->settings['exclude_plugins'] );
+			if ( ! empty( $this->settings['exclude_plugins'] ) ) {
+				$this->settings['exclude_plugins'] = array_unique( $this->settings['exclude_plugins'] );
+			} else {
+				$this->settings['exclude_plugins'] = array();
+			}
 			
 			if ( $this->settings['exclude_plugins'] != $titan->getOption( 'exclude_plugins' ) ) {
 				$titan->setOption( 'exclude_plugins', $this->settings['exclude_plugins'] );

@@ -21,7 +21,7 @@ if ( ! class_exists( 'GambitCachePageCache' ) ) {
 			
 			// Load page cache settings
 			add_action( 'tf_done', array( $this, 'gatherSettings' ), 10 );
-			
+			add_action( 'tf_save_admin_' . GAMBIT_COMBINATOR, array( __CLASS__, 'clearPageCache' ) );
 		}
 		
 		public function gatherSettings() {
@@ -30,13 +30,6 @@ if ( ! class_exists( 'GambitCachePageCache' ) ) {
 			$this->pageCacheEnabled = $titan->getOption( 'page_cache_enabled' );
 			$this->expiration = $titan->getOption( 'page_cache_expiration' );
 
-			global $gambitPageCache;
-			if ( ! empty( $gambitPageCache ) && $this->pageCacheEnabled ) {
-				try {
-					$gambitPageCache->clean();
-				} catch ( Exception $e ) {
-				}
-			}
 		}
 		
 		public static function clearPageCache() {
@@ -116,7 +109,7 @@ if ( ! class_exists( 'GambitCachePageCache' ) ) {
 		    // We'll need to get the number of ob levels we're in, so that we can iterate over each, collecting
 		    // that buffer's output into the final output.
 		    $levels = ob_get_level();
-
+			
 			// @see http://stackoverflow.com/questions/772510/wordpress-filter-to-modify-final-html-output/22818089#22818089
 		    for ( $i = 0; $i < $levels; $i++ ) {
 				$currentOb = ob_get_clean();
