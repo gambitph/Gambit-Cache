@@ -1,4 +1,4 @@
-Order Deny,Allow
+Order Allow,Deny
 Deny from all
 Allow from 127.0.0.1
 <FilesMatch "\.(js|css|gif|jpe?g|png)$">

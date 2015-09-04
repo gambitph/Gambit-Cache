@@ -4,6 +4,7 @@
 // TODO toggle for debug mode
 // TODO stats on bottom of page
 // FIXME saving becomes 404 sometimes
+// TODO add non-blocking request for preloading caching
 
 	
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly

@@ -18,14 +18,14 @@ require_once( 'combinator/lib/class-debug.php' );
 require_once( 'titan-framework-checker.php' );
 
 if ( ! class_exists( 'GambitCombinator' ) ) {
-	
+
 	class GambitCombinator {
-		
+
 		/**
 		 * Hook into WordPress
 		 */
 		function __construct() {
-			
+
 			new GambitCacheAdminPage();
 			new GambitCacheActivation();
 			new GambitCacheDeactivation();
@@ -36,18 +36,18 @@ if ( ! class_exists( 'GambitCombinator' ) ) {
 			new GambitCacheMinifyCleaner();
 			new GambitCacheSprite();
 			new GambitCacheDebug();
-			
+
 		}
-		
+
 	}
 
 	new GambitCombinator();
-	
+
 }
 
-add_action('wp_footer', 'print_queries', 1000);
+add_action( 'wp_footer', 'print_queries', 1000 );
 function print_queries() {
 ?>
-<!-- <?php echo get_num_queries(); ?> queries. <?php timer_stop(1); ?> seconds. -->
+<!-- <?php echo get_num_queries(); ?> queries. <?php timer_stop( 1 ); ?> seconds. -->
 <?php
 }
