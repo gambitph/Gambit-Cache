@@ -2,7 +2,7 @@
 
 global $wpdb;
 
-$options = $wpdb->get_var( "SELECT option_value FROM $wpdb->options WHERE option_name = 'combinator_options'" );
+$options = $wpdb->get_var( "SELECT option_value FROM $wpdb->options WHERE option_name = 'gambit_cache_options'" );
 $options = maybe_unserialize( maybe_unserialize( $options ) );
 $objectCacheEnabled = ! empty( $options['object_cache_enabled'] ) ? $options['object_cache_enabled'] : false;
 
@@ -44,7 +44,7 @@ if ( $objectCacheEnabled ) {
 		global $wpdb;
 		global $gcObjectCacheLog;
 
-		$options = $wpdb->get_var( "SELECT option_value FROM $wpdb->options WHERE option_name = 'combinator_options'" );
+		$options = $wpdb->get_var( "SELECT option_value FROM $wpdb->options WHERE option_name = 'gambit_cache_options'" );
 		$options = maybe_unserialize( maybe_unserialize( $options ) );
 	
 		$memcacheHosts = ! empty( $options['memcache_host'] ) ? $options['memcache_host'] : '';
@@ -548,7 +548,7 @@ class GambitObjectCache {
 	public function initCache() {
 		global $wpdb;
 
-		$options = $wpdb->get_var( "SELECT option_value FROM $wpdb->options WHERE option_name = 'combinator_options'" );
+		$options = $wpdb->get_var( "SELECT option_value FROM $wpdb->options WHERE option_name = 'gambit_cache_options'" );
 		$options = maybe_unserialize( maybe_unserialize( $options ) );
 		
 		// $memcacheHosts = ! empty( $options['memcache_host'] ) ? $options['memcache_host'] : '';
