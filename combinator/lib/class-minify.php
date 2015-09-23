@@ -113,6 +113,13 @@ if ( ! class_exists( 'GambitCacheMinify' ) ) {
 			$this->settings['js_compression_level'] = $titan->getOption( 'js_compression_level' );
 			$this->settings['css_compression_level'] = $titan->getOption( 'css_compression_level' );
 			
+			if ( empty( $this->settings['exclude_found_js'] ) ) {
+				$this->settings['exclude_found_js'] = array();
+			}
+			if ( empty( $this->settings['exclude_found_css'] ) ) {
+				$this->settings['exclude_found_css'] = array();
+			}
+			
 			if ( is_array( $titan->getOption( 'js_includes' ) ) ) {
 				$this->settings['js_include_theme'] = in_array( 'theme', $titan->getOption( 'js_includes' ) );
 				$this->settings['js_include_includes'] = in_array( 'includes', $titan->getOption( 'js_includes' ) );
