@@ -33,7 +33,7 @@ class GambitCacheActivation {
 		if ( count( $this->missing ) == 0 ) {
 			return;
 		}
-		wp_enqueue_style( 'gambit_cache_admin', plugins_url( 'gambit_cache/css/admin.css', GAMBIT_COMBINATOR_PATH ) );
+		wp_enqueue_style( 'gambit_cache_admin', plugins_url( 'gambit_cache/css/admin.css', GAMBIT_CACHE_PATH ) );
 	}
 	
 	public function performFileSystemActions() {
@@ -64,7 +64,7 @@ class GambitCacheActivation {
 						$dest = $wp_filesystem->wp_content_dir() . 'gambit-cache';
  						if ( $wp_filesystem->exists( $dest ) ) {
  							if ( ! $wp_filesystem->rmdir( $dest, true ) ) {
-								$creationErrors[] = new WP_Error( 'cannotdelete', sprintf( __( "Could not replace %s, please perform this manually", GAMBIT_COMBINATOR ), '<code>' . $dest . '</code>' ) );
+								$creationErrors[] = new WP_Error( 'cannotdelete', sprintf( __( "Could not replace %s, please perform this manually", GAMBIT_CACHE ), '<code>' . $dest . '</code>' ) );
 								continue;
  							}
  						}
@@ -78,7 +78,7 @@ class GambitCacheActivation {
 					if ( $missing['what'] == 'gambit-cache' && $missing['why'] == 'notfound' ) {
 
 						$dest = $wp_filesystem->wp_content_dir() . 'gambit-cache';
-						$src = trailingslashit( trailingslashit( plugin_dir_path( GAMBIT_COMBINATOR_PATH ) . 'gambit_cache' ) . 'wp-content' ) . 'gambit-cache';
+						$src = trailingslashit( trailingslashit( plugin_dir_path( GAMBIT_CACHE_PATH ) . 'gambit_cache' ) . 'wp-content' ) . 'gambit-cache';
 						
 						if ( ! $wp_filesystem->exists( $dest ) ) {
 							$wp_filesystem->mkdir( $dest, 0755 );
@@ -86,7 +86,7 @@ class GambitCacheActivation {
 						
 						$result = copy_dir( $src, $dest );
 						if ( is_wp_error( $result ) ) {
-							$creationErrors[] = new WP_Error( 'cannotcopy', sprintf( __( "Could not copy %s to %s, please perform this manually via FTP", GAMBIT_COMBINATOR ), '<code>' . $src . '</code>', '<code>' . $dest . '</code>' ) );
+							$creationErrors[] = new WP_Error( 'cannotcopy', sprintf( __( "Could not copy %s to %s, please perform this manually via FTP", GAMBIT_CACHE ), '<code>' . $src . '</code>', '<code>' . $dest . '</code>' ) );
 						}
 						
 						// Create the caching directories
@@ -113,7 +113,7 @@ class GambitCacheActivation {
 										   "Allow from all\n" .
 									   "</FilesMatch>";
 							if ( ! $wp_filesystem->put_contents( trailingslashit( $dest ) . '.htaccess', $content ) ) {
-								$creationErrors[] = new WP_Error( 'cannotcopy', sprintf( __( "Could not create %s, please add this file manually via FTP", GAMBIT_COMBINATOR ), '<code>' . trailingslashit( $dest ) . '.htaccess' . '</code>' ) );
+								$creationErrors[] = new WP_Error( 'cannotcopy', sprintf( __( "Could not create %s, please add this file manually via FTP", GAMBIT_CACHE ), '<code>' . trailingslashit( $dest ) . '.htaccess' . '</code>' ) );
 							}
 						}
 						
@@ -123,18 +123,18 @@ class GambitCacheActivation {
 						$parts = explode( '.', $missing['what'] );
 						$bak = $wp_filesystem->wp_content_dir() . $parts[0] . '-' . substr( md5( microtime() ), 0, 8 ) . '.' . $parts[1] . '.bak';
 						$dest = $wp_filesystem->wp_content_dir() . $missing['what'];
-						$src = trailingslashit( trailingslashit( plugin_dir_path( GAMBIT_COMBINATOR_PATH ) . 'gambit_cache' ) . 'wp-content' ) . $missing['what'];
+						$src = trailingslashit( trailingslashit( plugin_dir_path( GAMBIT_CACHE_PATH ) . 'gambit_cache' ) . 'wp-content' ) . $missing['what'];
 						
 						// If the file already exists, move it to a random filename
 						if ( $missing['why'] == 'exists' ) {
 							if ( ! $wp_filesystem->move( $dest, $bak, false ) ) {
-								$creationErrors[] = new WP_Error( 'cannotcopy', sprintf( __( "Could not copy %s to %s, please perform this manually via FTP", GAMBIT_COMBINATOR ), '<code>' . $src . '</code>', '<code>' . $dest . '</code>' ) );
+								$creationErrors[] = new WP_Error( 'cannotcopy', sprintf( __( "Could not copy %s to %s, please perform this manually via FTP", GAMBIT_CACHE ), '<code>' . $src . '</code>', '<code>' . $dest . '</code>' ) );
 							}
 						}
 						
 						// Copy the file
 						if ( ! $wp_filesystem->copy( $src, $dest, false, 0644 ) ) {
-							$creationErrors[] = new WP_Error( 'cannotcopy', sprintf( __( "Could not copy %s to %s, please perform this manually via FTP", GAMBIT_COMBINATOR ), '<code>' . $src . '</code>', '<code>' . $dest . '</code>' ) );
+							$creationErrors[] = new WP_Error( 'cannotcopy', sprintf( __( "Could not copy %s to %s, please perform this manually via FTP", GAMBIT_CACHE ), '<code>' . $src . '</code>', '<code>' . $dest . '</code>' ) );
 						}
 						
 					} else if ( $missing['what'] == 'WP_CACHE' || $missing['why'] == 'false' ) {
@@ -143,14 +143,14 @@ class GambitCacheActivation {
 						$content = $this->addWPCacheInConfig( $wp_filesystem->get_contents( $src ) );
 
 						if ( ! $wp_filesystem->put_contents( $src, $content ) ) {
-							$creationErrors[] = new WP_Error( 'cannotcopy', sprintf( __( "Could not edit %s, please turn on caching in WordPress by adding %s in this file", GAMBIT_COMBINATOR ), '<code>' . $src . '</code>', '<code>define( \'WP_CACHE\', true );</code>' ) );
+							$creationErrors[] = new WP_Error( 'cannotcopy', sprintf( __( "Could not edit %s, please turn on caching in WordPress by adding %s in this file", GAMBIT_CACHE ), '<code>' . $src . '</code>', '<code>define( \'WP_CACHE\', true );</code>' ) );
 						}
 
 					}
 				}
 			}
 			
-			update_option( 'gambit_cache_setup_done', VERSION_GAMBIT_COMBINATOR );
+			update_option( 'gambit_cache_setup_done', VERSION_GAMBIT_CACHE );
 			
 			if ( ! empty( $creationErrors ) ) {
 				set_transient( 'gambit_cache_activation_errors', serialize( $creationErrors ), MINUTE_IN_SECONDS * 5 );
@@ -186,11 +186,11 @@ class GambitCacheActivation {
 	
 	public function checkStatus() {
 		$cacheSetupDone = get_option( 'gambit_cache_setup_done' );
-		if ( $cacheSetupDone == VERSION_GAMBIT_COMBINATOR || get_transient( 'gambit_cache_activation_errors' ) ) {
+		if ( $cacheSetupDone == VERSION_GAMBIT_CACHE || get_transient( 'gambit_cache_activation_errors' ) ) {
 			return;
 		}
 		
-		$update = ! empty( $cacheSetupDone ) ? $cacheSetupDone != VERSION_GAMBIT_COMBINATOR : false;
+		$update = ! empty( $cacheSetupDone ) ? $cacheSetupDone != VERSION_GAMBIT_CACHE : false;
 
 		$this->checkObjectCache( $update );
 		$this->checkAdvancedCache( $update );
@@ -200,7 +200,7 @@ class GambitCacheActivation {
 		$this->checkFileSystemCredentials();
 		
 		if ( ! count( $this->missing ) ) {
-			update_option( 'gambit_cache_setup_done', VERSION_GAMBIT_COMBINATOR );
+			update_option( 'gambit_cache_setup_done', VERSION_GAMBIT_CACHE );
 		}
 	}
 	

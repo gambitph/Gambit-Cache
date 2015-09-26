@@ -101,7 +101,7 @@ if ( ! class_exists( 'GambitCacheMinify' ) ) {
 			
 			$this->blackListedPlugins = apply_filters( 'gc_blacklisted_plugins', array() );
 
-			$titan = TitanFramework::getInstance( GAMBIT_COMBINATOR );
+			$titan = TitanFramework::getInstance( GAMBIT_CACHE );
 			
 			$this->settings['minify_enabled'] = $titan->getOption( 'minify_enabled' );
 			$this->settings['remove_ver_from_urls'] = $titan->getOption( 'remove_ver_from_urls' );
@@ -626,7 +626,7 @@ if ( ! class_exists( 'GambitCacheMinify' ) ) {
 						$scriptTagsToReplace[] = $scriptTag;
 						$scriptSrcs[] = $src;
 						
-						gambitCache_debug( sprintf( __( 'Minify: Found script %s', GAMBIT_COMBINATOR ), $src ) );
+						gambitCache_debug( sprintf( __( 'Minify: Found script %s', GAMBIT_CACHE ), $src ) );
 						
 						continue;
 					}
@@ -714,7 +714,7 @@ if ( ! class_exists( 'GambitCacheMinify' ) ) {
 						$linkTagsToReplace[] = $linkTag;
 						$linkSrcs[] = $src;
 						
-						gambitCache_debug( sprintf( __( 'Minify: Found style %s', GAMBIT_COMBINATOR ), $src ) );
+						gambitCache_debug( sprintf( __( 'Minify: Found style %s', GAMBIT_CACHE ), $src ) );
 					}
 				}
 			}

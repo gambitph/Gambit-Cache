@@ -21,11 +21,11 @@ if ( ! class_exists( 'GambitCachePageCache' ) ) {
 			
 			// Load page cache settings
 			add_action( 'tf_done', array( $this, 'gatherSettings' ), 10 );
-			add_action( 'tf_save_admin_' . GAMBIT_COMBINATOR, array( __CLASS__, 'clearPageCache' ) );
+			add_action( 'tf_save_admin_' . GAMBIT_CACHE, array( __CLASS__, 'clearPageCache' ) );
 		}
 		
 		public function gatherSettings() {
-			$titan = TitanFramework::getInstance( GAMBIT_COMBINATOR );
+			$titan = TitanFramework::getInstance( GAMBIT_CACHE );
 			
 			$this->pageCacheEnabled = $titan->getOption( 'page_cache_enabled' );
 			$this->expiration = $titan->getOption( 'page_cache_expiration' );

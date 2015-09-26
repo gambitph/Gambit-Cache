@@ -28,7 +28,7 @@ class GambitCacheObjectCacheCleaner {
 	}
 	
 	public function gatherSettings() {
-		$titan = TitanFramework::getInstance( GAMBIT_COMBINATOR );
+		$titan = TitanFramework::getInstance( GAMBIT_CACHE );
 		
 		$this->objectCacheEnabled = $titan->getOption( 'object_cache_enabled' );
 	}

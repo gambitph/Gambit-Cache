@@ -11,10 +11,9 @@ Description: Automatically combines all your local scripts and styles for less H
 Author: Gambit Technologies
 Version: 0.1
 Author URI: http://gambit.ph
-Plugin URI: http://codecanyon.net/user/gambittech/portfolio
+Plugin URI: https://wordpress.org/plugins/gambit-cache/
 Text Domain: gambit_cache
 Domain Path: /languages
-SKU: COMBINATOR
  */
 
 /**
@@ -30,11 +29,11 @@ if ( ! defined( 'ABSPATH' ) ) { exit; // Exit if accessed directly.
 }
 
 // Identifies the plugin itself. If already existing, it will not redefine itself.
-defined( 'VERSION_GAMBIT_COMBINATOR' ) or define( 'VERSION_GAMBIT_COMBINATOR', '0.1' );
+defined( 'VERSION_GAMBIT_CACHE' ) or define( 'VERSION_GAMBIT_CACHE', '0.1' );
 
 // Initializes the plugin translations.
-defined( 'GAMBIT_COMBINATOR' ) or define( 'GAMBIT_COMBINATOR', 'gambit_cache' );
-defined( 'GAMBIT_COMBINATOR_PATH' ) or define( 'GAMBIT_COMBINATOR_PATH', __FILE__ );
+defined( 'GAMBIT_CACHE' ) or define( 'GAMBIT_CACHE', 'gambit_cache' );
+defined( 'GAMBIT_CACHE_PATH' ) or define( 'GAMBIT_CACHE_PATH', __FILE__ );
 
 // This is the main plugin functionality.
 require_once( 'class-gambit-cache.php' );
@@ -71,7 +70,7 @@ if ( ! class_exists( 'GambitCachePlugin' ) ) {
 		 * @since	0.1
 		 */
 		public function load_text_domain() {
-			load_plugin_textdomain( GAMBIT_COMBINATOR, false, basename( dirname( __FILE__ ) ) . '/languages/' );
+			load_plugin_textdomain( GAMBIT_CACHE, false, basename( dirname( __FILE__ ) ) . '/languages/' );
 		}
 
 
@@ -90,11 +89,11 @@ if ( ! class_exists( 'GambitCachePlugin' ) ) {
 
 				// $plugin_meta[] = sprintf( "<a href='%s' target='_blank'>%s</a>",
 				// 	'http://support.gambit.ph?utm_source=' . urlencode( $pluginData['Name'] ) . '&utm_medium=plugin_link',
-				// 	__( 'Get Customer Support', GAMBIT_COMBINATOR )
+				// 	__( 'Get Customer Support', GAMBIT_CACHE )
 				// );
 				$plugin_meta[] = sprintf( "<a href='%s' target='_blank'>%s</a>",
 					'https://gambit.ph/plugins?utm_source=' . urlencode( $pluginData['Name'] ) . '&utm_medium=plugin_link',
-					__( 'Get More Plugins', GAMBIT_COMBINATOR )
+					__( 'Get More Plugins', GAMBIT_CACHE )
 				);
 			}
 			return $plugin_meta;

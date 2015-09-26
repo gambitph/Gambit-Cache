@@ -21,7 +21,7 @@ class GambitCachePageCacheCleaner {
 	}
 	
 	public function gatherSettings() {
-		$titan = TitanFramework::getInstance( GAMBIT_COMBINATOR );
+		$titan = TitanFramework::getInstance( GAMBIT_CACHE );
 		
 		$this->pageCacheEnabled = $titan->getOption( 'page_cache_enabled' );
 	}

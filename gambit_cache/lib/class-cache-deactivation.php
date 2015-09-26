@@ -4,8 +4,8 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 if ( ! class_exists( 'GambitCacheDeactivation' ) ) {
 	
-register_deactivation_hook( GAMBIT_COMBINATOR_PATH, array( 'GambitCacheDeactivation', 'removeChecker' ) );
-register_deactivation_hook( GAMBIT_COMBINATOR_PATH, array( 'GambitCacheDeactivation', 'moveCachingFiles' ) );
+register_deactivation_hook( GAMBIT_CACHE_PATH, array( 'GambitCacheDeactivation', 'removeChecker' ) );
+register_deactivation_hook( GAMBIT_CACHE_PATH, array( 'GambitCacheDeactivation', 'moveCachingFiles' ) );
 	
 class GambitCacheDeactivation {
 	

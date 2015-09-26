@@ -98,7 +98,7 @@ class GambitCacheFiles {
 				$failedBefore = get_transient( 'cmbntr_fail' . $srcHash );
 				if ( $failedBefore ) {
 					$continueLoad = false;
-					gambitCache_debug( sprintf( __( 'Minify: File download previously failed, skipping %s', GAMBIT_COMBINATOR ), $src ) );
+					gambitCache_debug( sprintf( __( 'Minify: File download previously failed, skipping %s', GAMBIT_CACHE ), $src ) );
 				}
 			}
 			
@@ -109,9 +109,9 @@ class GambitCacheFiles {
 				if ( ! is_wp_error( $response ) ) {
 					$content = $response['body'];
 					
-					gambitCache_debug( sprintf( __( 'Minify: Successfully downloaded %s', GAMBIT_COMBINATOR ), $src ) );
+					gambitCache_debug( sprintf( __( 'Minify: Successfully downloaded %s', GAMBIT_CACHE ), $src ) );
 				} else {
-					gambitCache_debug( sprintf( __( 'Minify: [ERROR] Could not download %s', GAMBIT_COMBINATOR ), $src ) );
+					gambitCache_debug( sprintf( __( 'Minify: [ERROR] Could not download %s', GAMBIT_CACHE ), $src ) );
 				}
 			}
 			
