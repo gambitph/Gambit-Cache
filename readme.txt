@@ -30,6 +30,12 @@ Gambit Cache aims to be easily used by everyone, from the beginner who just want
 
 * Page Caching
 * Object Caching
+* Supports these caching solutions:
+  * Redis
+  * Memcache
+  * APC
+  * WinCache
+  * XCache
 * Auto-clearing of caches when needed (e.g. when saving options, a new comment comes in, etc)
 * Lessen server requests:
   * Minify and Uglify CSS and Javascript
