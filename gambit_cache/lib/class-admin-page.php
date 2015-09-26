@@ -44,7 +44,7 @@ class GambitCacheAdminPage {
 	}
 	
 	public function adminEnqueueScripts() {
-		wp_enqueue_style( __CLASS__, plugins_url( 'combinator/css/admin.css', GAMBIT_COMBINATOR_PATH ) );
+		wp_enqueue_style( __CLASS__, plugins_url( 'gambit_cache/css/admin.css', GAMBIT_COMBINATOR_PATH ) );
 	}
 	
 	public function ajaxClearAllCaches() {
@@ -190,7 +190,7 @@ class GambitCacheAdminPage {
 					continue;
 				}
 				
-				if ( stripos( $allPlugins[ $slug ]['Name'], 'combinator' ) !== false ) {
+				if ( stripos( $allPlugins[ $slug ]['Name'], 'gambit_cache' ) !== false ) {
 					continue;
 				}
 				
@@ -202,7 +202,7 @@ class GambitCacheAdminPage {
 
 
 			$adminPanel = $titan->createAdminPanel( array(
-			    'name' => 'Combinator',
+			    'name' => 'Gambit Cache',
 				'id' => GAMBIT_COMBINATOR,
 			    'parent' => 'options-general.php',
 			) );
@@ -418,7 +418,7 @@ class GambitCacheAdminPage {
 					'2' => __( 'Simple Optimizations (Recommended)', GAMBIT_COMBINATOR ),
 					'3' => __( 'Advanced Optimizations (NOT Recommended)', GAMBIT_COMBINATOR ),
 				),
-				'desc' => __( 'Combinator uses <a href="https://developers.google.com/closure/compiler/index">Closure Compiler</a> to perform code compression. You can choose from these types of compression:<ul><li><strong>White Space Removal</strong><br>Gives some compression by removing unnecessary spaces from your scripts. <em>(<strong>Recommended</strong> if Simple Optimization fails and produces errors)</em>,</li><li><strong>Simple Optimizations</strong><br>Performs great compression and optimizations that does not interfere with script interactions. <em>(<strong>Recommended</strong> and should work in most setups)</em></li><li><strong>Advanced Optimizations</strong><br>Highest level of compression, but all variables/function names/symbols in your scripts will be renamed. <em>(<strong>Not recommended</strong>, since this will most likely create broken references in your Javascript. Read more on this in the <a href="https://developers.google.com/closure/compiler/docs/api-tutorial3">Closure Compiler docs</a> for more information on how to circumvent this, note that this would entail rewriting your Javascript)</em></li></ul>', GAMBIT_COMBINATOR ),
+				'desc' => __( 'Gambit Cache uses <a href="https://developers.google.com/closure/compiler/index">Closure Compiler</a> to perform code compression. You can choose from these types of compression:<ul><li><strong>White Space Removal</strong><br>Gives some compression by removing unnecessary spaces from your scripts. <em>(<strong>Recommended</strong> if Simple Optimization fails and produces errors)</em>,</li><li><strong>Simple Optimizations</strong><br>Performs great compression and optimizations that does not interfere with script interactions. <em>(<strong>Recommended</strong> and should work in most setups)</em></li><li><strong>Advanced Optimizations</strong><br>Highest level of compression, but all variables/function names/symbols in your scripts will be renamed. <em>(<strong>Not recommended</strong>, since this will most likely create broken references in your Javascript. Read more on this in the <a href="https://developers.google.com/closure/compiler/docs/api-tutorial3">Closure Compiler docs</a> for more information on how to circumvent this, note that this would entail rewriting your Javascript)</em></li></ul>', GAMBIT_COMBINATOR ),
 			) );
 			
 			$minifyTab->createOption( array(
@@ -517,14 +517,14 @@ class GambitCacheAdminPage {
 				'type' => 'multicheck',
 				'default' => $blackListDefault,
 				'options' => $pluginOptions,
-				'desc' => __( 'Combinator combines all scripts and styles it can find. If a plugin stops working because of the combination process, <strong>check the plugin here to exclude it</strong>.', GAMBIT_COMBINATOR ) . 
+				'desc' => __( 'Gambit Cache combines all scripts and styles it can find. If a plugin stops working because of the combination process, <strong>check the plugin here to exclude it</strong>.', GAMBIT_COMBINATOR ) . 
 					'<div style="border-left: 4px solid #dd3d36; box-shadow: 0 1px 1px 0 rgba(0,0,0,.1); margin: 5px 0 15px; padding: 1px 12px;"><p style="margin: .5em 0;padding: 2px;"><strong>' .
-					__( 'If you have found a plugin to be not working when included with Combinator, please let us know by commenting it in our CodeCanyon page so we can include it in our internal blacklist.', GAMBIT_COMBINATOR ) . 
+					__( 'If you have found a plugin to be not working when included with Gambit Cache, please let us know by commenting it in our CodeCanyon page so we can include it in our internal blacklist.', GAMBIT_COMBINATOR ) . 
 					'</strong></p></div>',
 			) );
 			
 			
-			$foundJS = get_option( 'combinator_found_js' );
+			$foundJS = get_option( 'gambit_cache_found_js' );
 			$jsOptions = array();
 			if ( empty( $foundJS ) ) {
 				$foundJS = array();
@@ -541,11 +541,11 @@ class GambitCacheAdminPage {
 				'type' => 'multicheck',
 				'default' => array(),
 				'options' => $jsOptions,
-				'desc' => __( 'Here is a list of all the Javascript URLs Combinator has found. If the list below is empty, visit your site to populate it.<br><strong>Check the URL here to exclude it.</strong>', GAMBIT_COMBINATOR ),
+				'desc' => __( 'Here is a list of all the Javascript URLs Gambit Cache has found. If the list below is empty, visit your site to populate it.<br><strong>Check the URL here to exclude it.</strong>', GAMBIT_COMBINATOR ),
 			) );
 			
 			
-			$foundCSS = get_option( 'combinator_found_css' );
+			$foundCSS = get_option( 'gambit_cache_found_css' );
 			$cssOptions = array();
 			if ( empty( $foundCSS ) ) {
 				$foundCSS = array();
@@ -562,7 +562,7 @@ class GambitCacheAdminPage {
 				'type' => 'multicheck',
 				'default' => array(),
 				'options' => $cssOptions,
-				'desc' => __( 'Here is a list of all the Stylesheet URLs Combinator has found. If the list below is empty, visit your site to populate it.<br><strong>Check the URL here to exclude it.</strong>', GAMBIT_COMBINATOR ),
+				'desc' => __( 'Here is a list of all the Stylesheet URLs Gambit Cache has found. If the list below is empty, visit your site to populate it.<br><strong>Check the URL here to exclude it.</strong>', GAMBIT_COMBINATOR ),
 			) );
 
 			$minifyTab->createOption( array(

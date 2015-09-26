@@ -5,7 +5,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) )
     exit();
 
 // NOTE: This should correspond to the pointer_name in the main plugin file
-$pointerName = strtolower( 'GambitCombinatorPlugin' );
+$pointerName = strtolower( 'GambitCachePlugin' );
 
 // Deletes the dismissed admin pointer for this plugin
 $dismissedAdminPointers = get_user_meta( get_current_user_id(), 'dismissed_wp_pointers' );
@@ -17,5 +17,5 @@ update_user_meta( get_current_user_id(), 'dismissed_wp_pointers', $dismissedAdmi
 global $wpdb;
 $wpdb->query( "DELETE FROM $wpdb->options WHERE option_name LIKE '_transient_%' AND option_name LIKE '%cmbntr%'" );
 
-delete_option( 'combinator_found_js' );
-delete_option( 'combinator_found_css' );
+delete_option( 'gambit_cache_found_js' );
+delete_option( 'gambit_cache_found_css' );

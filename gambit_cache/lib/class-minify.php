@@ -157,7 +157,7 @@ if ( ! class_exists( 'GambitCacheMinify' ) ) {
 					continue;
 				}
 				
-				if ( stripos( $allPlugins[ $slug ]['Name'], 'combinator' ) !== false ) {
+				if ( stripos( $allPlugins[ $slug ]['Name'], 'gambit_cache' ) !== false ) {
 					continue;
 				}
 				
@@ -263,7 +263,7 @@ if ( ! class_exists( 'GambitCacheMinify' ) ) {
 				echo "<script type='text/javascript' src='" . esc_url( $output['js']['url'] ) . "' " . $defer . "></script>";
 			}
 			if ( ! empty( $output['css']['url'] ) ) {
-				echo "<link rel='stylesheet' id='css_combinator_" . esc_attr( $output['css']['hash'] ) . "-css' href='" . esc_url( $output['css']['url'] ) . "' type='text/css' media='all' />";
+				echo "<link rel='stylesheet' id='css_gambit_cache_" . esc_attr( $output['css']['hash'] ) . "-css' href='" . esc_url( $output['css']['url'] ) . "' type='text/css' media='all' />";
 			}
 
 		}
@@ -391,16 +391,16 @@ if ( ! class_exists( 'GambitCacheMinify' ) ) {
 				if ( empty( $outputJS ) && ( count( $files ) || ! empty( $inline ) ) ) {
 				
 					$timeStart = microtime( true );
-					$combined = GambitCombinatorJS::combineSources( $files, null, $inline );
+					$combined = GambitCacheJS::combineSources( $files, null, $inline );
 					gambitCache_debug( ( microtime( true ) - $timeStart ) . ' Minify: to combine scripts' );
 				
 					if ( $compressionLevel ) {
 						$timeStart = microtime( true );
-						$combined = GambitCombinatorJS::closureCompile( $combined, $compressionLevel );
+						$combined = GambitCacheJS::closureCompile( $combined, $compressionLevel );
 						gambitCache_debug( ( microtime( true ) - $timeStart ) . ' Minify: to closure compile (level ' . $compressionLevel . ') scripts' );
 					}
 				
-					$outputJS = GambitCombinatorJS::createFile(
+					$outputJS = GambitCacheJS::createFile(
 						$combined,
 						$hash . '.js'
 					);
@@ -443,13 +443,13 @@ if ( ! class_exists( 'GambitCacheMinify' ) ) {
 			
 				$outputCSS = get_transient( 'cmbntr_css' . $hash );
 				if ( empty( $outputCSS ) && ( count( $files ) || ! empty( $inline ) ) ) {
-					$combined = GambitCombinatorCSS::combineSources( $files, null, $inline );
+					$combined = GambitCacheCSS::combineSources( $files, null, $inline );
 					
 					if ( $compressionLevel ) {
-						$combined = GambitCombinatorCSS::compile( $combined );
+						$combined = GambitCacheCSS::compile( $combined );
 					}
 			
-					$outputCSS = GambitCombinatorCSS::createFile( 
+					$outputCSS = GambitCacheCSS::createFile( 
 						$combined, 
 						$hash . '.css'
 					);
@@ -510,7 +510,7 @@ if ( ! class_exists( 'GambitCacheMinify' ) ) {
 					continue;
 				}
 				
-				if ( stripos( $allPlugins[ $slug ]['Name'], 'combinator' ) !== false ) {
+				if ( stripos( $allPlugins[ $slug ]['Name'], 'gambit_cache' ) !== false ) {
 					continue;
 				}
 				
@@ -750,7 +750,7 @@ if ( ! class_exists( 'GambitCacheMinify' ) ) {
 			/**
 			 * Merge the scripts & styles we found
 			 */
-			$currentFoundJS = get_option( 'combinator_found_js' );
+			$currentFoundJS = get_option( 'gambit_cache_found_js' );
 			if ( empty( $currentFoundJS ) ) {
 				$currentFoundJS = array();
 			} else if ( is_serialized( $currentFoundJS ) ) {
@@ -758,9 +758,9 @@ if ( ! class_exists( 'GambitCacheMinify' ) ) {
 			}
 			$currentFoundJS = array_merge( $currentFoundJS, $foundJSScripts );
 			$currentFoundJS = array_unique( $currentFoundJS );
-			update_option( 'combinator_found_js', serialize( $currentFoundJS ) );
+			update_option( 'gambit_cache_found_js', serialize( $currentFoundJS ) );
 
-			$currentFoundCSS = get_option( 'combinator_found_css' );
+			$currentFoundCSS = get_option( 'gambit_cache_found_css' );
 			if ( empty( $currentFoundCSS ) ) {
 				$currentFoundCSS = array();
 			} else if ( is_serialized( $currentFoundCSS ) ) {
@@ -768,7 +768,7 @@ if ( ! class_exists( 'GambitCacheMinify' ) ) {
 			}
 			$currentFoundCSS = array_merge( $currentFoundCSS, $foundCSSStyles );
 			$currentFoundCSS = array_unique( $currentFoundCSS );
-			update_option( 'combinator_found_css', serialize( $currentFoundCSS ) );
+			update_option( 'gambit_cache_found_css', serialize( $currentFoundCSS ) );
 			
 			
 			return array(

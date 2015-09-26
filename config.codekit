@@ -20,11 +20,11 @@
 		"outputPathIsOutsideProject": 0,
 		"outputPathIsSetByUser": 0
 		},
-	"\/class-combinator.php": {
+	"\/class-gambit_cache.php": {
 		"fileType": 8192,
 		"ignore": 0,
 		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/class-combinator.php",
+		"inputAbbreviatedPath": "\/class-gambit_cache.php",
 		"outputAbbreviatedPath": "No Output Path",
 		"outputPathIsOutsideProject": 0,
 		"outputPathIsSetByUser": 0
@@ -38,186 +38,186 @@
 		"outputPathIsOutsideProject": 0,
 		"outputPathIsSetByUser": 0
 		},
-	"\/combinator\/css\/admin.css": {
+	"\/gambit_cache\/css\/admin.css": {
 		"fileType": 16,
 		"ignore": 1,
 		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/css\/admin.css",
+		"inputAbbreviatedPath": "\/gambit_cache\/css\/admin.css",
 		"outputAbbreviatedPath": "No Output Path",
 		"outputPathIsOutsideProject": 0,
 		"outputPathIsSetByUser": 0
 		},
-	"\/combinator\/lib\/class-admin-page.php": {
+	"\/gambit_cache\/lib\/class-admin-page.php": {
 		"fileType": 8192,
 		"ignore": 0,
 		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/lib\/class-admin-page.php",
+		"inputAbbreviatedPath": "\/gambit_cache\/lib\/class-admin-page.php",
 		"outputAbbreviatedPath": "No Output Path",
 		"outputPathIsOutsideProject": 0,
 		"outputPathIsSetByUser": 0
 		},
-	"\/combinator\/lib\/class-cache-activation.php": {
+	"\/gambit_cache\/lib\/class-cache-activation.php": {
 		"fileType": 8192,
 		"ignore": 0,
 		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/lib\/class-cache-activation.php",
+		"inputAbbreviatedPath": "\/gambit_cache\/lib\/class-cache-activation.php",
 		"outputAbbreviatedPath": "No Output Path",
 		"outputPathIsOutsideProject": 0,
 		"outputPathIsSetByUser": 0
 		},
-	"\/combinator\/lib\/class-cache-deactivation.php": {
+	"\/gambit_cache\/lib\/class-cache-deactivation.php": {
 		"fileType": 8192,
 		"ignore": 0,
 		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/lib\/class-cache-deactivation.php",
+		"inputAbbreviatedPath": "\/gambit_cache\/lib\/class-cache-deactivation.php",
 		"outputAbbreviatedPath": "No Output Path",
 		"outputPathIsOutsideProject": 0,
 		"outputPathIsSetByUser": 0
 		},
-	"\/combinator\/lib\/class-css.php": {
+	"\/gambit_cache\/lib\/class-css.php": {
 		"fileType": 8192,
 		"ignore": 0,
 		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/lib\/class-css.php",
+		"inputAbbreviatedPath": "\/gambit_cache\/lib\/class-css.php",
 		"outputAbbreviatedPath": "No Output Path",
 		"outputPathIsOutsideProject": 0,
 		"outputPathIsSetByUser": 0
 		},
-	"\/combinator\/lib\/class-debug.php": {
+	"\/gambit_cache\/lib\/class-debug.php": {
 		"fileType": 8192,
 		"ignore": 0,
 		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/lib\/class-debug.php",
+		"inputAbbreviatedPath": "\/gambit_cache\/lib\/class-debug.php",
 		"outputAbbreviatedPath": "No Output Path",
 		"outputPathIsOutsideProject": 0,
 		"outputPathIsSetByUser": 0
 		},
-	"\/combinator\/lib\/class-ewww-image-editor-gd.php": {
+	"\/gambit_cache\/lib\/class-ewww-image-editor-gd.php": {
 		"fileType": 8192,
 		"ignore": 0,
 		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/lib\/class-ewww-image-editor-gd.php",
+		"inputAbbreviatedPath": "\/gambit_cache\/lib\/class-ewww-image-editor-gd.php",
 		"outputAbbreviatedPath": "No Output Path",
 		"outputPathIsOutsideProject": 0,
 		"outputPathIsSetByUser": 0
 		},
-	"\/combinator\/lib\/class-ewww-image-editor-imagick.php": {
+	"\/gambit_cache\/lib\/class-ewww-image-editor-imagick.php": {
 		"fileType": 8192,
 		"ignore": 0,
 		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/lib\/class-ewww-image-editor-imagick.php",
+		"inputAbbreviatedPath": "\/gambit_cache\/lib\/class-ewww-image-editor-imagick.php",
 		"outputAbbreviatedPath": "No Output Path",
 		"outputPathIsOutsideProject": 0,
 		"outputPathIsSetByUser": 0
 		},
-	"\/combinator\/lib\/class-files.php": {
+	"\/gambit_cache\/lib\/class-files.php": {
 		"fileType": 8192,
 		"ignore": 0,
 		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/lib\/class-files.php",
+		"inputAbbreviatedPath": "\/gambit_cache\/lib\/class-files.php",
 		"outputAbbreviatedPath": "No Output Path",
 		"outputPathIsOutsideProject": 0,
 		"outputPathIsSetByUser": 0
 		},
-	"\/combinator\/lib\/class-js.php": {
+	"\/gambit_cache\/lib\/class-js.php": {
 		"fileType": 8192,
 		"ignore": 0,
 		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/lib\/class-js.php",
+		"inputAbbreviatedPath": "\/gambit_cache\/lib\/class-js.php",
 		"outputAbbreviatedPath": "No Output Path",
 		"outputPathIsOutsideProject": 0,
 		"outputPathIsSetByUser": 0
 		},
-	"\/combinator\/lib\/class-minify-cleaner.php": {
+	"\/gambit_cache\/lib\/class-minify-cleaner.php": {
 		"fileType": 8192,
 		"ignore": 0,
 		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/lib\/class-minify-cleaner.php",
+		"inputAbbreviatedPath": "\/gambit_cache\/lib\/class-minify-cleaner.php",
 		"outputAbbreviatedPath": "No Output Path",
 		"outputPathIsOutsideProject": 0,
 		"outputPathIsSetByUser": 0
 		},
-	"\/combinator\/lib\/class-minify.php": {
+	"\/gambit_cache\/lib\/class-minify.php": {
 		"fileType": 8192,
 		"ignore": 0,
 		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/lib\/class-minify.php",
+		"inputAbbreviatedPath": "\/gambit_cache\/lib\/class-minify.php",
 		"outputAbbreviatedPath": "No Output Path",
 		"outputPathIsOutsideProject": 0,
 		"outputPathIsSetByUser": 0
 		},
-	"\/combinator\/lib\/class-object-cache-cleaner.php": {
+	"\/gambit_cache\/lib\/class-object-cache-cleaner.php": {
 		"fileType": 8192,
 		"ignore": 0,
 		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/lib\/class-object-cache-cleaner.php",
+		"inputAbbreviatedPath": "\/gambit_cache\/lib\/class-object-cache-cleaner.php",
 		"outputAbbreviatedPath": "No Output Path",
 		"outputPathIsOutsideProject": 0,
 		"outputPathIsSetByUser": 0
 		},
-	"\/combinator\/lib\/class-page-cache-cleaner.php": {
+	"\/gambit_cache\/lib\/class-page-cache-cleaner.php": {
 		"fileType": 8192,
 		"ignore": 0,
 		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/lib\/class-page-cache-cleaner.php",
+		"inputAbbreviatedPath": "\/gambit_cache\/lib\/class-page-cache-cleaner.php",
 		"outputAbbreviatedPath": "No Output Path",
 		"outputPathIsOutsideProject": 0,
 		"outputPathIsSetByUser": 0
 		},
-	"\/combinator\/lib\/class-page-cache.php": {
+	"\/gambit_cache\/lib\/class-page-cache.php": {
 		"fileType": 8192,
 		"ignore": 0,
 		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/lib\/class-page-cache.php",
+		"inputAbbreviatedPath": "\/gambit_cache\/lib\/class-page-cache.php",
 		"outputAbbreviatedPath": "No Output Path",
 		"outputPathIsOutsideProject": 0,
 		"outputPathIsSetByUser": 0
 		},
-	"\/combinator\/lib\/class-sprite.php": {
+	"\/gambit_cache\/lib\/class-sprite.php": {
 		"fileType": 8192,
 		"ignore": 0,
 		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/lib\/class-sprite.php",
+		"inputAbbreviatedPath": "\/gambit_cache\/lib\/class-sprite.php",
 		"outputAbbreviatedPath": "No Output Path",
 		"outputPathIsOutsideProject": 0,
 		"outputPathIsSetByUser": 0
 		},
-	"\/combinator\/lib\/class-wp-image-editor-gd.php": {
+	"\/gambit_cache\/lib\/class-wp-image-editor-gd.php": {
 		"fileType": 8192,
 		"ignore": 0,
 		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/lib\/class-wp-image-editor-gd.php",
+		"inputAbbreviatedPath": "\/gambit_cache\/lib\/class-wp-image-editor-gd.php",
 		"outputAbbreviatedPath": "No Output Path",
 		"outputPathIsOutsideProject": 0,
 		"outputPathIsSetByUser": 0
 		},
-	"\/combinator\/lib\/class-wp-image-editor-imagick.php": {
+	"\/gambit_cache\/lib\/class-wp-image-editor-imagick.php": {
 		"fileType": 8192,
 		"ignore": 0,
 		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/lib\/class-wp-image-editor-imagick.php",
+		"inputAbbreviatedPath": "\/gambit_cache\/lib\/class-wp-image-editor-imagick.php",
 		"outputAbbreviatedPath": "No Output Path",
 		"outputPathIsOutsideProject": 0,
 		"outputPathIsSetByUser": 0
 		},
-	"\/combinator\/lib\/util.php": {
+	"\/gambit_cache\/lib\/util.php": {
 		"fileType": 8192,
 		"ignore": 0,
 		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/lib\/util.php",
+		"inputAbbreviatedPath": "\/gambit_cache\/lib\/util.php",
 		"outputAbbreviatedPath": "No Output Path",
 		"outputPathIsOutsideProject": 0,
 		"outputPathIsSetByUser": 0
 		},
-	"\/combinator\/scss\/admin.scss": {
+	"\/gambit_cache\/scss\/admin.scss": {
 		"createSourceMap": 0,
 		"debugStyle": 0,
 		"decimalPrecision": 10,
 		"fileType": 4,
 		"ignore": 0,
 		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/scss\/admin.scss",
-		"outputAbbreviatedPath": "\/combinator\/css\/admin.css",
+		"inputAbbreviatedPath": "\/gambit_cache\/scss\/admin.scss",
+		"outputAbbreviatedPath": "\/gambit_cache\/css\/admin.css",
 		"outputPathIsOutsideProject": 0,
 		"outputPathIsSetByUser": 0,
 		"outputStyle": 0,
@@ -225,47 +225,47 @@
 		"shouldRunBless": 0,
 		"useLibsass": 0
 		},
-	"\/combinator\/wp-content\/advanced-cache.php": {
+	"\/gambit_cache\/wp-content\/advanced-cache.php": {
 		"fileType": 8192,
 		"ignore": 0,
 		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/wp-content\/advanced-cache.php",
+		"inputAbbreviatedPath": "\/gambit_cache\/wp-content\/advanced-cache.php",
 		"outputAbbreviatedPath": "No Output Path",
 		"outputPathIsOutsideProject": 0,
 		"outputPathIsSetByUser": 0
 		},
-	"\/combinator\/wp-content\/gambit-cache\/lib\/phpfastcache.php": {
+	"\/gambit_cache\/wp-content\/gambit-cache\/lib\/phpfastcache.php": {
 		"fileType": 8192,
 		"ignore": 0,
 		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/wp-content\/gambit-cache\/lib\/phpfastcache.php",
+		"inputAbbreviatedPath": "\/gambit_cache\/wp-content\/gambit-cache\/lib\/phpfastcache.php",
 		"outputAbbreviatedPath": "No Output Path",
 		"outputPathIsOutsideProject": 0,
 		"outputPathIsSetByUser": 0
 		},
-	"\/combinator\/wp-content\/gambit-cache\/lib\/phpfastcache\/_extensions\/regex.php": {
+	"\/gambit_cache\/wp-content\/gambit-cache\/lib\/phpfastcache\/_extensions\/regex.php": {
 		"fileType": 8192,
 		"ignore": 0,
 		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/wp-content\/gambit-cache\/lib\/phpfastcache\/_extensions\/regex.php",
+		"inputAbbreviatedPath": "\/gambit_cache\/wp-content\/gambit-cache\/lib\/phpfastcache\/_extensions\/regex.php",
 		"outputAbbreviatedPath": "No Output Path",
 		"outputPathIsOutsideProject": 0,
 		"outputPathIsSetByUser": 0
 		},
-	"\/combinator\/wp-content\/gambit-cache\/lib\/phpfastcache\/index.html": {
+	"\/gambit_cache\/wp-content\/gambit-cache\/lib\/phpfastcache\/index.html": {
 		"fileType": 8192,
 		"ignore": 0,
 		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/wp-content\/gambit-cache\/lib\/phpfastcache\/index.html",
+		"inputAbbreviatedPath": "\/gambit_cache\/wp-content\/gambit-cache\/lib\/phpfastcache\/index.html",
 		"outputAbbreviatedPath": "No Output Path",
 		"outputPathIsOutsideProject": 0,
 		"outputPathIsSetByUser": 0
 		},
-	"\/combinator\/wp-content\/object-cache.php": {
+	"\/gambit_cache\/wp-content\/object-cache.php": {
 		"fileType": 8192,
 		"ignore": 0,
 		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/combinator\/wp-content\/object-cache.php",
+		"inputAbbreviatedPath": "\/gambit_cache\/wp-content\/object-cache.php",
 		"outputAbbreviatedPath": "No Output Path",
 		"outputPathIsOutsideProject": 0,
 		"outputPathIsSetByUser": 0
@@ -307,7 +307,7 @@
 	},
 "projectAttributes": {
 	"bowerAbbreviatedPath": "",
-	"displayValue": "combinator",
+	"displayValue": "gambit_cache",
 	"displayValueWasSetByUser": 0,
 	"iconImageName": "harddrive_brown"
 	},

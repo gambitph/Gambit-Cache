@@ -1,6 +1,6 @@
 {
-	"name": "gambitph/combinator",
-	"description": "Combinator",
+	"name": "gambitph/gambit_cache",
+	"description": "Gambit Cache",
 	"keywords": ["gambit", "wordpress"],
 	"homepage" : "http://gambit.ph",
 	"license": "GPLv2+",

@@ -130,7 +130,7 @@ if ( ! class_exists( 'GambitCachePageCache' ) ) {
 				$pageHash = $this->getCurrentUrlHash();
 				
 				// Add our note
-				$this->pageToCache .= "<!-- Cached by Combinator -->";
+				$this->pageToCache .= "<!-- Cached by Gambit Cache -->";
 				
 				if ( function_exists( 'gzencode' ) ) {
 					$this->pageToCache = gzencode( $this->pageToCache, 6, FORCE_GZIP );

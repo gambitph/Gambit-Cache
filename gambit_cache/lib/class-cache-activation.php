@@ -33,7 +33,7 @@ class GambitCacheActivation {
 		if ( count( $this->missing ) == 0 ) {
 			return;
 		}
-		wp_enqueue_style( 'gambit_cache_admin', plugins_url( 'combinator/css/admin.css', GAMBIT_COMBINATOR_PATH ) );
+		wp_enqueue_style( 'gambit_cache_admin', plugins_url( 'gambit_cache/css/admin.css', GAMBIT_COMBINATOR_PATH ) );
 	}
 	
 	public function performFileSystemActions() {
@@ -78,7 +78,7 @@ class GambitCacheActivation {
 					if ( $missing['what'] == 'gambit-cache' && $missing['why'] == 'notfound' ) {
 
 						$dest = $wp_filesystem->wp_content_dir() . 'gambit-cache';
-						$src = trailingslashit( trailingslashit( plugin_dir_path( GAMBIT_COMBINATOR_PATH ) . 'combinator' ) . 'wp-content' ) . 'gambit-cache';
+						$src = trailingslashit( trailingslashit( plugin_dir_path( GAMBIT_COMBINATOR_PATH ) . 'gambit_cache' ) . 'wp-content' ) . 'gambit-cache';
 						
 						if ( ! $wp_filesystem->exists( $dest ) ) {
 							$wp_filesystem->mkdir( $dest, 0755 );
@@ -123,7 +123,7 @@ class GambitCacheActivation {
 						$parts = explode( '.', $missing['what'] );
 						$bak = $wp_filesystem->wp_content_dir() . $parts[0] . '-' . substr( md5( microtime() ), 0, 8 ) . '.' . $parts[1] . '.bak';
 						$dest = $wp_filesystem->wp_content_dir() . $missing['what'];
-						$src = trailingslashit( trailingslashit( plugin_dir_path( GAMBIT_COMBINATOR_PATH ) . 'combinator' ) . 'wp-content' ) . $missing['what'];
+						$src = trailingslashit( trailingslashit( plugin_dir_path( GAMBIT_COMBINATOR_PATH ) . 'gambit_cache' ) . 'wp-content' ) . $missing['what'];
 						
 						// If the file already exists, move it to a random filename
 						if ( $missing['why'] == 'exists' ) {
@@ -670,8 +670,8 @@ class GambitCacheActivation {
         // by this point, the $wp_filesystem global should be working, so let's use it to create a file
         global $wp_filesystem;
         $contentdir = trailingslashit( $wp_filesystem->wp_content_dir() ); 
-        $wp_filesystem->mkdir( $contentdir. 'combinator-blah' );
-        if ( ! $wp_filesystem->put_contents(  $contentdir . 'combinator-blah/test.txt', 'Test file contents', FS_CHMOD_FILE) ) 
+        $wp_filesystem->mkdir( $contentdir. 'gambit_cache-blah' );
+        if ( ! $wp_filesystem->put_contents(  $contentdir . 'gambit_cache-blah/test.txt', 'Test file contents', FS_CHMOD_FILE) ) 
         {
             echo "error saving file!";
         }

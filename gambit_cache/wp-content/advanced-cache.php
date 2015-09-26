@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) die();
 
 // global $wpdb;
 
-// $options = $wpdb->get_var( "SELECT option_value FROM $wpdb->options WHERE option_name = 'combinator_options'" );
+// $options = $wpdb->get_var( "SELECT option_value FROM $wpdb->options WHERE option_name = 'gambit_cache_options'" );
 // $options = maybe_unserialize( maybe_unserialize( $options ) );
 // $pageCacheEnabled = ! empty( $options['page_cache_enabled'] ) ? $options['page_cache_enabled'] : false;
 //
@@ -124,7 +124,7 @@ if ( ! defined( 'ABSPATH' ) ) die();
 		// }
 		echo $html;
 		// var_dump(function_exists( 'gzencode' ), $pageHash);
-		// echo "<!-- Cached by Combinator -->";
+		// echo "<!-- Cached by Gambit Cache -->";
 		die();
 	}
 	

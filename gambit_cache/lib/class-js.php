@@ -4,9 +4,9 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 require_once( 'class-files.php' );
 	
-if ( ! class_exists( 'GambitCombinatorJS' ) ) {
+if ( ! class_exists( 'GambitCacheJS' ) ) {
 	
-class GambitCombinatorJS extends GambitCombinatorFiles {
+class GambitCacheJS extends GambitCacheFiles {
 	
 	public static function closureCompile( $code, $level ) {
 	

@@ -2,9 +2,9 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-if ( ! class_exists( 'GambitCombinatorFiles' ) ) {
+if ( ! class_exists( 'GambitCacheFiles' ) ) {
 
-class GambitCombinatorFiles {
+class GambitCacheFiles {
 	
 	/**
 	 * Convets a relative URL to an absolute URL

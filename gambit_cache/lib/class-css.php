@@ -4,9 +4,9 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 require_once( 'class-files.php' );
 	
-if ( ! class_exists( 'GambitCombinatorCSS' ) ) {
+if ( ! class_exists( 'GambitCacheCSS' ) ) {
 	
-class GambitCombinatorCSS extends GambitCombinatorFiles {
+class GambitCacheCSS extends GambitCacheFiles {
 	
 	public static function compile( $code ) {
 		
@@ -30,7 +30,7 @@ class GambitCombinatorCSS extends GambitCombinatorFiles {
 		$code = preg_replace( "/#([0-9a-fA-F])\\1([0-9a-fA-F])\\2([0-9a-fA-F])\\3/", "#$1$2$3", $code );
 
 		// Convert content CSS to glyphs
-		// $code = preg_replace_callback( "/(?<=content:[\"'])(\\\[0-9a-fA-F]+)/", 'combinator_css_content_hex_to_glyph', $code );
+		// $code = preg_replace_callback( "/(?<=content:[\"'])(\\\[0-9a-fA-F]+)/", 'gambit_cache_css_content_hex_to_glyph', $code );
 		
 		return $code;
 	}
@@ -43,9 +43,9 @@ class GambitCombinatorCSS extends GambitCombinatorFiles {
 
 }
 
-if ( ! function_exists( 'combinator_css_content_hex_to_glyph' ) ) {
+if ( ! function_exists( 'gambit_cache_css_content_hex_to_glyph' ) ) {
 
-function combinator_css_content_hex_to_glyph( $matches ) {
+function gambit_cache_css_content_hex_to_glyph( $matches ) {
 	return html_entity_decode( '&#x' . trim( $matches[1], '\\' ) . ';', 0, 'UTF-8' );
 }
 

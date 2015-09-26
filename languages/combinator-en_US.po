@@ -103,79 +103,79 @@ msgstr ""
 msgid "Keep your plugin updated by entering your purchase code here."
 msgstr ""
 
-#: ../class-combinator.php:574
+#: ../class-gambit_cache.php:574
 msgid "Settings"
 msgstr ""
 
-#: ../class-combinator.php:630
+#: ../class-gambit_cache.php:630
 msgid "General Settings"
 msgstr ""
 
-#: ../class-combinator.php:635
-msgid "Enable Combinator"
+#: ../class-gambit_cache.php:635
+msgid "Enable Gambit Cache"
 msgstr ""
 
-#: ../class-combinator.php:639
+#: ../class-gambit_cache.php:639
 msgid ""
 "You can enable or disable the combining of scripts and stylesheets globally "
 "with this setting."
 msgstr ""
 
-#: ../class-combinator.php:643
+#: ../class-gambit_cache.php:643
 msgid "Cache Control"
 msgstr ""
 
-#: ../class-combinator.php:648
+#: ../class-gambit_cache.php:648
 msgid "Cleared Generated Files & Database Caches"
 msgstr ""
 
-#: ../class-combinator.php:649
+#: ../class-gambit_cache.php:649
 msgid "Something went wrong, try again"
 msgstr ""
 
-#: ../class-combinator.php:654
+#: ../class-gambit_cache.php:654
 msgid "Clearing..."
 msgstr ""
 
-#: ../class-combinator.php:655
+#: ../class-gambit_cache.php:655
 msgid "Clear Generated Files & Database Caches"
 msgstr ""
 
-#: ../class-combinator.php:666
+#: ../class-gambit_cache.php:666
 msgid "Javascript Settings"
 msgstr ""
 
-#: ../class-combinator.php:671
+#: ../class-gambit_cache.php:671
 msgid "Combine Javascripts"
 msgstr ""
 
-#: ../class-combinator.php:675
+#: ../class-gambit_cache.php:675
 msgid "Enable combining of Javascript files"
 msgstr ""
 
-#: ../class-combinator.php:679 ../class-combinator.php:734
+#: ../class-gambit_cache.php:679 ../class-gambit_cache.php:734
 msgid "Compression Level"
 msgstr ""
 
-#: ../class-combinator.php:684
+#: ../class-gambit_cache.php:684
 msgid "No Compression, Just Combine Scripts"
 msgstr ""
 
-#: ../class-combinator.php:685
+#: ../class-gambit_cache.php:685
 msgid "White Space Removal"
 msgstr ""
 
-#: ../class-combinator.php:686 ../class-combinator.php:740
+#: ../class-gambit_cache.php:686 ../class-gambit_cache.php:740
 msgid "Simple Optimizations (Recommended)"
 msgstr ""
 
-#: ../class-combinator.php:687
+#: ../class-gambit_cache.php:687
 msgid "Advanced Optimizations (NOT Recommended)"
 msgstr ""
 
-#: ../class-combinator.php:689
+#: ../class-gambit_cache.php:689
 msgid ""
-"Combinator uses <a href=\"https://developers.google.com/closure/compiler/"
+"Gambit Cache uses <a href=\"https://developers.google.com/closure/compiler/"
 "index\">Closure Compiler</a> to perform code compression. You can choose "
 "from these types of compression:<ul><li><strong>White Space Removal</"
 "strong><br>Gives some compression by removing unnecessary spaces from your "
@@ -193,125 +193,125 @@ msgid ""
 "your Javascript)</em></li></ul>"
 msgstr ""
 
-#: ../class-combinator.php:693 ../class-combinator.php:746
+#: ../class-gambit_cache.php:693 ../class-gambit_cache.php:746
 msgid "What to Combine"
 msgstr ""
 
-#: ../class-combinator.php:698 ../class-combinator.php:751
+#: ../class-gambit_cache.php:698 ../class-gambit_cache.php:751
 msgid "WordPress wp-include files"
 msgstr ""
 
-#: ../class-combinator.php:699
+#: ../class-gambit_cache.php:699
 msgid "Remote scripts"
 msgstr ""
 
-#: ../class-combinator.php:700
+#: ../class-gambit_cache.php:700
 msgid "Script tags (small chance to give errors)"
 msgstr ""
 
-#: ../class-combinator.php:702
+#: ../class-gambit_cache.php:702
 msgid ""
 "Check the types of scripts to combine. Scripts from plugins & themes are "
 "always combined."
 msgstr ""
 
-#: ../class-combinator.php:706 ../class-combinator.php:759
+#: ../class-gambit_cache.php:706 ../class-gambit_cache.php:759
 msgid "Exclude these Domains"
 msgstr ""
 
-#: ../class-combinator.php:710 ../class-combinator.php:763
+#: ../class-gambit_cache.php:710 ../class-gambit_cache.php:763
 msgid ""
 "Enter a domain or part of a URL (one per line) that you want to exclude from "
 "the combination process."
 msgstr ""
 
-#: ../class-combinator.php:711 ../class-combinator.php:764
+#: ../class-gambit_cache.php:711 ../class-gambit_cache.php:764
 msgid "Enter a domain or part of a URL (one per line)"
 msgstr ""
 
-#: ../class-combinator.php:721
+#: ../class-gambit_cache.php:721
 msgid "CSS Settings"
 msgstr ""
 
-#: ../class-combinator.php:726
+#: ../class-gambit_cache.php:726
 msgid "Combine Stylesheets"
 msgstr ""
 
-#: ../class-combinator.php:730
+#: ../class-gambit_cache.php:730
 msgid "Enable combining of stylesheets"
 msgstr ""
 
-#: ../class-combinator.php:739
+#: ../class-gambit_cache.php:739
 msgid "No Compression, Just Combine Styles"
 msgstr ""
 
-#: ../class-combinator.php:742
+#: ../class-gambit_cache.php:742
 msgid "Choose the compression level for CSS stylesheets."
 msgstr ""
 
-#: ../class-combinator.php:752
+#: ../class-gambit_cache.php:752
 msgid "Remote stylesheets"
 msgstr ""
 
-#: ../class-combinator.php:753
+#: ../class-gambit_cache.php:753
 msgid "Style tags (high chance to disrupt page styles)"
 msgstr ""
 
-#: ../class-combinator.php:755
+#: ../class-gambit_cache.php:755
 msgid ""
 "Check the types of styles to combine. Styles from plugins & themes are "
 "always combined."
 msgstr ""
 
-#: ../class-combinator.php:774
+#: ../class-gambit_cache.php:774
 msgid "Exclusion Settings"
 msgstr ""
 
-#: ../class-combinator.php:779
+#: ../class-gambit_cache.php:779
 msgid "Exclude these Plugins"
 msgstr ""
 
-#: ../class-combinator.php:784
+#: ../class-gambit_cache.php:784
 msgid ""
-"Combinator combines all scripts and styles it can find. If a plugin stops "
+"Gambit Cache combines all scripts and styles it can find. If a plugin stops "
 "working because of the combination process, <strong>check the plugin here to "
 "exclude it</strong>."
 msgstr ""
 
-#: ../class-combinator.php:786
+#: ../class-gambit_cache.php:786
 msgid ""
-"If you have found a plugin to be not working when included with Combinator, "
+"If you have found a plugin to be not working when included with Gambit Cache, "
 "please let us know by commenting it in our CodeCanyon page so we can include "
 "it in our internal blacklist."
 msgstr ""
 
-#: ../class-combinator.php:803
+#: ../class-gambit_cache.php:803
 msgid "Exclude Found Javascript"
 msgstr ""
 
-#: ../class-combinator.php:808
+#: ../class-gambit_cache.php:808
 msgid ""
-"Here is a list of all the Javascript URLs Combinator has found. If the list "
+"Here is a list of all the Javascript URLs Gambit Cache has found. If the list "
 "below is empty, visit your site to populate it.<br><strong>Check the URL "
 "here to exclude it.</strong>"
 msgstr ""
 
-#: ../class-combinator.php:824
+#: ../class-gambit_cache.php:824
 msgid "Exclude Found Stylesheets"
 msgstr ""
 
-#: ../class-combinator.php:829
+#: ../class-gambit_cache.php:829
 msgid ""
-"Here is a list of all the Stylesheet URLs Combinator has found. If the list "
+"Here is a list of all the Stylesheet URLs Gambit Cache has found. If the list "
 "below is empty, visit your site to populate it.<br><strong>Check the URL "
 "here to exclude it.</strong>"
 msgstr ""
 
-#: ../class-combinator.php:996
-msgid "Combinator Error"
+#: ../class-gambit_cache.php:996
+msgid "Gambit Cache Error"
 msgstr ""
 
-#: ../class-combinator.php:996
+#: ../class-gambit_cache.php:996
 msgid ""
 "We have a problem. We generate files and put them in our own subdirectory in "
 "your <code>uploads</code> folder for caching. Since it is unwritable, we "
@@ -321,7 +321,7 @@ msgid ""
 msgstr ""
 
 #: ../class-plugin.php:59
-msgid "Keep Combinator updated by entering your purchase code here."
+msgid "Keep Gambit Cache updated by entering your purchase code here."
 msgstr ""
 
 #: ../class-plugin.php:97
