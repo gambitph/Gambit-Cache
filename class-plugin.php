@@ -7,7 +7,7 @@
 
 /**
 Plugin Name: Gambit Cache
-Description: Automatically combines all your local scripts and styles for less HTTP requests and faster page loading times.
+Description: All the perks of caching plus more.. pain-free
 Author: Gambit Technologies
 Version: 0.1
 Author URI: http://gambit.ph
